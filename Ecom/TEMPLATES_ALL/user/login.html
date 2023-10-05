@@ -1,0 +1,109 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% load socialaccount %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+
+{% endblock %}
+
+
+{% block main %}
+
+{% include 'base/loader.html' %}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-4 col-md-7 col-10 ">
+            <div class="position-relative top-0 start-50 login_box">
+
+                <i class="fa-solid fa-user maincolor fs-1"></i>
+
+            </div>
+            <div class="login_form_box p-3">
+                
+                <h4 class="text-center text-light">L <small class="maincolor">O</small> GIN</h4>
+
+                <form method="post" class="text-center forms" novalidate>
+                    {% csrf_token %}
+
+                    <!-- import for form validation js in front end -->
+
+                    <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded"></p>
+
+                    {% for ele in form %}
+                    
+                    <div class="form-floating mb-3">
+                        
+                        {{ ele }}
+                        <label for="{{ ele.id_for_label }}" class="bg-transparent text-light">{{ ele.label }}</label>
+                    </div>
+
+                    {% if ele.errors %}
+                    <p class="text-light p-2 bg-danger rounded">{{ele.errors|join:", "}}</p>
+                    {% endif %}
+
+                    {% endfor %}
+
+                    <div class="form-check mb-2 text-start p-0">
+                        <input class="form-check-input shadow-none mainborder ms-0" type="checkbox"  id="show_password" />
+                        <label class="form-check-label text-light ms-2" for="show_password">
+                          show password
+                        </label>
+                      </div>
+
+                    <input type="submit" class="btn btn-outline-light w-100 p-2" name="signin" value="LOGIN">
+
+                </form>
+
+                <form action="{% provider_login_url 'google' %}" method="post" class="mt-3">
+
+                    {% csrf_token %}
+
+                    <button type="submit" class="btn btn-outline-light w-100 p-2">
+                        <div class="d-flex justify-content-center align-items-center ">
+
+                            <i class="fa-brands fa-google me-1" class="fs-6"></i>
+                            <p class="m-0">OOGLE</p>
+                            
+                        </div>
+                    </button>
+                </form>
+                
+                <div class="d-flex justify-content-evenly mt-3">
+                    <div>
+                      <p class="maincolor pointer">
+                        <a href="#" class="nav-link">Create</a>
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-light pointer">Forget password ?</p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+
+<!-- loader  -->
+<script src="{% static 'js/loader.js' %}"></script>
+
+<!-- form validation  -->
+<script src="{% static 'js/form.js' %}"></script>
+
+<!-- show password   -->
+<script src="{% static 'js/show_password_login.js' %}"></script>
+
+{% endblock %}

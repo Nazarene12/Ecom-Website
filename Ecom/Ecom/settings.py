@@ -158,7 +158,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 
     # `allauth` specific authentication methods, such as login by email
-    'allauth.account.auth_backends.AuthenticationBackend',
+    'allauth.account.auth_backends.AuthenticationBackend'
 
     # 'social_core.backends.google.GoogleOAuth2',
     
@@ -178,4 +178,23 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+
+
 SOCIALACCOUNT_ADAPTER = 'Ecom_Web.customAdapter.CustomSocialAccountAdapter'  # Replace 'path.to' with the actual path to your custom adapter
+
+
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587  # The default port is often 587 or 25
+EMAIL_USE_TLS = True  # Use TLS encryption
+EMAIL_HOST_USER = 'ssnazarenesrs@gmail.com'
+EMAIL_HOST_PASSWORD = 'lcjcsgffunxbzkhr'
+# lcjc sgff unxb zkhr
+
+# ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS =1
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+# ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
+# ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 86400 # 1 day in seconds
+# ACCOUNT_LOGOUT_REDIRECT_URL ='/accounts/login/'

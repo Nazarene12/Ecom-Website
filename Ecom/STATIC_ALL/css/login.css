@@ -1,0 +1,33 @@
+body{
+    background-image: url("https://c4.wallpaperflare.com/wallpaper/73/206/565/water-squirt-feet-sneakers-running-hd-wallpaper-preview.jpg");
+    background-position: bottom;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+body::before{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: #08080842;
+    z-index: -1;
+}
+
+.login_box{
+    padding:20px;
+    width:100px;
+    height:100px;
+    border-radius: 50%;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translate(-50%,0%)!important;
+}
+
+.login_form_box{
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+    padding:30px;
+
+    
+}

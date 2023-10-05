@@ -1,0 +1,159 @@
+.category-div::after {
+    content: "";
+    position: absolute;
+    top: 20%;
+    left: 20%;
+    right: 20%;
+    bottom: 20%;
+    background-color: rgba(6, 6, 6, 0.233);
+    border-radius: 50%;
+    transform: rotate3d(1, 1, 1, 120deg);
+    transition: all 0.5s;
+  }
+
+  .category-div:hover::after {
+    transform: rotate3d(1, 1, 1, 0deg);
+  }
+
+  .category-div > div {
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .category-div:hover div {
+    opacity: 1;
+  }
+
+  .p-table > div:first-of-type {
+    bottom: -12px;
+    left: -28px;
+    overflow: hidden;
+    transition: width 0.5s;
+  }
+  /*.p-table:hover > div {
+    width: 100%;
+  }*/
+
+  .like-form {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow: hidden;
+  }
+  .p-like {
+    width: 1px;
+    height: 1px;
+  }
+
+  .p-nolike {
+    position: absolute;
+    top: 42%;
+    left: 56%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+  }
+
+  .p-button {
+    background-color: #fff;
+    color: var(--main-color);
+    letter-spacing: 2px;
+  }
+
+  .p-button:hover {
+    background-color: var(--main-color);
+    color: white;
+  }
+
+  .p-button-s {
+    background-color: var(--main-color);
+    color: white;
+    letter-spacing: 2px;
+  }
+  .p-button-s:hover {
+    background-color: var(--main-color);
+    color: rgb(14, 14, 14);
+  }
+
+  .bg-ic {
+    background-color: rgba(82, 80, 80, 0.233);
+  }
+
+  .form-control:focus {
+    border: 1px solid var(--main-color);
+  }
+  .act-bg {
+    background-color: var(--main-color);
+    font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+      sans-serif;
+  }
+
+  .about {
+    background-color: #232020;
+    letter-spacing: 2px;
+  }
+
+  .fix {
+    background-image: url("https://miro.medium.com/max/940/1*36RMuxDkCG2CNA-xpNzK7w.jpeg");
+    background-size: cover;
+    background-attachment: fixed;
+  }
+
+  iframe {
+    min-height: 400px;
+  }
+
+  .c-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(6, 6, 6, 0.233);
+  }
+  
+  .c-inner {
+    color: rgb(179, 183, 187);
+    z-index: 2;
+  }
+  
+  .c-inner h1 {
+    font-size: 3rem;
+  }
+  .c-inner p {
+    font-size: 2.5rem; 
+  }
+  .c-inner button {
+    font-size: 1rem;
+    padding: 10px 15px;
+    background-color: var(--main-color);
+    color: white;
+  }
+  
+  .c-inner button:hover {
+    background-color: transparent;
+    border: 1px solid var(--main-color);
+    color: var(--main-color);
+  }
+  
+
+@media (min-width: 992px) {
+    
+
+    .c-inner {
+      color: rgb(179, 183, 187);
+      z-index: 2;
+    }
+
+    .c-inner h1 {
+      font-size: 4rem;
+    }
+    .c-inner p {
+      font-size: 3.5rem;
+    }
+    .c-inner button {
+      font-size: 1.5rem;
+      padding: 10px 15px;
+      background-color: var(--main-color);
+      color: white;
+    }
+  }

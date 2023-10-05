@@ -1,0 +1,159 @@
+{% extends 'base/base.html' %}
+
+
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<!-- <link rel="stylesheet" href="{% static 'css/loader.css' %}"> -->
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+
+<style>
+
+    body{
+        background-image: url("https://c4.wallpaperflare.com/wallpaper/73/206/565/water-squirt-feet-sneakers-running-hd-wallpaper-preview.jpg");
+        background-position: bottom;
+        background-repeat: no-repeat;
+        background-size: cover;
+        padding:100px;
+
+    }
+
+    input.form-control{
+        color:black;
+    }
+
+    input.form-control:focus{
+        color:black;
+    }
+</style>
+
+{% endblock %}
+
+
+{% block main %}
+
+<!-- {% include 'base/loader.html' %} -->
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-4 col-md-7 col-10 bg-light p-4 rounded">
+            
+           <div>
+
+                <h4 class="text-center">ENTER OTP</h4>
+                <p class="text-center"><small >Four digit otp number has been send to you email</small></p>
+
+                {% if messages %}
+                {% for message in messages %}
+                     {% if message.tags == "error" %}
+        
+                        <p class="text-danger text-center">{{message}}</p>
+        
+                     {% endif %}
+                {% endfor %}
+            {% endif %}
+                <p class="countdown text-danger text-center">
+
+                </p>
+
+
+                <form method="post" class="forms" novalidate>
+                    {% csrf_token %}
+
+                    <!-- import for form validation js in front end -->
+
+                    <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded"></p>
+
+                    <input type="hidden" name="counter" id="counterinput" value="{{countdown}}">
+                    
+                    <div class="form-floating mb-3">
+                        
+                        <input class="form-control" type="number" name="otp" id="otp_verify" required placeholder="otp">
+                        <label for="otp_verify" class="bg-transparent ">OTP</label>
+                    </div>
+
+                    
+
+                   
+
+                    <input type="submit" class="btn btn-outline-dark w-100 p-2" name="verify" value="ENTER">
+
+                </form>
+                <div class="d-flex justify-content-evenly mt-3">
+                    <div>
+                      <p class="maincolor pointer">
+                        <a href="{% url 'Ecom:verify' email=uemail %}" class="nav-link">Resend</a>
+                      </p>
+                    </div>
+                    <div>
+                        <p class="pointer">
+                          <a href="{% url 'Ecom:login' %}" class="nav-link">Cancel</a>
+                        </p>
+                      </div>
+                </div>
+           </div>
+            
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+
+<!-- loader  -->
+<!-- <script src="{% static 'js/loader.js' %}"></script> -->
+
+<!-- form validation  -->
+<script src="{% static 'js/form.js' %}"></script>
+
+
+
+<script>
+    let count = parseInt('{{countdown}}')
+    let min = parseInt(count/60)
+    let sec = parseInt(count%60)
+    let counter_box = document.querySelector('.countdown')
+    let counter_input = document.getElementById('counterinput')
+    let otp_input = document.getElementById('otp_verify')
+
+   
+    let intervel_redirect = ()=>{
+
+        setTimeout(()=>{
+
+            window.location.href = "{% url 'Ecom:login' %}"
+
+        } , 5000)
+    }
+
+    let counter =setInterval(()=>{
+
+            if (count === 1){
+                console.log(count);
+                counter_box.textContent = "TIME UP TRY TO RESEND THE OTP"
+                otp_input.disabled = true
+                clearInterval(counter)
+                return 
+            }
+            count-- 
+            min = parseInt(count/60)
+            sec = parseInt(count%60)
+
+            counter_box.textContent = `${min} : ${sec}`
+            counter_input.value = count 
+
+        },1000)
+    
+
+    
+
+    
+    
+</script>
+
+{% endblock %}

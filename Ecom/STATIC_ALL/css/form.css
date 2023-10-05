@@ -1,0 +1,31 @@
+.form-control{
+    background-color: transparent;
+    border:1px solid var(--main-color);
+    color:var(--color1)
+}
+
+input.form-control:focus{
+    background-color: transparent;
+    border:1px solid var(--main-color);
+    outline: none;
+    box-shadow: none;
+    color:var(--color1)
+}
+
+input[type="checkbox"]:checked{
+    background-color: var(--main-color);
+    outline: none;
+    box-shadow: none;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}

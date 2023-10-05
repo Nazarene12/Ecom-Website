@@ -1,0 +1,102 @@
+<header>
+    <div class="container-fluid mt-2 text-light">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex header-1-row fs-5">
+            <div class="d-none d-lg-block">
+              <p>
+                Upto 30% of on All styles, click for
+
+                <span class="act">
+                  <i
+                    class="fa-solid fa-hand-point-right ms-2 me-2 fa-beat-fade"
+                  ></i>
+                  more details</span
+                >
+              </p>
+            </div>
+            <div
+              class="d-flex flex-fill justify-content-between justify-content-lg-end align-items-center"
+            >
+              <div>
+                <a href="customerprofile"
+                  ><i
+                    class="fa-solid fa-user rounded-circle text-center text-light me-2"
+                  ></i
+                ></a>
+                {% if request.user.is_autenticate %}
+                <a href="./">
+                
+                  <i class="fa-solid fa-right-from-bracket rounded-circle text-center text-light"></i>
+                </a>
+                {% else %}
+
+                <a href="{% url 'account_login' %}">log</a>
+
+                {% endif %}
+              </div>
+              <p class="rounded-pill m-0 ms-4 me-0 me-lg-3">
+                myCart
+                <a href="coustomercart"
+                  ><i class="fa-solid fa-cart-shopping ms-1 text-light"></i
+                ></a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a class="navbar-brand logo text-light" href="#">
+          <img src="static/images/e-logo.png" alt="logo" />iviya
+        </a>
+
+        <button
+          class="navbar-toggler shadow-none border-0"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#offcanvasNavbar"
+          aria-controls="offcanvasNavbar"
+        >
+          <i class="fa-solid fa-bars fs-3 act"></i>
+        </button>
+        <div
+          class="offcanvas offcanvas-end flex-lg-grow-0"
+          tabindex="-1"
+          id="offcanvasNavbar"
+          aria-labelledby="offcanvasNavbarLabel"
+        >
+          <div class="offcanvas-header justify-content-end">
+            <button
+              type="button"
+              class="shadow-none border-0 bg-transparent"
+              data-bs-dismiss="offcanvas"
+              aria-label="Close"
+            >
+              <i class="fa-solid fa-xmark fs-4 text-light"></i>
+            </button>
+          </div>
+
+          <div class="offcanvas-body">
+            <ul
+              class="navbar-nav justify-content-end flex-grow-1 pe-3 fs-4 nav-li"
+            >
+              <li class="nav-item me-lg-5">
+                <a class="nav-link act" aria-current="page" href="#">Home</a>
+              </li>
+              <li class="nav-item me-lg-5 ms-lg-5">
+                <a class="nav-link" href="customerviewproduct">Product</a>
+              </li>
+              <li class="nav-item me-lg-5 ms-lg-5">
+                <a class="nav-link" href="#about">About</a>
+              </li>
+              <li class="nav-item ms-lg-5">
+                <a class="nav-link" href="#contact">Contact</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+</header>

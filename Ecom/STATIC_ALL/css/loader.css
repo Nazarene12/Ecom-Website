@@ -1,0 +1,39 @@
+.loader {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: linear-gradient(
+    to right top,
+    #fb910c,
+    #f78d0e,
+    #f3890f,
+    #ef8511,
+    #eb8112
+  );
+  z-index: 9999;
+  transition: opacity 0.5s;
+}
+
+.loader_finish {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader div {
+  height: 50px;
+  width: 50px;
+  border-bottom: 5px solid white;
+  border-radius: 50%;
+  margin-right: 50px;
+  animation: load 1s linear infinite;
+}
+
+@keyframes load {
+  to {
+    transform: rotate(360deg);
+  }
+}

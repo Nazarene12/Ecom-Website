@@ -1,0 +1,149 @@
+{% extends 'base/base.html' %}
+
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/nav.css' %}">
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+
+{% endblock %}
+
+
+{% block main %}
+
+{% include 'base/loader.html' %}
+
+{% include 'base/nav.html' %}
+
+<div class="container-fluid">
+    <div class="row bg-light">
+      <div
+        class="col-lg-8 p-0 d-flex justify-content-center align-items-center"
+      >
+        <div class="sec1">
+          <div
+            id="carouselExampleControls"
+            class="carousel slide"
+            data-bs-ride="carousel"
+          >
+            <div class="carousel-inner">
+              <div class="carousel-item active position-relative c-bg">
+                <img
+                  src="{% static 'image/banner/c-1.jpg' %}"
+                  class="d-block w-100"
+                  alt="..."
+                />
+                <div
+                  class="position-absolute top-50 start-50 translate-middle text-light c-inner"
+                >
+                  <h1>PUMA BRAND SHOES</h1>
+                  <p>10% OFF</p>
+                  <button class="btn act">Shop now</button>
+                </div>
+              </div>
+              <div class="carousel-item position-relative c-bg">
+                <img
+                  src="{% static 'image/banner/c-2.jpg' %}"
+                  class="d-block w-100"
+                  alt="..."
+                />
+                <div
+                  class="position-absolute top-50 start-50 translate-middle text-light c-inner"
+                >
+                  <h1>EXPENSIVE FASION'S</h1>
+                  <p>33% OFF</p>
+                  <button class="btn act">Shop now</button>
+                </div>
+              </div>
+              <div class="carousel-item position-relative c-bg">
+                <img
+                  src="{% static 'image/banner/c-3.jpg' %}"
+                  class="d-block w-100"
+                  alt="..."
+                />
+                <div
+                  class="position-absolute top-50 start-50 translate-middle text-light c-inner"
+                >
+                  <h1>WOMEN'S BRAND</h1>
+                  <p>58% OFF</p>
+                  <button class="btn act">Shop now</button>
+                </div>
+              </div>
+            </div>
+            <button
+              class="carousel-control-prev"
+              type="button"
+              data-bs-target="#carouselExampleControls"
+              data-bs-slide="prev"
+            >
+              <i class="fa-solid fa-chevron-left fs-2 act fa-beat"></i>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button
+              class="carousel-control-next"
+              type="button"
+              data-bs-target="#carouselExampleControls"
+              data-bs-slide="next"
+            >
+              <i class="fa-solid fa-chevron-right fs-2 act fa-beat"></i>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 p-0">
+        <div class="sec2 position-relative">
+          <img src="{% static 'image/banner/cn.jpg' %}" alt="" class="w-100" />
+          <div
+            class="position-absolute top-50 start-50 translate-middle text-light c-inner"
+          >
+            <h1>LEGEND'S FASION'S</h1>
+            <p>40% OFF</p>
+            <button class="btn act">Shop now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+{% endblock %}
+
+
+{% block script %}
+
+
+<!-- script for scroll -->
+<script src="{% static 'js/navscroll.js' %}"></script>
+
+<!-- loader  -->
+<script src="{% static 'js/loader.js' %}"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+
+<script>
+    gsap.defaults({ ease: "power1.in" });
+    const t1 = new TimelineMax({});
+    const carousel = document.querySelector(".sec1");
+    t1.fromTo(carousel, 2, { opacity: 0 }, { opacity: 1 })
+      .fromTo(carousel, 0.5, { x: 50 }, { x: 0 })
+      .fromTo(".sec2", 0.5, { opacity: 0 }, { opacity: 1 })
+      .fromTo("header", 0.3, { y: "-100%" }, { y: "0%", clearProps: "y" });
+
+    t1.pause();
+
+    window.addEventListener("load", () => {
+      t1.play();
+    });
+
+    
+</script>
+
+{% endblock %}
