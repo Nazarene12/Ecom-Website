@@ -32,7 +32,6 @@ def createUser(data):
 
     user  = User.objects.create_user(username=data.get('email') , password= data.get('password') , email = data.get('email'))
     user.save()
-
     obj = UserProfile(first_name = data.get('first_name') , last_name = data.get('last_name'),email = data.get('email') , gender = data.get('gender'))
     obj.phone_number = data.get("phone_number")
     obj.user = user

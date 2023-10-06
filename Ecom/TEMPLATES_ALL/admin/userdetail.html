@@ -1,0 +1,95 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<style>
+    img.img{
+        width:200px;
+        height:200px;
+        object-fit: contain;
+        border-radius: 50%;
+        
+    }
+</style>
+
+{% endblock %}
+
+{% block main %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='user' %}
+        <div class="col-lg-8 bodysection">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-lg-5 col-md-5 col-7">
+                        <div class="card justify-content-center align-items-center p-5" >
+
+                            <img src="{% if user.picture %} {{user.picture.url }} {% else %} {% static 'default/noprofile.png' %} {% endif %}" class="img" alt="">
+                            <div class="card-body">
+                              <h5 class="card-title">{{user.first_name}} {{user.last_name}}</h5>
+                              <p class="card-text">Email:{{user.email}}</p>
+                              <p class="card-text">Gender:{{user.gender}}</p>
+                              <p class="card-text">Number:{% if user.phone_number %} {{user.email}} {% else %} undefined {% endif %}</p>
+                              <button class="btn btn-primary" id="toggle">
+                                {% if user.user.is_active %}
+                                    DEACTIVATE
+                                {% else %}
+                                    ACTIVATE
+                                {% endif %}
+                               </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="{% static 'js/adminnav.js' %}"></script>
+
+<script>
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
+
+    function toggleButtonText() {
+        const button = document.getElementById('toggle');
+        const isActive = button.textContent.trim() === 'DEACTIVATE';
+        button.textContent = isActive ? 'ACTIVATE' : 'DEACTIVATE';
+    }
+
+    document.getElementById('toggle').addEventListener('click', function() {
+        // axios.get('{% url "admins:toggle_user_status" pk=user.user.pk %}')
+        axios.post('{% url "admins:toggle_user_status" pk=user.user.pk %}')  // Replace with the actual URL of your toggle action
+        .then(function(response) {
+            if (response.data.success) {
+                // Toggle the button text based on the response
+                toggleButtonText();
+            } else {
+                alert('Toggle action failed.');
+            }
+            })
+        .catch(function(error) {
+            console.error('An error occurred:', error);
+        });
+    });
+
+    
+
+</script>
+
+{% endblock %}

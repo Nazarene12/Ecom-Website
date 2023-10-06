@@ -56,15 +56,13 @@ def verifyEmail(request , email ):
     if request.user.is_authenticated:
         return redirect('Ecom:home')
     
-    count = 10
+    count = 180
     if request.POST.get('verify'):
         otp = request.POST.get('otp')
         count = int(request.POST.get('counter'))
-        print(request.session.get('new_user'))
         if otp == request.session.get('otp'):
-            user = createUser(request.session.get('new_user'))
-            user = authenticate(request , username = user.username , password = user.password)
-            login(request , user)
+            user = createUser(request.session.get('new_user'))            
+            login(request , user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect("Ecom:home")
         messages.error(request, 'WORNG OTP')
         
@@ -75,17 +73,17 @@ def verifyEmail(request , email ):
     except signing.BadSignature:
         return redirect('Ecom:signup')
     
-    # if  not count <  -1:
+    if  count ==  180:
     
-    #     if data:
-    #         otp,status , message = sendOTP(data)
-    #     else:
-    #         return redirect('Ecom:signup')
+        if data:
+            otp,status , message = sendOTP(data)
+        else:
+            return redirect('Ecom:signup')
         
-    #     if not status:
-    #         return HttpResponse(f"{message}")
-    #     else:
-    #         request.session['otp'] = otp
-    #         return render(request , 'user/verify.html' , {'uemail' : email , 'countdown' : count})
+        if not status:
+            return HttpResponse(f"{message}")
+        else:
+            request.session['otp'] = otp
+            return render(request , 'user/verify.html' , {'uemail' : email , 'countdown' : count})
      
     return render(request , 'user/verify.html' , {'uemail' : email , 'countdown' : count})

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     'Ecom_Web',
+    'adminpanel',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',

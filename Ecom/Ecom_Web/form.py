@@ -9,11 +9,12 @@ from .models import UserProfile
 
 
 class LoginForm(forms.Form):
-    username = forms.CharField(max_length=30, required=True, label='Email',help_text="required *", widget=forms.EmailInput(attrs={'class': 'email form-control', 'placeholder': 'email'}))
+    username = forms.CharField(max_length=30, required=True, label='Email',help_text="required *", widget=forms.TextInput(attrs={'class': 'email form-control', 'placeholder': 'email'}))
     password = forms.CharField(max_length=30, required=True, label='Password', widget=forms.PasswordInput(attrs={'class': 'password form-control', 'placeholder': 'password'}))
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None) 
+        self.log = kwargs.pop("log" , None)
         super().__init__(*args, **kwargs)
 
     def clean(self):
@@ -35,6 +36,8 @@ class LoginForm(forms.Form):
                 user = authenticate(username=username, password=password)
                 if user is None:
                     self.add_error('password', forms.ValidationError('Invalid password.'))
+                elif self.log and not user.is_superuser :
+                    self.add_error("username" , "you have no autherization to acess this page")
                 elif not user.is_active:
                     self.add_error("username" , "You have been block by super user...")
                 else:

@@ -1,0 +1,206 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+<style>
+
+input.form-control:focus{
+   
+    color:black;
+}
+
+</style>
+{% endblock %}
+
+{% block main %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='category' %}
+        <div class="col-lg-8 bodysection">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-12 p-4 rounded">
+                        <h5 class="text-center text-light">ADD CATEGORY</h5>
+                        <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded mt-3"></p>
+
+                        <form method="post" class="text-center forms" id="categoryform" novalidate>
+                            {% csrf_token %}
+        
+                            <!-- import for form validation js in front end -->
+        
+                            <div class="container-fluid">
+                                <div class="row justify-content-center align-items-center">
+                                    <div class="col-8">
+                                        {% for ele in form %}
+                            
+                                        <div>
+                                            <div class="form-floating">
+                                            
+                                                {{ ele }}
+                                                <label for="{{ ele.id_for_label }}" class="bg-transparent">{{ ele.label }}</label>
+                                            </div>
+                        
+                                            {% if ele.errors %}
+                                            <p class=" p-2 bg-danger rounded">{{ele.errors|join:", "}}</p>
+                                            {% endif %}
+                                        </div>
+        
+                                        {% endfor %}
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="submit" class="btn btn-outline-dark w-100 p-2" name="add" value="ADD">
+                                    </div>
+                                </div>
+                            </div>
+                            
+        
+                            
+        
+        
+                        </form>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-8 mt-5">
+                        <div class="table-responsive bg-dark p-3 rounded">
+                            <h5 class="text-center text-light mb-4">CATEGORYS</h5>
+                            <table id="categoryTable" class="table table-hover align-middle ">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="fw-normal text-light">ID</th>
+                                        <th scope="col" class="fw-normal text-light">NAME</th>
+                                        <th scope="col" class="fw-normal text-light">DELETE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ele in categorys %}
+                                    <tr>
+                                        <th  class="fw-normal text-light s_no_ro">{{ forloop.counter }}</th>
+                                        <td class="fw-normal text-light">{{ ele.name }}</td>
+                                        <td class="fw-normal text-light">
+                                            <a class="btn btn-light deletecategory" href="{% url 'admins:delete_category' pk=ele.pk %}">DELETE</a>
+                                        </td>
+                                     </tr>   
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="{% static 'js/adminnav.js' %}"></script>
+<!-- form validation  -->
+<script src="{% static 'js/form.js' %}"></script>
+
+<script>
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
+
+    let inputfeild = document.querySelector(".form-control");
+    
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const categoryForm = document.getElementById("categoryform");
+        categoryForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const formData = new FormData(categoryForm);
+            axios.post('{% url "admins:add_category" %}', formData)
+                .then(function(response) {
+                    if (response.data.success) {
+                        // Handle a successful response, e.g., close the modal
+                        console.log(response.data.category_data)
+                        const newRow = categoryTable.insertRow(-1);
+                        const cell1 = newRow.insertCell(0);
+                        cell1.classList.add("text-light");
+                        cell1.classList.add("fw-normal");
+                        cell1.classList.add("s_no_ro");
+
+                        const cell2 = newRow.insertCell(1);
+                        cell2.classList.add("fw-normal");
+                        cell2.classList.add("text-light");
+                        cell1.innerText = response.data.category_data.count;
+                        cell2.innerText = response.data.category_data.name;
+                        // Optionally, update the UI to display the new category
+
+                        const anchor = document.createElement("a");
+                        anchor.href = `/admins/category/${response.data.category_data.id}/delete` // Set the href attribute
+                        anchor.innerText = "DELETE"; // Set the link text
+                        
+                        // Optionally, add classes and attributes to the anchor tag
+                        anchor.classList.add("btn");
+                        anchor.classList.add("btn-light");
+                        anchor.addEventListener("click",deleteevent);
+                        const cell3 = newRow.insertCell(2);
+                        cell3.classList.add("fw-normal");
+                        cell3.classList.add("text-light");
+
+                        cell3.appendChild(anchor);
+                        inputfeild.value = '';
+                    } else {
+                        // Handle an error response, e.g., display an error message
+                        console.error('Error:', response.data.error_message);
+                    }
+                })
+                .catch(function(error) {
+                    // Handle network or other errors
+                    console.error('An error occurred:', error);
+                });
+        });
+
+        deleteevent = (event)=>{
+                const url = event.target.getAttribute('href');
+                event.preventDefault();
+                axios.delete(url)
+                .then(function(response) {
+                    if (response.data.success){
+                        event.target.parentElement.parentElement.remove();
+                        counterupdate()
+                    }
+                    else{
+                        console.log(response.data);
+                    }
+                })
+                .catch(function(error) {
+                    // Handle errors
+                    console.error('An error occurred:', error);
+                });
+           }
+
+        const deletecategory = document.querySelectorAll('.deletecategory')
+        deletecategory.forEach(function(element) {
+            element.addEventListener("click" ,deleteevent)
+        });
+
+        let counterupdate = ()=>{
+            let counteravilable = document.querySelectorAll(".s_no_ro");
+            let sno = 1;
+            counteravilable.forEach(ele=>{
+                ele.innerText = sno;
+                sno +=1;
+                console.log(ele);
+            })
+        }
+
+    });
+</script>
+
+{% endblock %}

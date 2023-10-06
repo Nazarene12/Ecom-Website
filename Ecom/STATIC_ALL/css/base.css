@@ -1,9 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Waiting+for+the+Sunrise&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Waiting+for+the+Sunrise&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap');
 
 :root {
   --logo-font: "Waiting for the Sunrise", cursive;
-  --head-font: "Bebas Neue", cursive;
+  --head-font: 'Josefin Sans', sans-serif;
   --main-color: rgb(255, 69, 0);
   --color1:white;
 }

@@ -1,0 +1,33 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+
+
+{% endblock %}
+
+{% block main %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='home' %}
+        <div class="col-lg-8 bodysection">
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="{% static 'js/adminnav.js' %}"></script>
+
+{% endblock %}
