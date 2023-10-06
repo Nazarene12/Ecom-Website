@@ -1,3 +1,5 @@
+from typing import Any
+from django.db.models.query import QuerySet
 from django.shortcuts import render
 from django.shortcuts import render,redirect,HttpResponse
 from django.views.generic.base import TemplateView
@@ -8,7 +10,7 @@ from django.core import signing
 from django.urls import reverse
 from django.contrib.auth import authenticate , login
 from django.contrib import messages
-from django.views.generic import ListView , DetailView
+from django.views.generic import ListView , DetailView ,CreateView
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -21,9 +23,9 @@ from django.db.models import Count
 
 
 from Ecom_Web import form
-from.forms import CategoryForm
+from.forms import CategoryForm,ProductForm
 from Ecom_Web.models import UserProfile
-from .models import Category,Product
+from .models import Category,Product,Connector,ProductImage
 
 # Create your views here.
 
@@ -132,3 +134,30 @@ class CategoryDeleteView(DeleteView):
             return JsonResponse({'success': False, 'error_message': 'User not found'})
 
 
+class ProductList(ListView):
+    model = Connector
+    template_name= 'admin/productlist.html'
+    context_object_name ='products'
+
+
+    def get_queryset(self) -> QuerySet[Any]:
+
+        return Connector.objects.filter(first_preference = True)
+
+class ProductDetail(DetailView):
+    model = Connector
+    template_name = "admin/productdetail.html"
+    context_object_name = 'product'
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context =  super().get_context_data(**kwargs)
+
+        sizes = Connector.objects.filter(product = context['product'].product).filter(color =context['product'].color )
+
+        context["sizes"] = sizes
+        return context
+
+class AddProduct(CreateView):
+    model = Product
+    form_class = ProductForm
+    template_name = 'admin/addproduct.html'

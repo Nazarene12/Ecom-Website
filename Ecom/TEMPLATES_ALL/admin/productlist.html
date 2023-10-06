@@ -1,0 +1,55 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+
+
+{% endblock %}
+
+{% block main %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='product' %}
+        <div class="col-lg-8 bodysection">
+            <div class="container-fluid">
+                <div class="row">
+                    {% for ele in products %}
+
+                    <div class="col-lg-4 col-md-4 col-6">
+                        <div class="card" >
+                            <img src="{{ele.image.normal_image.url}}" class="card-img-top" alt="">
+                            <div class="card-body">
+                              <h5 class="card-title">Name :{{ele.product.name}}</h5>
+                              <p class="card-text m-0">Price :{{ele.product.price}}</p>
+                              <div class="d-flex">
+                                <a href="" class="me-2">{{ele.product.category.name}}</a>
+                                <a href="" class="me-2">{{ele.product.brand.name}}</a>
+                                <a href="" >color</a>
+                              </div>
+                              <p class="m-0">sale :{{ele.sale}}</p>
+                              <a href="{% url 'admins:productdetail' pk=ele.pk %}" class="btn btn-primary">DETAIL</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="{% static 'js/adminnav.js' %}"></script>
+
+{% endblock %}

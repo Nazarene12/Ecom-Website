@@ -1,0 +1,98 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+
+<style>
+    
+    .img_container{
+        width:150px;
+        margin-bottom: 15px;
+    }
+
+    .main_container{
+        width:300px;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='product' %}
+        <div class="col-lg-8 bodysection">
+
+            <div class="container-fluid">
+                <div class="row justify-content-center align-items-center">
+                    <div class="col-lg-2 col-md-3 col-3">
+                            <div class="w-100">
+                                <div class="w-100">
+                                    <img src="{{product.image.normal_image.url}}" alt="normal-view" class="w-100 img_box">
+                                    <p>normal</p>
+                                </div>
+                                <div class="w-100">
+                                    <img src="{{product.image.front_image.url}}" alt="front-view" class="w-100 img_box">
+                                    <p>front</p>
+                                </div>
+                                <div class="w-100">
+                                    <img src="{{product.image.back_image.url}}" alt="back-view" class="w-100 img_box">
+                                    <p>back</p>
+                                </div>
+                                <div class="w-100">
+                                    <img src="{{product.image.side_image.url}}" alt="side-view" class="w-100 img_box">
+                                    <p>side</p>
+                                </div>
+                            </div>
+                            
+                    </div>
+                    <div class="col-lg-7 col-md-6 col-6">
+                        <div class="w-100">
+                            <img src="{{product.image.normal_image.url}}" alt="normal-view" class="w-100 main_img">
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-3">
+                        <h3>{{product.product.name}}</h3>
+                        <p>₹ {{product.product.price}}</p>
+                        <p>Brand :{{product.product.brand.name}}</p>
+                        <p>Category :{{product.product.category.name}}</p>
+                        <div class="d-flex  align-items-center mb-2">
+                            <p class="m-0 me-3">Color</p>
+                            <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{product.color.name}}"></table>
+                        </div>
+                        <p>Size :{{product.size.size}}</p>
+                        <p>Count :{{product.count}}</p>
+                        <a href="" class="btn btn-outline-dark">EDIT</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="{% static 'js/adminnav.js' %}"></script>
+
+<script>
+    let img = document.querySelectorAll('.img_box')
+    img.forEach(ele=>{
+        ele.addEventListener('click',()=>{
+            let main_img = document.querySelector(".main_img");
+            main_img.src = ele.src;
+            // console.log("clicked");
+        })
+    })
+</script>
+
+{% endblock %}
