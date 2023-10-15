@@ -1,0 +1,261 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+<style>
+    .varient_container{
+        background-color: rgba(128, 128, 128, 0.089);
+        border-radius: 10px;
+    }
+
+    
+    .form-control{
+        color:black;
+        box-shadow: none !important;
+    }
+
+    input.form-control{
+        color:black;
+    }
+
+    input.form-control:focus {
+        color:black;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='product' %}
+        <div class="col-lg-8 bodysection" id="bodysection">
+
+            <div class="container-fluid p-5 mb-3">
+                <div class="row col-12">
+                    <p>Name : {{product.name}}</p>
+                    <p>Price : {{product.price}}</p>
+                    <p>Discription : {{product.description}}</p>
+                    <p>Category : {{product.category}}</p>
+                    <p>Brand : {{product.brand}}</p>
+                    <div class="d-flex">
+                        <a href="" class="btn btn-primary me-2">EDIT</a>
+                        <a href="" class="btn btn-primary">DELETE</a>
+                    </div>
+                </div>
+                <div class="row my-3">
+                    <div class="col-12">
+                        <a href="{% url 'admins:addadditionalvarientproduct' pk=product.id %}" class="btn btn-primary">ADD VARIENT</a>
+                    </div>
+                </div>
+            </div>
+            {% for varient in varients %}
+            <div class="container-fluid p-5 varient_container mb-4" id="varient{{forloop.counter}}">
+                <p class="text-light bg-danger p-1 visually-hidden" id="error_content"></p>
+                <div class="row mb-3">
+                    <div class="col-lg-2 col-4">
+                        <img src="{{varient.image.front_image.url}}" alt="front_image" class="img-fluid rounded">
+                        <p>front image</p>
+                    </div>
+                    <div class="col-lg-2 col-4">
+                        <img src="{{varient.image.back_image.url}}" alt="back_image" class="img-fluid">
+                        <p>back image</p>
+                    </div>
+                    <div class="col-lg-2 col-4">
+                        <img src="{{varient.image.side_image.url}}" alt="side_image" class="img-fluid">
+                        <p>side image</p>
+                    </div>
+                    <div class="col-lg-2 col-4">
+                        <img src="{{varient.image.normal_image.url}}" alt="normal_image" class="img-fluid">
+                        <p>normal image</p>
+                    </div>
+
+                    
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="d-flex">
+                            <p class="d-flex me-3">color : </p>
+                            <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{varient.color.name}}"></table>
+                        </div>
+                    
+                        <p class=" me-3">size : {{varient.size.size}}</p>
+                    
+                        <p class=" me-3">count : {{varient.count}}</p>
+
+                        {% if varient.first_preference %}
+                        <p>first preference : yes</p>
+                        {% else %}
+                        <p>first preference : no</p>
+                        {% endif %}
+
+                        <div class="d-flex">
+                            <a href="{% url 'admins:updateproduct' pk=varient.id %}" class="btn btn-primary me-2">Edit</a>
+                            <a href="{% url 'admins:productvarientdelete' pk=varient.id %}" class="btn btn-primary me-2 delete_varient"  data-target="varient{{forloop.counter}}">Delete</a>
+                            <button class="btn btn-primary add_similar_varient" data-target="{{varient.id}}">Add similar varient</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {% endfor %}
+
+        </div>
+    </div>
+</div>
+
+<div class="modal  fade" id="cropperboard" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="m-0">Add Similar Varient</h4>
+          <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="container-fluid">
+                <div class="row">
+                        <form  method="post" class=" forms" novalidate>
+                            {% csrf_token %}
+
+
+                          
+                            <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded"></p>
+                             
+                            {% for ele in form %}
+                            <div class="col-6">
+
+                                {% if ele.help_text %}
+
+                                <small class="text-danger">{{ele.help_text}}</small>
+
+                                {% else %}
+
+                                {% endif %}
+                                <div class="form-floating mb-3">
+                
+                                    {{ ele }}
+                                    <label for="{{ ele.id_for_label }}" class="bg-transparent ">{{ ele.label }}</label>
+                                </div>
+                                {% if ele.errors %}
+                                    <p class="text-light p-2 bg-danger rounded form_error">{{ele.errors|join:", "}}</p>
+                                {% endif %}
+
+                            </div>
+                            {% endfor %}
+
+
+                            <div class="col-12">
+                                <input type="submit" value="ADD" name="add" class="btn btn-primary">
+                            </div>
+                        </form> 
+                </div>
+            </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>    
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="{% static 'js/adminnav.js' %}"></script>
+<!-- form validation  -->
+<script src="{% static 'js/form.js' %}"></script>
+
+<script>
+    const modal_elelment = document.getElementById("cropperboard")
+
+    const myModal = new bootstrap.Modal(modal_elelment, {
+        keyboard: false
+    })
+
+    let add_similar_varient = document.getElementById('add_similar_varient')
+
+    let add_similar_varient_all = document.querySelectorAll('.add_similar_varient');
+    add_similar_varient_all.forEach(ele =>{
+        ele.addEventListener('click',(e)=>{
+
+            e.preventDefault();
+            let all_input = document.querySelectorAll('.form-control');
+            all_input.forEach(ele =>{
+                ele.value = ''
+            })
+
+            let form_error = document.querySelectorAll('.form_error')
+
+            form_error.forEach(ele=>{
+                if (! ele.classList.contains('visually-hidden')){
+                    ele.classList.add("visually-hidden")
+                }
+            })
+            myModal.show();
+            add_similar_varient.value = e.target.dataset.target;
+        })
+    })
+
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
+
+    let bodysection = document.getElementById('bodysection');
+    let delete_varient = document.querySelectorAll('.delete_varient');
+    let error_content = document.getElementById('error_content')
+
+    delete_varient.forEach(ele =>{
+        
+        ele.addEventListener('click' ,(e)=>{
+
+            e.preventDefault()
+            const url = e.target.getAttribute('href');
+            let target_to_delete = document.getElementById(e.target.dataset.target);
+            console.log(target_to_delete);
+            axios.delete(url)
+
+                .then(function(response) {
+                    if (response.data.success && response.data.element_count){
+                        bodysection.removeChild(target_to_delete)
+                    }
+                    else if(response.data.success && ! (response.data.element_count)){
+                        error_content.innerText = response.data.error_message;
+                        error_content.classList.remove('visually-hidden')
+                    }
+                    else{
+                        console.log(response.data);
+                    }
+                })
+                .catch(function(error) {
+                    // Handle errors
+                    console.error('An error occurred:', error);
+                });
+
+        })
+    })
+
+
+
+</script>
+
+{% if error %}
+
+<script>
+    myModal.show();
+</script>
+
+{% endif %}
+
+{% endblock %}

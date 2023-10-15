@@ -14,7 +14,12 @@ urlpatterns = [
     path("category/<int:pk>/delete" , views.CategoryDeleteView.as_view() , name='delete_category'),
     path('addcategory' , views.AddCategory.as_view(), name='add_category'),
     path('productlist', views.ProductList.as_view() , name='productlist'),
+    path('productvarient/<int:pk>' , views.ProductVarient.as_view() , name="productvarient"),
+    path('productvarient/<int:pk>/delete', views.ProductVarientDelete, name='productvarientdelete'),
+    path('productvarient/<int:pk>/add' , views.AddAdditionProductVarient.as_view() , name='addadditionalvarientproduct'),
     path('productdetail/<int:pk>', views.ProductDetail.as_view() , name='productdetail'),
-    path('addproduct',views.AddProduct.as_view() , name ='add_product'),
+    path('addproduct',views.UpdatedAddProduct.as_view() , name ='add_product'),
+    path('updateproduct/<int:pk>',views.update_product , name='updateproduct'),
+    path('logout',views.logouts , name='logout'),
 
 ]

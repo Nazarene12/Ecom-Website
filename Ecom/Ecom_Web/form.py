@@ -119,3 +119,38 @@ class ProfileForm(forms.ModelForm):
         #     if self.log:
         #         login(self.request , user)
         # return profile
+
+class ResetPassword(forms.Form):
+    password = forms.CharField(max_length=30 ,required=True, label='Password' ,help_text="required *",  widget=forms.PasswordInput(attrs={'class': 'password form-control', 'placeholder':'password'}))
+    c_password = forms.CharField(max_length=30 ,required=True, label='Confrim Password'  ,help_text="required *", widget=forms.PasswordInput(attrs={'class': 'password form-control', 'placeholder':'password'}))
+
+
+    def clean_password(self): 
+        password = self.cleaned_data.get('password')
+        if not any(char.isupper() for char in password):
+            raise forms.ValidationError("Passwords should contain atleast one upper case.")
+    
+        # Check for at least one lowercase letter
+        if not any(char.islower() for char in password):
+            raise forms.ValidationError("Passwords should contain atleast one lower case")
+        
+        # Check for at least one digit
+        if not any(char.isdigit() for char in password):
+            raise forms.ValidationError("Passwords should contain atleast one number.")
+        
+        # Check for at least one special character using regular expression
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            raise forms.ValidationError("Passwords should contain atleast one special char.")
+        
+        # If all conditions are met, return True
+        return password
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get('password')
+        password2 = cleaned_data.get('c_password')
+        
+        if password1 and password2 and password1 != password2:
+            self.add_error( 'c_password',"Passwords do not match.")
+        
+        return cleaned_data

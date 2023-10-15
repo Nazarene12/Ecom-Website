@@ -7,7 +7,67 @@
 
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+<style>
 
+    .form-control{
+        color:black;
+        box-shadow: none !important;
+    }
+
+    input.form-control{
+        color:black;
+    }
+
+    input.form-control:focus {
+        color:black;
+    }
+    
+
+    
+
+    input[type='file']{
+        opacity: 0;
+   
+    }
+
+    label.img_label{
+        padding:5px;
+        background-color: rgb(245, 126, 29);
+        border-radius: 5px;
+        width:150px
+    }
+
+    .img_preview{
+        width:200px;
+        height:200px;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .img_preview > img{
+        width:100%;
+        height:100%;
+        object-fit: cover;
+    }
+    .img_preview >button{
+        position: absolute;
+        top:50%;
+        left:50%;
+        transform: translate(-50%,-50%);
+    }
+
+
+    #main_image , #preview_image{
+        max-width:100%;
+        display: block;
+    }
+
+   
+
+
+</style>
 
 {% endblock %}
 
@@ -17,14 +77,158 @@
     <div class="row p-0">
         {% include 'base/adminnav.html' with page='product' %}
         <div class="col-lg-8 bodysection">
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Create Product</button>
-            </form>
+            
+
+            <div class="container-fluid">
+                
+                    
+                <form method="post" class=" forms" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded"></p>
+                        </div>
+                    </div>
+                    <div class="row">            
+                            
+                            
+                        {% for ele in form %}
+                        <div class="col-lg-4">
+                            {% if ele.help_text %}
+        
+                            <small class="text-danger">{{ele.help_text}}</small>
+        
+                            {% endif %}
+                        
+                                {% if 'image' in ele.name %}
+                                    <div>
+                                        <div class="form-floating mb-3 p-1 position-relative">
+                                                
+                                            {{ ele }}
+                                            <label for="{{ ele.id_for_label }}" class="img_label">{{ ele.label }}</label>
+                                            
+                                        </div>
+                                        <div class="img_preview visually-hidden">
+                                            <img src="" alt="preview">
+                                            <button class="btn btn-outline-dark mt-3 cropperbutton" >crop</button>
+                                        </div>
+                                    </div>
+                                                                      
+                                {% else %}
+                                    <div class="form-floating mb-3 p-1 position-relative">
+                                            
+                                        {{ ele }}
+                                        <label for="{{ ele.id_for_label }}" class="bg-transparent">{{ ele.label }}</label>
+                                    </div>
+
+                                {% endif %}
+        
+                          
+        
+                            {% if ele.errors %}
+                            <p class="text-light p-2 bg-danger rounded">{{ele.errors|join:", "}}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                            <!-- Size and Count Formset -->
+
+                                
+                            <div id="size-count-formset">
+                                    {{ form.size_count_formset.management_form }}
+                                    
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            {% for forms in form.size_count_formset %}
+
+                                                {% for ele in forms %}
+                                                <div class="col-6">
+
+                                                    {% if ele.help_text %}
+            
+                                                    <small class="text-danger">{{ele.help_text}}</small>
+            
+                                                    {% else %}
+
+                                                    {% endif %}
+                                                    <div class="form-floating mb-3">
+                                    
+                                                        {{ ele }}
+                                                        <label for="{{ ele.id_for_label }}" class="bg-transparent ">{{ ele.label }}</label>
+                                                    </div>
+                                                    {% if ele.errors %}
+                                                        <p class="text-light p-2 bg-danger rounded">{{ele.errors|join:", "}}</p>
+                                                    {% endif %}
+
+                                                </div>
+                                                {% endfor %}
+                                                
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    
+                            </div>
+                    
+                            
+                            <div class="w-100 text-center">
+                                <input type="submit" class="btn btn-outline-dark " value="Add Product">
+                            </div>
+                    </div>
+                </form>
+                    
+                
+            </div>
         </div>
     </div>
 </div>
+
+
+  
+  <!-- Modal -->
+  
+    <div class="modal  fade" id="cropperboard" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              
+              <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="container-fluid">
+                <div class="row">
+                    <div class="col-6" id="parent-container">
+                        <div class="w-100" >
+                            <img src="" alt="main board" id ="main_image" >
+
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <img src="" alt="preview pannel" class="visually-hidden"  id="preview_image">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="options hide">
+                    
+                            <div>
+                                <button class="ascept-ratio">16:9</button>
+                                <button class="ascept-ratio">4:3</button>
+                                <button class="ascept-ratio">1:1</button>
+                                <button class="ascept-ratio">2:3</button>
+                                <button class="ascept-ratio">Free</button>
+                            </div>
+                        </div>
+                        <div>
+                            <button id="preview">PREVIEW</button>
+                            <button type="button" id="cropper_finish">CROP</button>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </div>    
 
 {% endblock %}
 
@@ -33,5 +237,164 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
 <script src="{% static 'js/adminnav.js' %}"></script>
+<!-- form validation  -->
+<script src="{% static 'js/form.js' %}"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<script>
+    let elements = document.querySelectorAll("input[type='file']");
+    elements.forEach(ele =>{
+
+        ele.addEventListener('change' ,()=>{
+            const img_file = ele.files[0];
+
+            if (img_file){
+                const reader = new FileReader();
+
+                reader.onload = (e)=>{
+                    ele.parentElement.nextElementSibling.firstElementChild.src = e.target.result;
+                };
+
+                reader.readAsDataURL(img_file);
+                ele.parentElement.nextElementSibling.classList.remove('visually-hidden')
+            }
+            else{
+                ele.parentElement.nextElementSibling.firstElementChild.src ='';
+                ele.parentElement.nextElementSibling.classList.add('visually-hidden')
+
+            }
+        })
+    })
+
+    const modal_elelment = document.getElementById("cropperboard")
+    const myModal = new bootstrap.Modal(modal_elelment, {
+        keyboard: false
+    })
+
+    
+
+    const all_cropper_button = document.querySelectorAll('.cropperbutton');
+
+    const main_image = document.getElementById("main_image")
+    const preview_button = document.getElementById("preview")
+    const preview_image = document.getElementById("preview_image")
+    const cropper_finised_button = document.getElementById("cropper_finish")
+
+    const ascept_ratio = document.querySelectorAll('.ascept-ratio');
+
+    var parentContainer = document.getElementById('parent-container');
+    var parentWidth = parentContainer.offsetWidth;
+    var parentHeight = parentContainer.offsetHeight;
+
+    let current_file = ''
+
+    console.log(parentWidth,parentHeight);
+    let cropper=''
+
+    all_cropper_button.forEach(ele => {
+
+        ele.addEventListener('click' , (e)=>{
+            e.preventDefault()
+            myModal.show()
+            main_image.src ='';
+            
+            
+            const img_file = ele.parentElement.previousElementSibling.firstElementChild.files[0];
+            current_file = ele.parentElement.previousElementSibling.firstElementChild;
+
+            if (img_file){
+                const reader = new FileReader();
+
+                reader.onload = (e)=>{
+                    main_image.src = e.target.result;
+                    
+                    if(cropper){
+                    cropper.destroy()
+                    }
+
+                    cropper = new Cropper(main_image,{
+                        minContainerHeight:300,
+                        minContainerWidth:300,
+                    })
+                };
+
+                reader.readAsDataURL(img_file);
+
+                
+                
+                
+            }
+            else{
+                main_image.src ='';
+
+            }
+
+        })
+    })
+
+
+    ascept_ratio.forEach(ele=>{
+
+        ele.addEventListener('click',()=>{
+
+            if (ele.innerText == "Free"){
+                cropper.setAspectRatio(NaN)
+            }
+            else{
+
+                cropper.setAspectRatio(eval(ele.innerText.replace(':','/')));
+            }
+        })
+    })
+
+    preview_button.addEventListener('click',(e)=>{
+        e.preventDefault()
+        console.log('clicked');
+        let croped_image = cropper.getCroppedCanvas({}).toDataURL();
+
+        preview_image.src = croped_image
+        preview_image.classList.remove('visually-hidden')
+    })
+
+
+cropper_finised_button.addEventListener('click', () => {
+    if (cropper) {
+        cropper.getCroppedCanvas().toBlob((blob) => {
+            const new_file = new File([blob], `crop-${current_file.files[0].name}`, { type: 'image/jpeg' });
+
+            // Now let's create a DataTransfer to get a FileList
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(new_file);
+
+            // Assign the new FileList to the input element
+            current_file.files = dataTransfer.files;
+
+            if (current_file.files[0]){
+                const reader = new FileReader();
+                reader.onload = (e)=>{
+                    current_file.parentElement.nextElementSibling.firstElementChild.src = e.target.result;
+                    
+                    if(cropper){
+                    cropper.destroy()
+                    }
+
+                    cropper = new Cropper(main_image,{
+                        minContainerHeight:300,
+                        minContainerWidth:300,
+                    })
+                };
+
+                reader.readAsDataURL(current_file.files[0]);
+            }
+            
+        }, 'image/jpeg');
+    }
+});
+</script>
 
 {% endblock %}
+
+
+

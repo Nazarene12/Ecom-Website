@@ -1,0 +1,93 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% load socialaccount %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+
+{% endblock %}
+
+
+{% block main %}
+
+{% include 'base/loader.html' %}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-4 col-md-7 col-10 ">
+            <div class="position-relative top-0 start-50 login_box">
+
+                <i class="fa-solid fa-user maincolor fs-1"></i>
+
+            </div>
+            <div class="login_form_box p-3">
+                
+                <h4 class="text-center text-light">F<small class="maincolor">o</small> GOT PASSWORD</h4>
+
+                {% if error %}
+
+                <p class=" text-light bg-danger p-2 rounded">{{error}}</p>
+
+                {% endif %}
+
+                <form method="post" class="text-center forms" novalidate>
+                    {% csrf_token %}
+
+                    <!-- import for form validation js in front end -->
+
+                    <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded"></p>
+
+                    
+                    <div class="form-floating mb-3">
+                        
+                        <input type="text" name="email" id="email" class="form-control" placeholder="email">
+                        <label for="email" class="bg-transparent text-light">email</label>
+                    </div>
+
+                    
+
+
+                    
+
+                    <input type="submit" class="btn btn-outline-light w-100 p-2" name="signin" value="Enter">
+
+                </form>
+
+                
+                <div class="d-flex justify-content-evenly mt-3">
+                    <div>
+                      <p class="maincolor pointer">
+                        <a href="{% url 'Ecom:signup' %}" class="nav-link">Create</a>
+                      </p>
+                    </div>
+                    <div>
+                      
+                        <a href="{% url 'Ecom:login' %}" class="nav-link text-light">signin</a>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+
+<!-- loader  -->
+<script src="{% static 'js/loader.js' %}"></script>
+
+<!-- form validation  -->
+<script src="{% static 'js/form.js' %}"></script>
+
+<!-- show password   -->
+
+{% endblock %}

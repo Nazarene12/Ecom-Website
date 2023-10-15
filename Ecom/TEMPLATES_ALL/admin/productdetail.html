@@ -28,46 +28,89 @@
         {% include 'base/adminnav.html' with page='product' %}
         <div class="col-lg-8 bodysection">
 
-            <div class="container-fluid">
+            <div class="container-fluid p-5">
                 <div class="row justify-content-center align-items-center">
-                    <div class="col-lg-2 col-md-3 col-3">
-                            <div class="w-100">
-                                <div class="w-100">
-                                    <img src="{{product.image.normal_image.url}}" alt="normal-view" class="w-100 img_box">
+                    
+                    <div class="col-lg-7  col-12">
+                        <div class="w-100">
+                            {% for varient in product.detail_product.all %}
+                                    {% if varient.first_preference %}
+                                        <img src="{{varient.image.normal_image.url}}" alt="normal-view" class="w-100 main_img" style="height:20rem;object-fit: cover;">
+                                    {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <div class="container-fluid my-4">
+                            <div class="row">
+                                {% for varient in product.detail_product.all %}
+                                {% if varient.first_preference %}
+
+                                <div class="col-lg-3 col-6">
+                                    <img src="{{varient.image.normal_image.url}}" alt="normal-view" class="w-100 img_box"  style="height:150px;object-fit: cover;">
                                     <p>normal</p>
                                 </div>
-                                <div class="w-100">
-                                    <img src="{{product.image.front_image.url}}" alt="front-view" class="w-100 img_box">
+                                <div class="col-lg-3 col-6">
+                                    <img src="{{varient.image.front_image.url}}" alt="front-view" class="w-100 img_box" style="height:150px;object-fit: cover;">
                                     <p>front</p>
                                 </div>
-                                <div class="w-100">
-                                    <img src="{{product.image.back_image.url}}" alt="back-view" class="w-100 img_box">
+                                <div class="col-lg-3 col-6">
+                                    <img src="{{varient.image.back_image.url}}" alt="back-view" class="w-100 img_box" style="height:150px;object-fit: cover;">
                                     <p>back</p>
                                 </div>
-                                <div class="w-100">
-                                    <img src="{{product.image.side_image.url}}" alt="side-view" class="w-100 img_box">
+                                <div class="col-lg-3 col-6">
+                                    <img src="{{varient.image.side_image.url}}" alt="side-view" class="w-100 img_box" style="height:150px;object-fit: cover;">
                                     <p>side</p>
                                 </div>
+                                {% endif %}
+                                {% endfor %} 
                             </div>
-                            
-                    </div>
-                    <div class="col-lg-7 col-md-6 col-6">
-                        <div class="w-100">
-                            <img src="{{product.image.normal_image.url}}" alt="normal-view" class="w-100 main_img">
                         </div>
+                        
                     </div>
-                    <div class="col-lg-2 col-md-3 col-3">
-                        <h3>{{product.product.name}}</h3>
-                        <p>₹ {{product.product.price}}</p>
-                        <p>Brand :{{product.product.brand.name}}</p>
-                        <p>Category :{{product.product.category.name}}</p>
-                        <div class="d-flex  align-items-center mb-2">
-                            <p class="m-0 me-3">Color</p>
-                            <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{product.color.name}}"></table>
-                        </div>
-                        <p>Size :{{product.size.size}}</p>
-                        <p>Count :{{product.count}}</p>
-                        <a href="" class="btn btn-outline-dark">EDIT</a>
+                    <div class="col-lg-5  col-12">
+                       <div class="d-flex justify-content-around">
+                            <div>
+                                <h3>{{product.name}}</h3>
+                                <p>Price : ₹ {{product.price}}</p>
+                                <p>Brand :{{product.brand.name}}</p>
+                                <p>Category :{{product.category.name}}</p>
+                            </div>
+
+                            <div>
+                                <p>Varient</p>
+                                <div class="d-flex  align-items-center">
+                                    <p class="m-0 me-3">Color : </p>
+                                    <div>
+                                        {% with colors = set() %}
+                                            {% for varient in product.detail_product.all %}
+                                                {% if varient.first_preference %}
+                                                    <div style="border:2px solid var(--main-color);padding:5px">
+                                                        <table style="width:20px;height:20px; border-radius:50%; " bgcolor="{{varient.color.name}}"></table>
+                                                    </div>
+                                                {% else %}
+                                                    <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{varient.color.name}}"></table>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                                <div class="d-flex">
+                                    <p class="m-0 me-3">Size : </p>
+                                    <div>
+                                        {% for varient in product.detail_product.all %}
+                                        {% if varient.first_preference %}
+                                        <p>{{varient.size.size}}</p>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                    </div>
+                                </div>
+
+                                <a href="{% url 'admins:updateproduct' pk=product.id %}" class="btn btn-outline-dark">EDIT</a>
+
+                            </div>
+                       </div>
+                       
                     </div>
                 </div>
             </div>

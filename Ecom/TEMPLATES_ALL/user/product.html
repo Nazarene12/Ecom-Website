@@ -1,0 +1,338 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/nav.css' %}">
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+<style>
+    body{
+        display: block;
+    }
+    .nav-background{
+
+        background-image: url("{% static 'image/banner/cn.jpg' %}");
+        background-repeat: no-repeat;
+        background-size: cover;
+        width:100%;
+        height:150px
+    }
+
+    .like-button{
+        position: absolute;
+        top:0px;
+        right:0px;
+        padding:5px;
+        background: rgba(63, 61, 61, 0.274);
+        margin:20px;
+        border-radius:50%;
+    }
+
+    .main-background{
+
+        background-color: var(--main-color);
+    }
+
+    ol { list-style: none;}
+    .breadcrumb { width: 100%; float: left; margin: 20px 0; padding: 7px; position: relative; display: block; background: rgba(0,0,0,.05)}
+    .breadcrumb ol { list-style: none;}
+    .breadcrumb li { height: 30px; line-height: 30px; float: left; padding: 0 12px;}
+    .breadcrumb li a { text-decoration: none;}
+    .breadcrumb li .fa { width: 30px; height: 30px; line-height: 30px;}
+    .breadcrumb a:hover { text-decoration: none;}
+
+    .breadcrumb-fill2.style3 { border-radius: 30px; background: #bb123c;}
+    .breadcrumb-fill2.style3 .fa { background: #F62459;}
+
+    
+
+</style>
+
+{% endblock %}
+
+
+{% block main %}
+
+{% include 'base/loader.html' %}
+
+{% include 'base/nav.html' %}
+
+<div class="container-fluid p-0">
+    <div class="nav-background">
+
+    </div>
+</div>
+
+<div class="container">
+    <div class="verticals ten offset-by-one">
+        <ol class="breadcrumb breadcrumb-fill1">
+            <li><a href="{% url 'Ecom:home' %}">Home</a></li>
+            <li><a href="{% url 'Ecom:products' %}" class="maincolor">Products</a></li>
+            
+        </ol>
+    </div>
+    
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-2 col-5 navsection p-2">
+            <div>
+                <div class="card mb-2 rounded" >
+                    <div class="card-header text-center">
+                      Price
+                    </div>
+                    <ul class="list-group list-group-flush text-center">
+                    {% if price_param == '200' %}
+                    
+
+                        <li class="list-group-item f-item main-background" data-option = 'price' data-select = 'True' data-value="200">200</li>
+                    {% else %}
+                        <li class="list-group-item f-item" data-option = 'price' data-select = 'False' data-value="200">200</li>
+
+                    {% endif %}
+
+                    {% if price_param == '400' %}
+                        <li class="list-group-item   f-item main-background" data-option = 'price' data-select = 'True' data-value="400">400</li>
+                    {% else %}
+                        <li class="list-group-item   f-item" data-option = 'price' data-select = 'False' data-value="400">400</li>
+
+                    {% endif %}
+
+                    {% if price_param == '500' %}
+                        <li class="list-group-item   f-item main-background" data-option = 'price' data-select = 'True' data-value="500">500+</li>
+                    {% else %}
+                        <li class="list-group-item   f-item" data-option = 'price' data-select = 'False' data-value="500">500+</li>
+
+                    {% endif %}
+                    </ul>
+                </div>
+
+                <div class="card mb-2 rounded" >
+                    <div class="card-header text-center">
+                      Brand
+                    </div>
+                    <ul class="list-group list-group-flush text-center">
+                    {% for ele in brand %}
+                        {% if ele.id == brand_param %}
+                            <li class="list-group-item   f-item main-background" data-option = 'brand' data-select = 'True' data-value="{{ele.id}}">{{ele.name}}</li>
+                        {% else %}
+                            <li class="list-group-item   f-item" data-option = 'brand' data-select = 'False' data-value="{{ele.id}}">{{ele.name}}</li>
+                        {% endif %}
+                    {% endfor %}
+                      
+                    </ul>
+                </div>
+
+                <div class="card mb-2 rounded" >
+                    <div class="card-header text-center">
+                      Category
+                    </div>
+                    <ul class="list-group list-group-flush text-center">
+                        {% for ele in category %}
+                            {% if ele.id == category_param %}
+                            
+                                <li class="list-group-item  f-item main-background" data-option = 'category' data-select = 'True' data-value="{{ele.id}}">{{ele.name}}</li>
+                            {% else %}
+                                <li class="list-group-item  f-item" data-option = 'category' data-select = 'False' data-value="{{ele.id}}">{{ele.name}}</li>
+                            {% endif %}
+                        {% endfor %}
+                      
+                    </ul>
+                </div>
+
+                <div class="card mb-2 rounded" >
+                    <div class="card-header text-center">
+                      color
+                    </div>
+                    <ul class="list-group list-group-flush text-center">
+                        {% for ele in color %}
+                            {% if ele.id == color_param %}
+
+                                <li class="list-group-item   f-item main-background" data-option = 'color' data-select = 'True' data-value="{{ele.id}}">{{ele.name}}</li>
+                            {% else %}
+                                <li class="list-group-item   f-item" data-option = 'color' data-select = 'False' data-value="{{ele.id}}">{{ele.name}}</li>
+                            {% endif %}
+
+                        {% endfor %}
+                      
+                    </ul>
+                </div>
+
+                <div>
+                    <a href="{% url 'Ecom:products' %}" id="options" class="btn btn-primary main-background w-100">Apply</a>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-lg-9 col-7 bodysection">
+            <div class="container-fluid">
+                <div class="row">
+                    {% for ele in products %}
+
+                    <div class="col-lg-4 p-2">
+                        <div class="card position-relative">
+                            <img src="{{ele.varient.image.normal_image.url}}" class="card-img-top" alt="products" style="height:20rem;object-fit: cover;">
+                            <div class="card-body">
+                              <h5 class="card-title">{{ele.name}}</h5>
+                              <p class="card-text">{{ele.description}}</p>
+                              <p class="card-text">$ {{ele.price}}</p>
+                              <p class="card-text">Brand : {{ele.brand.name}}</p>
+                              <p class="card-text">Ctegory : {{ele.category.name}}</p>
+                              <div class="d-flex  align-items-center">
+                                <p class="m-0 me-2">color : </p>
+                                <table style="width:20px;height:20px; border-radius:50%; " bgcolor="{{ele.varient.color.name}}"></table>
+                              </div>
+                              <div>
+                                <a href="{% url 'Ecom:product_detail' pk=ele.varient.id %}" class="btn btn-primary">DETAIL</a>
+                              </div>
+                            </div>
+                            <div class="like-button ">
+                                <i class="fa-solid fa-heart fs-3 text-light"></i>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center align-items-center">
+        <nav aria-label="Page navigation example" style="width:max-content">
+            <ul class="pagination">
+                <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
+
+                {% if page_obj.has_previous %}
+
+
+                <li class="page-item"><a class="page-link" href="?page={{page_obj.previous_page_number}}">previous</a></li>
+                {% endif %}
+
+
+                {% if page_obj.has_next %}
+
+                <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}">next</a></li>
+
+                <li class="page-item"><a class="page-link" href="?page={{page_obj.paginator.num_pages}}">{{page_obj.paginator.num_pages}}</a></li>
+                {% endif %}
+              
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+
+
+
+{% endblock %}
+
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+
+
+<!-- script for scroll -->
+<script src="{% static 'js/navscroll.js' %}"></script>
+
+<!-- loader  -->
+<script src="{% static 'js/loader.js' %}"></script>
+
+<script src="{% static 'js/adminnav.js' %}"></script>
+
+
+
+<script>
+    const filter_button = document.querySelectorAll(".f-item")
+
+    const apply_btn = document.getElementById('options')
+
+    let send_value = {
+        'price':'{% if price_param %}{{price_param}}{% endif %}','brand':'{% if brand_param %}{{brand_param}}{% endif %}','category':'{% if category_param %}{{category_param}}{% endif %}','color':'{% if color_param %}{{color_param}}{% endif %}'
+    }
+
+    filter_button.forEach(ele =>{
+        ele.addEventListener("click" , ()=>{
+            let option = ele.dataset.option 
+
+            if (ele.dataset.select == 'False'){
+
+                let element = document.querySelectorAll(`.f-item[data-option=${ele.dataset.option}]`)
+                element.forEach(eles =>{
+                    if(eles.dataset.select == 'True'){
+                        eles.dataset.select = 'False'
+                        eles.classList.remove("main-background")
+                    }
+                })
+
+                send_value[ele.dataset.option] = ele.dataset.value
+                ele.dataset.select = 'True'
+                ele.classList.add("main-background")
+
+
+            }
+            else{
+                send_value[ele.dataset.option] =''
+                ele.dataset.select = 'False'
+                ele.classList.remove("main-background")
+            }
+
+        })
+    })
+
+    apply_btn.addEventListener('click', function (e) {
+        e.preventDefault(); // Prevent the default behavior of navigating to the href
+        const searchParams = new URLSearchParams(send_value);
+        const queryString = searchParams.toString();
+        console.log(apply_btn.href +'?',send_value ,queryString)
+        apply_btn.href = `${apply_btn.href }?${queryString}`
+        // console.log(apply_btn.href )
+        window.location.href = apply_btn.href; 
+    });
+
+
+    let paginator = document.querySelectorAll('.page-link');
+    paginator.forEach(ele =>{
+        ele.addEventListener('click' ,(e)=>{
+            e.preventDefault();
+            const searchParams = new URLSearchParams(send_value);
+            const queryString = searchParams.toString();
+            ele.href = `${ele.href}&${queryString}`
+            window.location.href = ele.href;
+          
+
+        })
+    })
+
+
+    
+    // axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    // axios.defaults.xsrfCookieName = "csrftoken"
+
+    // const apply_btn = document.getElementById("apply_btn")
+    // apply_btn.addEventListener('click' , ()=>{
+    //     axios.post('{% url "Ecom:product_filter" %}', {fil})
+    //     .then((response)=>{
+
+    //         if (response.data.success){
+    //             console.log(response.data.value);
+    //         }
+    //         else{
+    //             console.log("there is a error in the response");
+    //         }
+    //     })
+    //     .catch((error)=>{
+    //         console.log("there is an error....");
+    //     })
+    // })
+</script>
+
+{% endblock %}

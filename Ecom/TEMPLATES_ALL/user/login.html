@@ -79,11 +79,11 @@
                 <div class="d-flex justify-content-evenly mt-3">
                     <div>
                       <p class="maincolor pointer">
-                        <a href="#" class="nav-link">Create</a>
+                        <a href="{% url 'Ecom:signup' %}" class="nav-link">Create</a>
                       </p>
                     </div>
                     <div>
-                      <p class="text-light pointer">Forget password ?</p>
+                      <a href="{% url 'Ecom:forgot' %}" class="nav-link text-light">forgot</a>
                     </div>
                 </div>
             </div>

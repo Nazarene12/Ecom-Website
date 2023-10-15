@@ -1,0 +1,292 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% load dict_filters %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/nav.css' %}">
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<style>
+
+    
+    .img_container{
+        width:150px;
+        margin-bottom: 15px;
+    }
+
+    .main_container{
+        width:300px;
+    }
+
+    .img-box{
+        flex-basis: 20%;  
+    }
+
+    body{
+        display: block;
+    }
+    .nav-background{
+
+        background-image: url("{% static 'image/banner/cn.jpg' %}");
+        background-repeat: no-repeat;
+        background-size: cover;
+        width:100%;
+        height:150px
+    }
+
+    .main-background{
+
+        background-color: var(--main-color);
+    }
+
+    ol { list-style: none;}
+    .breadcrumb { width: 100%; float: left; margin: 20px 0; padding: 7px; position: relative; display: block; background: rgba(0,0,0,.05)}
+    .breadcrumb ol { list-style: none;}
+    .breadcrumb li { height: 30px; line-height: 30px; float: left; padding: 0 12px;}
+    .breadcrumb li a { text-decoration: none;}
+    .breadcrumb li .fa { width: 30px; height: 30px; line-height: 30px;}
+    .breadcrumb a:hover { text-decoration: none;}
+
+    .breadcrumb-fill2.style3 { border-radius: 30px; background: #bb123c;}
+    .breadcrumb-fill2.style3 .fa { background: #F62459;}
+
+
+    .selected_color{
+
+        padding:5px;
+        border:1px solid var(--main-color);
+    }
+
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+    }
+
+    
+</style>
+{% endblock %}
+
+{% block main %}
+
+{% include 'base/loader.html' %}
+
+{% include 'base/nav.html' %}
+
+<div class="container-fluid p-0">
+    <div class="nav-background">
+
+    </div>
+</div>
+
+<div class="container-fluid">
+    
+        <ol class="breadcrumb breadcrumb-fill1">
+            <li><a href="{% url 'Ecom:home' %}">Home</a></li>
+            <li><a href="{% url 'Ecom:products' %}" >Products</a></li>
+            <li><a href="#" class="maincolor">Products detail</a></li>
+            
+        </ol>
+    
+</div>
+
+<div class="container-fluid mb-5">
+    <div class="row p-0">
+        <div class="col-lg-12 ">
+
+            <div class="container-fluid">
+                <div class="row justify-content-around align-items-center">
+                   
+                    <div class="col-lg-6  d-flex justify-content-around">
+                        <div class="d-flex flex-column justify-content-between">
+                            <div class="p-1 img-box" >
+                                <img src="{{product.image.normal_image.url}}" id="normal_image"  style="height:100px;width:100px;object-fit: cover;"  alt="normal-view" class=" img-zoom">
+                                <p  class="m-0">normal</p>
+                            </div>
+                            <div class="p-1 img-box" >
+                                <img src="{{product.image.front_image.url}}" id="front_image"   style="height:100px;width:100px;object-fit: cover;" alt="front-view" class=" img-zoom">
+                                <p class="m-0">front</p>
+                            </div>
+                            <div class="p-1 img-box" >
+                                <img src="{{product.image.back_image.url}}" id="back_image"  style="height:100px;width:100px;object-fit: cover;" alt="back-view" class=" img-zoom">
+                                <p class="m-0">back</p>
+                            </div>
+                            <div class="p-1 img-box" >
+                                <img src="{{product.image.side_image.url}}" id="side_image"  style="height:100px;width:100px;object-fit: cover;" alt="side-view" class=" img-zoom">
+                                <p class="m-0">side</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" >
+                            <img id="zoom_01"  src="{{product.image.normal_image.url}}" style="height:40rem; object-fit: contain;" alt="normal-view" class=" main_img">
+                        </div>
+
+                        
+                        
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-3">
+                        <h3>{{product.product.name}}</h3>
+                        <p>₹ {{product.product.price}}</p>
+                        <p>Brand :{{product.product.brand.name}}</p>
+                        <p>Category :{{product.product.category.name}}</p>
+                        <div class="d-flex  align-items-center mb-2">
+                            <p class="m-0 me-3">Color</p>
+                            <div class="selected_color all_color" data-active ='True' data-image='{% url "app1:get_data_product" pk=product.image.id %}'>
+                                <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{product.color.name}}"></table>
+                            </div>
+                            {% for each_color in product.colors %}
+                            <div class=" ms-2 all_color" data-active ='False' data-image='{% url "app1:get_data_product" pk=each_color.image %}'>
+                                <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{each_color.color__name}}"></table>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <p class="m-0 me-2">size</p>
+                            <select class="form-select form-select-lg" style="width:100px">
+                            {% for each_size in all_size %}
+
+                            {% if each_size.size == product.size.size %}
+                                <option class="size_option" value="{{product.id}}" selected>{{product.size.size}}</option>
+
+                            {% elif each_size.size in product.sizes %}
+                                <option class="size_option" value="{{size_id|get_item:each_size.size}}" >{{each_size.size}}</option>
+                            {% else %}
+                                <option class="size_option" value="" disabled>{{each_size.size}}</option>
+                            {% endif %}
+
+                            {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-3" style="gap:10px">
+                            <div id="minus_button">
+                                <i class="fa-solid fa-minus"></i>
+                            </div>
+                            <input type="number" value="1" name="count" id="needed_count" style="width:50px;padding:5px;">
+                            <div id="plus_button">
+                                <i class="fa-solid fa-plus"></i>
+                            </div>
+                        </div>
+
+
+                        <a herf="#" class="btn btn-primary" id="cart_button">add cart</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<!-- script for scroll -->
+<script src="{% static 'js/navscroll.js' %}"></script>
+
+<!-- loader  -->
+<script src="{% static 'js/loader.js' %}"></script>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.min.js" integrity="sha512-UH428GPLVbCa8xDVooDWXytY8WASfzVv3kxCvTAFkxD2vPjouf1I3+RJ2QcSckESsb7sI+gv3yhsgw9ZhM7sDw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+    var active_ele = $('#zoom_01');
+    active_ele.elevateZoom();
+    let img = document.querySelectorAll('.img-zoom')
+    img.forEach(ele=>{
+        ele.addEventListener('click',()=>{
+            let main_img = document.querySelector(".main_img");
+            main_img.src = ele.src;
+            active_ele.removeData('elevateZoom');
+            active_ele.elevateZoom();
+
+            // console.log("clicked");
+        })
+    })
+
+    const needed_count = document.getElementById('needed_count');
+    const minus_button = document.getElementById('minus_button');
+    const plus_button = document.getElementById('plus_button');
+    const main_image_box = document.getElementById('zoom_01');
+    const f_image = document.getElementById("front_image");
+    const b_image = document.getElementById("back_image");
+    const s_image = document.getElementById("side_image");
+    const n_image = document.getElementById("normal_image");
+
+    const size_option = document.querySelectorAll('.size_option');
+
+    minus_button.addEventListener('click',(e)=>{
+
+        if (needed_count.value == 1) return;
+
+        needed_count.value  = parseInt(needed_count.value)-1;
+    })
+
+    plus_button.addEventListener('click',(e)=>{
+
+        // if (needed_count.value == 1) return;
+
+        needed_count.value  = parseInt(needed_count.value)+1;
+    })
+
+    const all_color  = document.querySelectorAll('.all_color');
+
+    all_color.forEach(ele =>{
+
+        ele.addEventListener('click' ,(e)=>{
+
+            if (e.target.dataset.active == 'True') return 
+
+            let current_active = document.querySelector('[data-active="True"].all_color');
+            current_active.dataset.active = 'False';
+            current_active.classList.remove('selected_color');
+            ele.dataset.active = 'True';
+            ele.classList.add('selected_color');
+
+            axios.get(ele.dataset.image)
+            .then(function(response){
+                
+                if(response.data.success){
+                    main_image_box.src = response.data.normal_image;
+                    f_image.src = response.data.front_image;
+                    s_image.src = response.data.side_image;
+                    b_image.src = response.data.back_image;
+                    n_image.src = response.data.normal_image;
+                    active_ele.removeData('elevateZoom');
+                    active_ele.elevateZoom();
+                    let sizes = Object.keys(response.data.size_id);
+                    size_option.forEach(ele=>{
+                        if(sizes.includes(ele.innerText)){
+                            ele.value = response.data.size_id[ele.innerText];
+                            ele.selected  =true;
+                            ele.disabled = false;
+
+                        }
+                        else{
+                            ele.disabled = true
+                            ele.selected  =false;
+                            ele.value=''
+                        }
+                        
+                    })
+                }
+            })
+            .catch(function(error){
+                console.log("error");
+            })
+        })
+    })
+
+</script>
+
+{% endblock %}

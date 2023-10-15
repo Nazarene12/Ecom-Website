@@ -46,21 +46,26 @@ class Color(models.Model):
         return self.name
     
 class Product(models.Model):
-    name = models.CharField(max_length=255, unique=True, blank=False, null=False)
-    description = models.TextField(blank=True, null=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.SET_DEFAULT, default=1)  # Default to 'normal' category
+    name = models.CharField(max_length=255, unique=True, blank=False, null=False , help_text='required*')
+    description = models.TextField(blank=False, null=False, help_text='required*')
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False, help_text='required*')
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE,blank=False,null=False, help_text='required*')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL,help_text='required*' , null=True)  # Default to 'normal' category
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
+
+    def delete(self, *args, **kwargs):
+        self.detail_product.all().delete()
+        super().delete(*args, **kwargs)
     
 class Connector(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,related_name='detail_product')
     color = models.ForeignKey(Color, on_delete=models.CASCADE,related_name='detail_color')
     image = models.ForeignKey(ProductImage, on_delete=models.CASCADE,related_name='detail_image')
     size = models.ForeignKey(Size,on_delete=models.CASCADE,related_name='detail_size')
-    count = models.IntegerField()
+    count = models.IntegerField(blank=False,null=False ,default=0)
     first_preference = models.BooleanField(default=False)
     sale = models.IntegerField(default=0)
 
