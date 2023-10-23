@@ -1,0 +1,261 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% load socialaccount %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+<link rel="stylesheet" href="{% static 'css/nav.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+<style>
+
+    body{
+        display: block;
+    }
+
+    input.form-control{
+        color:black;
+    }
+
+    input.form-control:focus{
+        color:black;
+    }
+
+    .card-img-top{
+        height:300px;
+    }
+
+    .card-no-border .card {
+        border-color: #d7dfe3;
+        border-radius: 4px;
+        margin-bottom: 30px;
+        -webkit-box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05);
+        box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05)
+    }
+
+    .card-body {
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+        padding: 1.25rem
+    }
+
+    .pro-img {
+        margin-top: -80px;
+        margin-bottom: 20px
+    }
+
+    .little-profile .pro-img img {
+        width: 128px;
+        height: 128px;
+        -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        border-radius: 100%
+    }
+
+    html body .m-b-0 {
+        margin-bottom: 0px
+    }
+
+    h3 {
+        line-height: 30px;
+        font-size: 21px
+    }
+
+    .btn-rounded.btn-md {
+        padding: 12px 35px;
+        font-size: 16px
+    }
+
+    html body .m-t-10 {
+        margin-top: 10px
+    }
+
+    .btn-rounded {
+        border-radius: 60px;
+        padding: 7px 18px
+    }
+
+   
+
+    .text-center {
+        text-align: center !important
+    }
+
+
+</style>
+{% endblock %}
+
+
+{% block main %}
+
+
+
+{% include 'base/loader.html' %}
+
+{% include 'base/nav.html' %}
+
+<div class="container-fluid p-0">
+    <div class="row">
+        <div class="col-lg-12">
+            <div >
+                <div >
+                    <!-- Column -->
+                    <div class="card"> <img class="card-img-top" src="https://img.freepik.com/premium-photo/umbrella-with-rain-hd-8k-wallpaper-stock-photographic-image_890746-37067.jpg" style="object-fit: cover;" alt="Card image cap">
+                        <div class="card-body little-profile text-center">
+                            <div class="pro-img">
+                                {% if request.user.user.picture %}
+                                <img src="{{user.user.picture.url}}" alt="user">
+                                {% else %}
+                                <img src="{% static 'default/noprofile.png' %}" alt="user">
+                                {% endif %}
+                            </div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% for each in orders %}
+    <div class="row border rounded p-5 m-5">
+        <div class="col-lg-5">
+
+            <div class="container-fluid">
+                <div class="row">
+                    {% for ele in each.products.all %}
+
+                    <div class="col-lg-6 mb-3">
+        
+                        <div>
+                            <img src="{{ele.image.normal_image.url}}" alt="image" class="rounded" style="width:150px;height:150px;object-fit: cover;">
+                        </div>
+                        <div>
+                            <p class="fs-4 m-0">{{ele.product.name}}</p>
+                            <p class="fs-5 m-0" style="width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ele.product.description}}</p>
+                            <div class="d-flex align-items-center" style="gap:30px;">
+                                <p class="fs-6 m-0 text-success"> ₹ {{ele.product.price}}</p>
+                                <p class="text-secondary m-0">Size : {{ele.size.size}}</p>
+                            </div>
+        
+                            <div class="d-flex flex-wrap" style="gap:10px;">
+                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.color.name}}</p>
+                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.product.brand.name}}</p>
+                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.product.category.name}}</p>
+                            </div>
+                        </div>
+        
+        
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+
+            
+        </div>
+
+        <div class="col-lg-4">
+            <p class="fs-4 m-0">Total amount : ₹ {{each.total_price}}</p>
+            <p class="fs-5 m-0">Total items : {{each.total_item}}</p>
+            <p class="fs-5 m-0">Order Date : {{each.order_date}}</p>
+            <p class="fs-5 m-0" id="status{{forloop.counter}}">Status : {{each.status}}</p>
+            <p class="fs-5 m-0">Payment : {{each.payment_method}}</p>
+
+            
+        </div>
+
+        <div class="col-lg-3" id="conatiner_button{{foorloop.counter}}">
+            <p class="fs-4 m-0">Delivery Address :</p>
+            <div class="p-3 " style="width: max-content;">
+                <p class="m-0">{{each.address.village}}</p>
+                <p class="m-0">{{each.address.city}}</p>
+                <div class="d-flex">
+                    <p class="m-0">{{each.address.district}} - </p>
+                    <p class="m-0">{{each.address.pincode}}</p>
+                </div>
+                <p class="m-0">{{each.address.first_phone_number}}</p>
+                {% if each.address.second_phone_number %}
+                <p class="m-0">{{each.address.second_phone_number}}</p>
+                {% endif %}
+
+                {% if each.address.landmark %}
+                <p class="m-0">{{each.address.landmark}}</p>
+                {% endif %}
+
+            </div>
+            {% if each.status == 'delivered' or each.status == 'cancel' %}
+            {% else %}
+            <a href="{% url 'Ecom:cancelorder' pk=each.id %}" data-set="{{foorloop.counter}}" class="btn btn-outline-dark cancel_button">Cancel Order</a>
+            {% endif %}
+        </div>
+        
+
+    </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+
+<!-- loader  -->
+<script src="{% static 'js/loader.js' %}"></script>
+
+<!-- form validation  -->
+<!-- <script src="{% static 'js/form.js' %}"></script> -->
+
+
+
+<!-- script for scroll -->
+<script src="{% static 'js/navscroll.js' %}"></script>
+
+<script>
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
+    let cancel_button = document.querySelectorAll('cancel_button')
+
+    // cancel_button.forEach(ele=>{
+
+    //     ele.addEventListener('click' ,(e)=>{
+
+    //         e.preventDefault()
+
+    //         axios.get(ele.href )
+    //         .then(function(response){
+
+    //             if(response.data.success){
+    //                 let conatiner_button = document.getElementById(`conatiner_button${ele.dataset.set}`)
+    //                 container_button.removeChild(ele);
+    //                 let status_update = document.getElementById(`status${ele.dataset.set}`)
+    //                 status_update.innerText = 'cancel'
+    //                 for (var i = 0; i < id_status.options.length; i++) {
+    //                 var option = id_status.options[i];
+                    
+    //                 // Disable the option if its value is not equal to the desired value
+    //                 if (option.value !== response.data.value) {
+    //                     option.disabled = true;
+    //                 }
+    //                 }
+    //             }
+    //             else{
+    //                 console.log('error');
+    //             }
+    //         })
+    //         .catch(function(error){
+    //             console.error(error)
+    //         })
+    //     })
+    // })
+</script>
+
+{% endblock %}

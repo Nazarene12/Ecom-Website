@@ -139,18 +139,18 @@
                         <p>Category :{{product.product.category.name}}</p>
                         <div class="d-flex  align-items-center mb-2">
                             <p class="m-0 me-3">Color</p>
-                            <div class="selected_color all_color" data-active ='True' data-image='{% url "app1:get_data_product" pk=product.image.id %}'>
+                            <div class="selected_color all_color" data-active ='True' data-image='{% url "Ecom:get_data_product" pk=product.image.id %}'>
                                 <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{product.color.name}}"></table>
                             </div>
                             {% for each_color in product.colors %}
-                            <div class=" ms-2 all_color" data-active ='False' data-image='{% url "app1:get_data_product" pk=each_color.image %}'>
+                            <div class=" ms-2 all_color" data-active ='False' data-image='{% url "Ecom:get_data_product" pk=each_color.image %}'>
                                 <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{each_color.color__name}}"></table>
                             </div>
                             {% endfor %}
                         </div>
                         <div class="d-flex align-items-center mb-3">
                             <p class="m-0 me-2">size</p>
-                            <select class="form-select form-select-lg" style="width:100px">
+                            <select class="form-select form-select-lg" id="select_size" style="width:100px">
                             {% for each_size in all_size %}
 
                             {% if each_size.size == product.size.size %}
@@ -176,8 +176,12 @@
                             </div>
                         </div>
 
+                        <div class="position-relative">
+                            <p class="m-0 mb-2 p-1 text-light bg-success rounded position-absolute start-0 visually-hidden" id="signal_cart_added_success" style="width:max-content;bottom:-50px;">Added to cart</p>
+                            <p class="m-0 mb-2 p-1 text-light bg-danger rounded position-absolute start-0 visually-hidden" id="signal_cart_added_error" style="width:max-content;bottom:-50px;">try again later</p>
+                            <a href="{% url 'Ecom:addcart' %}" class="btn btn-primary" id="cart_button">add cart</a>
 
-                        <a herf="#" class="btn btn-primary" id="cart_button">add cart</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -200,6 +204,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.min.js" integrity="sha512-UH428GPLVbCa8xDVooDWXytY8WASfzVv3kxCvTAFkxD2vPjouf1I3+RJ2QcSckESsb7sI+gv3yhsgw9ZhM7sDw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
+
     var active_ele = $('#zoom_01');
     active_ele.elevateZoom();
     let img = document.querySelectorAll('.img-zoom')
@@ -225,6 +232,54 @@
 
     const size_option = document.querySelectorAll('.size_option');
 
+    const cart_button = document.getElementById('cart_button');
+
+    needed_count.addEventListener('input',(e)=>{
+        if (needed_count.value >= 5){
+            needed_count.value = 5;
+        }
+        if (needed_count.value =='' || needed_count.value==0){
+            needed_count.value = 1;
+
+        }
+    })
+
+    cart_button.addEventListener('click',(e)=>{
+        e.preventDefault()
+        var url = new URL(e.target.href);  
+        var params = new URLSearchParams();  
+        const select_size = document.getElementById('select_size');
+        params.set('pk',select_size.value)
+        params.set('quantity',needed_count.value)
+        url.search = params.toString();
+        axios.get(url.toString())
+        .then(function(response){
+
+            if (response.data.success) {
+                let signal_cart_added_success = document.getElementById('signal_cart_added_success');
+                signal_cart_added_success.classList.remove('visually-hidden');
+
+                setTimeout(()=>{
+                    signal_cart_added_success.classList.add('visually-hidden');
+                },2000)
+            }
+            else{
+                let signal_cart_added_error = document.getElementById('signal_cart_added_error');
+                signal_cart_added_error.classList.remove('visually-hidden');
+
+                signal_cart_added_error.innerText = response.data.error
+                setTimeout(()=>{
+                    signal_cart_added_error.classList.add('visually-hidden');
+                },2000) 
+            }
+        })
+        .catch(function(error){
+            console.error('An error occurred:', error);
+        });
+
+       
+    })
+
     minus_button.addEventListener('click',(e)=>{
 
         if (needed_count.value == 1) return;
@@ -234,10 +289,12 @@
 
     plus_button.addEventListener('click',(e)=>{
 
-        // if (needed_count.value == 1) return;
+        if (needed_count.value == 5) return;
 
         needed_count.value  = parseInt(needed_count.value)+1;
     })
+
+
 
     const all_color  = document.querySelectorAll('.all_color');
 

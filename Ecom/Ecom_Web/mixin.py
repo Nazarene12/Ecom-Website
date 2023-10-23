@@ -6,6 +6,9 @@ from django.contrib.auth.models import User
 
 from .models import UserProfile
 
+from django.shortcuts import render,redirect,HttpResponse
+from django.contrib.auth.mixins import UserPassesTestMixin
+
 
 
 def sendOTP(email):
@@ -37,3 +40,32 @@ def createUser(data):
     obj.user = user
     obj.save()
     return user
+
+
+def conformationmail(email):
+
+    subject = 'order confrimation'
+    message  = f"Your order has been placed"
+
+    try:
+        send_mail(subject , message , settings.EMAIL_HOST_USER , [email])
+
+    except SMTPRecipientsRefused:
+        print("invalid email")
+        return ( False , "invalid email")
+    except SMTPException:
+        return ( False , "server issue")
+    except Exception:
+        return ( False , "error occured")
+
+    return ( True , 'success')
+
+
+class UserPermissionCustomMixin(UserPassesTestMixin):
+    def test_func(self):
+        if self.request.user.is_authenticated and self.request.user.is_active:
+            return True
+
+    def handle_no_permission(self):
+        if self.raise_exception or ( self.request.user.is_authenticated and not self.request.user.is_active) or not self.request.user.is_authenticated:
+            return redirect('Ecom:login')  # Redirect to login if user is not logged in or raise_exception is True

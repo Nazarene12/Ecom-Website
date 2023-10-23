@@ -1,0 +1,158 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+{% endblock %}
+
+{% block main %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='product' %}
+        <div class="col-lg-8 bodysection">
+            <div class="container-fluid p-2 mt-5">
+                <div class="row border rounded p-5 m-5">
+                    <div class="col-lg-5">
+            
+                        <div class="container-fluid">
+                            <div class="row">
+                                {% for ele in order.products.all %}
+            
+                                <div class="col-lg-6 mb-3">
+                    
+                                    <div>
+                                        <img src="{{ele.image.normal_image.url}}" alt="image" class="rounded" style="width:150px;height:150px;object-fit: cover;">
+                                    </div>
+                                    <div>
+                                        <p class="fs-4 m-0">{{ele.product.name}}</p>
+                                        <p class="fs-5 m-0" style="width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ele.product.description}}</p>
+                                        <div class="d-flex align-items-center" style="gap:30px;">
+                                            <p class="fs-6 m-0 text-success"> ₹ {{ele.product.price}}</p>
+                                            <p class="text-secondary m-0">Size : {{ele.size.size}}</p>
+                                        </div>
+                    
+                                        <div class="d-flex flex-wrap" style="gap:10px;">
+                                            <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.color.name}}</p>
+                                            <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.product.brand.name}}</p>
+                                            <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.product.category.name}}</p>
+                                        </div>
+                                    </div>
+                    
+                    
+                                </div>
+                                {% endfor %}
+            
+                            </div>
+                        </div>
+            
+                        
+                    </div>
+            
+                    <div class="col-lg-4">
+                        <p class="fs-4 m-0">Total amount : ₹ {{order.total_price}}</p>
+                        <p class="fs-5 m-0">Total items : {{order.total_item}}</p>
+                        <p class="fs-5 m-0">Order Date : {{order.order_date}}</p>
+                        <p class="fs-5 m-0">Status :</p>{{form}}
+                        <p class="fs-5 m-0">Payment : {{order.payment_method}}</p>
+            
+                        
+                    </div>
+            
+                    <div class="col-lg-3" id="container_button">
+                        <p class="fs-4 m-0">Delivery Address :</p>
+                        <div class="p-3 " style="width: max-content;">
+                            <p class="m-0">{{order.address.village}}</p>
+                            <p class="m-0">{{order.address.city}}</p>
+                            <div class="d-flex">
+                                <p class="m-0">{{order.address.district}} - </p>
+                                <p class="m-0">{{order.address.pincode}}</p>
+                            </div>
+                            <p class="m-0">{{order.address.first_phone_number}}</p>
+                            {% if order.address.second_phone_number %}
+                            <p class="m-0">{{order.address.second_phone_number}}</p>
+                            {% endif %}
+            
+                            {% if order.address.landmark %}
+                            <p class="m-0">{{order.address.landmark}}</p>
+                            {% endif %}
+            
+                        </div>
+                        {% if order.status == 'delivered' or order.status == 'cancel' %}
+                        {% else %}
+                        <a href="{% url 'admins:orderupdate' pk=order.id %}" id="order_status_button" class="btn btn-outline-dark">Change</a>
+                        {% endif %}
+                    </div>
+                    
+            
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="{% static 'js/adminnav.js' %}"></script>
+
+<script>
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
+
+    let order_status_button = document.getElementById('order_status_button')
+    let id_status = document.getElementById('id_status')
+
+    let container_button = document.getElementById('container_button')
+    
+    if(order_status_button){
+        order_status_button.addEventListener('click' ,(e)=>{
+
+            e.preventDefault()
+
+            if(id_status !== 'pending'){
+                let formData = new FormData()
+
+            formData.append('status',id_status.value)
+
+            axios.post(order_status_button.href,formData)
+            .then(function(response){
+
+                if(response.data.success){
+                    container_button.removeChild(order_status_button);
+                    for (var i = 0; i < id_status.options.length; i++) {
+                    var option = id_status.options[i];
+                    
+                    // Disable the option if its value is not equal to the desired value
+                    if (option.value !== response.data.value) {
+                        option.disabled = true;
+                    }
+                    }
+                }
+                else{
+                    console.log('error');
+                }
+            })
+            .catch(function(error){
+                console.error(error)
+            })
+
+            }
+
+            })
+    }
+    
+
+
+</script>
+
+{% endblock %}

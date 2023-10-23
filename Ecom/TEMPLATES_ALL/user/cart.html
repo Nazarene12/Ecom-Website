@@ -1,0 +1,362 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% load dict_filters %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/nav.css' %}">
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<style>
+
+    
+    .img_container{
+        width:150px;
+        margin-bottom: 15px;
+    }
+
+    .main_container{
+        width:300px;
+    }
+
+    .img-box{
+        flex-basis: 20%;  
+    }
+
+    body{
+        display: block;
+    }
+    .nav-background{
+
+        background-image: url("{% static 'image/banner/cn.jpg' %}");
+        background-repeat: no-repeat;
+        background-size: cover;
+        width:100%;
+        height:150px
+    }
+
+    .main-background{
+
+        background-color: var(--main-color);
+    }
+
+ 
+
+
+    .selected_color{
+
+        padding:5px;
+        border:1px solid var(--main-color);
+    }
+
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+    }
+
+    
+</style>
+{% endblock %}
+
+{% block main %}
+
+{% include 'base/loader.html' %}
+
+{% include 'base/nav.html' %}
+
+<div class="container-fluid p-0">
+    <div class="nav-background">
+
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-4 col-2 navsection  border ">
+               <div class="border border-secondary rounded p-5 mt-3">
+                    <p class="text-success">Your order is eligible for FREE Delivery.</p>
+                    <p id="total_count"></p>
+                    <p id="total_amount"></p>
+                    <a href="{% url 'Ecom:f_handlecart' %}" id="checkout_button">Process to buy</a>
+               </div>
+        </div>
+        <div class="col-lg-7 col-10 bodysection">
+            <div class="container-fluid p-5">
+                <div class="row" id="parent_container_cart">
+                    {% for each_ele in cart %}
+
+                    <div class="col-lg-12 border rounded p-2 mb-3" id="each_cart_row{{forloop.counter}}">
+
+                        <div class="d-flex each_cart_row" style="gap:20px" >
+                            {% if each_ele.connect.count == 0 %}
+                            <input type="checkbox" name="items" class="items" value="{{each_ele.id}}" disabled>
+                            {% else %}
+                            <input type="checkbox" name="items" class="items" value="{{each_ele.id}}" checked>
+                            {% endif %}
+                            <div>
+                                <img src="{{each_ele.connect.image.normal_image.url}}" alt="image" style="width:200px;height: 200px;object-fit: cover;border-radius: 10px;">
+                            </div>
+
+                            <div>
+                                <p>{{each_ele.connect.product.name}}</p>
+                                <p class="amout_product" data-amount="{{each_ele.connect.product.price}}">₹ {{each_ele.connect.product.price}}</p>
+                                <p>size : {{each_ele.connect.size.size}}</p>
+                                <p>color : {{each_ele.connect.color.name}}</p>
+                                {% if each_ele.connect.count == 0 %}
+                                    <p class="text-danger"> currently not available</p>
+                                {% else %}
+                                    <small class="text-success">In stock</small>
+                                    <div class="d-flex align-items-center mb-3" style="gap:10px">
+                                        <div class="minus_button" data-min="1">
+                                            <i class="fa-solid fa-minus"></i>
+                                        </div>
+                                        {% if each_ele.quantity > each_ele.connect.count %}
+                                        <input type="number" data-pk="{{each_ele.id}}"  value="{{each_ele.connect.count}}" name="count" class="needed_count" style="width:50px;padding:5px;">
+                                        <div class="plus_button" data-max="{{each_ele.connect.count}}">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </div>
+                                        {% else %}
+                                        <input type="number" data-pk="{{each_ele.id}}"  value="{{each_ele.quantity}}" name="count" class="needed_count" style="width:50px;padding:5px;">
+                                        <div class="plus_button" data-max="5">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </div>
+                                        {% endif %}
+                                        
+                                    </div>
+                                    {% if each_ele.quantity > each_ele.connect.count %}
+                                        <p class="text-danger">only {{each_ele.connect.count}} is available not {{each_ele.quantity}}</p>
+                                    {% endif %}
+
+                                {% endif %}
+                            </div>
+                        </div>
+                        <button class="btn btn-primary cart_delete_button" data-delete="{{each_ele.id}}" data-target="each_cart_row{{forloop.counter}}">Delete</button>
+                    </div>
+
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+
+<script src="{% static 'js/adminnav.js' %}"></script>
+
+<!-- script for scroll -->
+<script src="{% static 'js/navscroll.js' %}"></script>
+
+<!-- loader  -->
+<script src="{% static 'js/loader.js' %}"></script>
+
+<script>
+
+axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+axios.defaults.xsrfCookieName = "csrftoken"
+let total_count_box = document.getElementById('total_count');
+let total_amount_box = document.getElementById('total_amount');
+let needed_count = document.querySelectorAll('.needed_count');
+needed_count.forEach(ele=>{
+
+    ele.addEventListener('input',(e)=>{
+        if (ele.value >= parseInt(ele.nextElementSibling.dataset.max)){
+            ele.value = parseInt(ele.nextElementSibling.dataset.max);
+        }
+
+        if (ele.value =='' || ele.value==0){
+            ele.value = 1;
+
+        }
+    })
+})
+
+let final_amount = 0
+let total_items = 0
+
+let total_amount  = ()=>{
+    let each_cart_row = document.querySelectorAll('.each_cart_row');
+    let amount = 0;
+    let total_count = 0;
+    each_cart_row.forEach(ele=>{
+        let input_check = ele.querySelector('input[type="checkbox"]');
+        if (input_check.checked){
+            let price = parseInt(ele.querySelector('.amout_product').dataset.amount);
+            let count = parseInt(ele.querySelector('input.needed_count').value);
+            amount  = amount + ( price * count );
+            total_count +=1;
+        }
+    })
+
+    final_amount = amount;
+    total_items = total_count;
+    total_count_box.innerText = `Total items (${total_count})`;
+    total_amount_box.innerText=`Total price ₹${amount}`;
+}
+
+total_amount()
+
+let all_input_checks = document.querySelectorAll('input[type="checkbox"]')
+all_input_checks.forEach(ele=>{
+    ele.addEventListener('input',(e)=>{
+
+        total_amount()
+    })
+})
+
+let minus_button = document.querySelectorAll('.minus_button');
+
+minus_button.forEach(ele=>{
+
+    ele.addEventListener('click' , (e)=>{
+        if (ele.nextElementSibling.value == 1) return
+
+        const formData = new FormData()
+        formData.append('action', 0)
+        formData.append('pk' ,ele.nextElementSibling.dataset.pk )
+        
+        
+        // for (var [key, value] of formData.entries()) { 
+        //     console.log(key, value);
+        // }
+
+        axios.post('{% url "Ecom:updatecart" %}',formData)
+
+        .then(function(response){
+
+            if (response.data.success){
+                ele.nextElementSibling.value = parseInt(ele.nextElementSibling.value) - 1
+                total_amount()
+            }
+            else{
+                console.log("there is a error...")
+            }
+        })
+        .catch(function(error) {
+            // Handle network or other errors
+            console.error('An error occurred:', error);
+        });
+
+        
+
+    })
+})
+
+let plus_button = document.querySelectorAll('.plus_button');
+
+plus_button.forEach(ele=>{
+
+    ele.addEventListener('click' , (e)=>{
+        if (ele.previousElementSibling.value == parseInt(ele.dataset.max)) return
+
+        const formData = new FormData()
+        formData.append('action', 1)
+        formData.append('pk' ,ele.previousElementSibling.dataset.pk )
+
+        axios.post('{% url "Ecom:updatecart" %}',formData)
+
+        .then(function(response){
+
+            if (response.data.success){
+                ele.previousElementSibling.value = parseInt(ele.previousElementSibling.value) + 1
+                total_amount()
+            }
+            else{
+                console.log("there is a error...")
+            }
+        })
+        .catch(function(error) {
+            // Handle network or other errors
+            console.error('An error occurred:', error);
+        });
+
+        
+    })
+})
+
+const parent_container_cart = document.getElementById('parent_container_cart');
+let cart_delete_button = document.querySelectorAll('.cart_delete_button');
+
+cart_delete_button.forEach(ele =>{
+
+    ele.addEventListener('click' ,(e)=>{
+        e.preventDefault();
+        const formData = new FormData()
+        formData.append('pk', ele.dataset.delete)
+        axios.post("{% url 'Ecom:deletecart' %}" , formData)
+        .then(function(response){
+
+            if (response.data.success){
+                let child = document.getElementById(ele.dataset.target)
+                parent_container_cart.removeChild(child)
+                setTimeout(()=>{
+                    total_amount()
+                },100)
+            }
+            else{
+                console.log("there is a error...")
+            }
+        })
+        .catch(function(error) {
+            // Handle network or other errors
+            console.error('An error occurred:', error);
+        });
+
+    })
+})
+
+
+const checkout_button = document.getElementById('checkout_button');
+
+checkout_button.addEventListener('click' , (e)=>{
+
+    e.preventDefault()
+
+    if (total_items == 0){
+        return
+    }
+
+    let all_items = document.querySelectorAll('input[name="items"]:checked');
+    var formData = new FormData();
+    all_items.forEach(ele=>{
+        formData.append("values", ele.value);
+    })
+
+    formData.append('total_price',final_amount)
+    formData.append('total_items',total_items)
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST",checkout_button.href );
+
+    xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+    //   var response = JSON.parse(xhr.responseText);
+      // Process the response data as needed
+    //   console.log(response);
+
+      // Redirect to a different page after receiving the response
+      window.location.href = "{% url 'Ecom:checkout' %}"; // Replace "/success-page" with the desired URL
+    }
+  };
+
+    xhr.setRequestHeader("X-CSRFToken", '{{csrf_token}}'); 
+    xhr.send(formData)
+
+    
+
+})
+</script>
+
+{% endblock %}

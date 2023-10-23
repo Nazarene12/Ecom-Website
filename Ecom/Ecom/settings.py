@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'Ecom_Web.custommiddleware.CheckoutRedirectMiddleware',
 
     'allauth.account.middleware.AccountMiddleware',
 ]
@@ -200,3 +201,8 @@ EMAIL_HOST_PASSWORD = 'lcjcsgffunxbzkhr'
 # ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
 # ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 86400 # 1 day in seconds
 # ACCOUNT_LOGOUT_REDIRECT_URL ='/accounts/login/'
+
+
+RAZOR_KEY_ID = 'rzp_test_hjG9C59EJBeKxG'
+
+RAZOR_KEY_SECRET = 'YGNkn0IMQYPYPpnwJ2EAwy9K'

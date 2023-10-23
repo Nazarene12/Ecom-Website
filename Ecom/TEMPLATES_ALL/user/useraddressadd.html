@@ -1,0 +1,206 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% load socialaccount %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+<link rel="stylesheet" href="{% static 'css/nav.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+
+<style>
+
+
+
+    input.form-control{
+        color:black;
+    }
+
+    input.form-control:focus{
+        color:black;
+    }
+
+    .card-img-top{
+        height:300px;
+    }
+
+    .card-no-border .card {
+        border-color: #d7dfe3;
+        border-radius: 4px;
+        margin-bottom: 30px;
+        -webkit-box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05);
+        box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05)
+    }
+
+    .card-body {
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+        padding: 1.25rem
+    }
+
+    .pro-img {
+        margin-top: -80px;
+        margin-bottom: 20px
+    }
+
+    .little-profile .pro-img img {
+        width: 128px;
+        height: 128px;
+        -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        border-radius: 100%
+    }
+
+    html body .m-b-0 {
+        margin-bottom: 0px
+    }
+
+    h3 {
+        line-height: 30px;
+        font-size: 21px
+    }
+
+    .btn-rounded.btn-md {
+        padding: 12px 35px;
+        font-size: 16px
+    }
+
+    html body .m-t-10 {
+        margin-top: 10px
+    }
+
+    .btn-rounded {
+        border-radius: 60px;
+        padding: 7px 18px
+    }
+
+   
+
+    .text-center {
+        text-align: center !important
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        color: #455a64;
+        font-family: "Poppins", sans-serif;
+        font-weight: 400
+    }
+
+</style>
+{% endblock %}
+
+
+{% block main %}
+
+
+
+{% include 'base/loader.html' %}
+
+{% include 'base/nav.html' %}
+
+<div class="container-fluid p-0">
+    <div class="row">
+        <div class="col-lg-12">
+            <div >
+                <div >
+                    <!-- Column -->
+                    <div class="card"> <img class="card-img-top" src="https://img.freepik.com/premium-photo/umbrella-with-rain-hd-8k-wallpaper-stock-photographic-image_890746-37067.jpg" style="object-fit: cover;" alt="Card image cap">
+                        <div class="card-body little-profile text-center">
+                            <div class="pro-img">
+                                {% if request.user.user.picture %}
+                                <img src="{{user.user.picture.url}}" alt="user">
+                                {% else %}
+                                <img src="{% static 'default/noprofile.png' %}" alt="user">
+                                {% endif %}
+                            </div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-4 col-md-7 col-10 ">
+            
+            <div class="login_form_box p-3">
+                
+
+                <form method="post" class="text-center forms" novalidate>
+                    {% if form.non_field_errors %}
+                    <p class="text-light p-2 bg-danger rounded">{{form.non_field_errors|join:", "}}</p>
+                    {% endif %}
+                    {% csrf_token %}
+
+                    <!-- import for form validation js in front end -->
+
+                    <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded"></p>
+
+                    {% for ele in form %}
+
+                    {% if ele.name == 'primary_address' %}
+
+                    <div class="d-flex mb-3">
+                        
+                        {{ ele }}
+                        <label for="{{ ele.id_for_label }}" class="ms-2">{{ ele.label }}</label>
+                    </div>
+
+
+                    {% else %}
+                    
+                    <div class="form-floating mb-3">
+                        
+                        {{ ele }}
+                        <label for="{{ ele.id_for_label }}" class="bg-transparent ">{{ ele.label }}</label>
+                    </div>
+
+                    {% if ele.errors %}
+                    <p class="text-light p-2 bg-danger rounded">{{ele.errors|join:", "}}</p>
+                    {% endif %}
+
+                    {% endif %}
+
+                    {% endfor %}
+
+                    
+
+                    <input type="submit" class="btn btn-outline-dark w-100 p-2 mb-3" name="restform" value="ADD">
+                    <a href="{% url 'Ecom:profile' %}" class="btn btn-outline-dark w-100 p-2">CANCEL</a>
+                </form>
+
+                
+                
+                
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+
+<!-- loader  -->
+<script src="{% static 'js/loader.js' %}"></script>
+
+<!-- form validation  -->
+<!-- <script src="{% static 'js/form.js' %}"></script> -->
+
+
+
+<!-- script for scroll -->
+<script src="{% static 'js/navscroll.js' %}"></script>
+
+{% endblock %}

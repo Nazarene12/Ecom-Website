@@ -4,6 +4,8 @@ from .models import Product, Color, Brand, Category ,Size,Connector
 from .mixins import get_count
 from django.core.exceptions import ValidationError
 
+from Ecom_Web.models import Order
+
 
 class CategoryForm(forms.ModelForm):
     class Meta:
@@ -153,6 +155,12 @@ class ProductForm(forms.ModelForm):
 
         }
 
+    def clean_price(self):
+        price = self.cleaned_data.get('price')
+        if int(price) <= 0 :
+            raise forms.ValidationError("this can not be zero or negative ..")
+        return price
+
     def clean_name(self):
         name = self.cleaned_data.get('name')
         if Product.objects.filter(name=name).exists():
@@ -272,6 +280,14 @@ class UpdatedProductAddForm(forms.ModelForm):
         self.fields['brand'].empty_label = 'Select a Brand'
         self.fields['category'].empty_label = 'Select a Category'
 
+
+
+    def clean_price(self):
+        price = self.cleaned_data.get('price')
+        if int(price) <= 0 :
+            raise forms.ValidationError("this can not be zero or negative ..")
+        return price
+
 class  AddAditionVarientColorForm(forms.ModelForm):
 
     normal_image = forms.ImageField(
@@ -371,3 +387,33 @@ class AddAditionVarientForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+    
+
+class OredrFormStatus(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['status']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.pop('instance',None)
+        if instance:
+            # Disable specific choices based on the instance
+            if instance.status == 'pending':
+                self.fields['status'].widget.choices = (
+                  
+                    ('pending', 'Pending'),
+                    ('cancel', 'Canceled'),
+                    ('delivered', 'Delivered'),
+                )
+            elif instance.status == 'cancel':
+                self.fields['status'].widget.choices = (
+
+                    ('cancel', 'Canceled'),
+                )
+
+            else:
+                self.fields['status'].widget.choices = (
+
+                    ('delivered', 'Delivered' ),
+                )

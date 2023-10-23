@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
 
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 {% endblock %}
 
@@ -20,10 +21,10 @@
                 <div class="row mb-4">
                     <a href="{% url 'admins:add_product' %}" class="btn btn-primary" style="width:max-content">ADD PRODUCT</a>
                 </div>
-                <div class="row">
+                <div class="row" id="container_product">
                     {% for ele in products %}
 
-                    <div class="col-lg-4 col-md-4 col-6">
+                    <div class="col-lg-4 col-md-4 col-6 " id="product_box{{forloop.counter}}">
                         <div class="card" >
                             {% for varient in ele.detail_product.all %}
                                 {% if varient.first_preference %}
@@ -48,7 +49,9 @@
 
                             {% endfor %}
                             
-                              <a href="{% url 'admins:productvarient' pk=ele.pk %}" class="btn btn-primary my-2">Detail</a>
+                              <a href="{% url 'admins:productvarient' pk=ele.pk %}" class="btn btn-primary my-2 me-3">Detail</a>
+                              <a href="{% url 'admins:deleteproduct' pk=ele.pk %}" data-target="product_box{{forloop.counter}}" class="btn btn-primary my-2 delete-product">Delete</a>
+
                             </div>
                         </div>
                     </div>
@@ -69,11 +72,43 @@
 <script src="{% static 'js/adminnav.js' %}"></script>
 
 <script>
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
+
     let productData =  JSON.stringify('{{products|safe}}');
 
     let product = JSON.parse(productData)
 
     console.log(product);
+
+    let container_product = document.getElementById('container_product');
+
+    let delete_product = document.querySelectorAll('.delete-product');
+
+    delete_product.forEach(ele =>{
+
+        ele.addEventListener('click' ,(e)=>{
+
+            e.preventDefault()
+
+            axios.delete(ele.href)
+            .then(function(response){
+
+                if(response.data.success){
+                    let product_box = document.getElementById(ele.dataset.target);
+                    container_product.removeChild(product_box);
+                }
+                else{
+                    console.log('error');
+                }
+            })
+            .catch(function(error){
+                console.error(error)
+            })
+
+            
+        })
+    })
 
 
 </script>

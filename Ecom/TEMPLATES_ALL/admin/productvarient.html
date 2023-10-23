@@ -49,8 +49,7 @@
                     <p>Category : {{product.category}}</p>
                     <p>Brand : {{product.brand}}</p>
                     <div class="d-flex">
-                        <a href="" class="btn btn-primary me-2">EDIT</a>
-                        <a href="" class="btn btn-primary">DELETE</a>
+                        <a href="{% url 'admins:updateproduct2' pk=product.id %}" class="btn btn-primary me-2">EDIT</a>
                     </div>
                 </div>
                 <div class="row my-3">

@@ -1,0 +1,123 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+{% endblock %}
+
+{% block main %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='product' %}
+        <div class="col-lg-8 bodysection">
+            <div class="container-fluid p-2 mt-5">
+                <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">No</th>
+                        <th scope="col">Order Id</th>
+                        <th scope="col">Product</th>
+                        <th scope="col">User</th>
+                        <th scope="col">Address</th>
+                        <th scope="col">Total Price</th>
+                        <th scope="col">Payment Method</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Detail</th>
+
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for each in orders %}
+                      <tr>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td>{{each.id}}</td>
+                        <td>
+                            <p style="width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                {% for each_p in each.products.all %}
+                                {{each_p.product.name}},
+                                {% endfor %}
+                            </p>
+                        </td>
+                        <td>{{each.user.user.first_name}}</td>
+                        <td >
+                            <p style="width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{each.address}}</p>
+                        </td>
+                        <td>{{each.total_price}}</td>
+                        <td>{{each.payment_method}}</td>
+                        <td>
+
+                            {{each.status}}
+                            
+                        </td>
+                        <td><a href="{% url 'admins:orderdetail' pk=each.id %}" class="btn btn-outline-dark">Detail</a></td>
+
+                        
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="{% static 'js/adminnav.js' %}"></script>
+
+<!-- <script>
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
+
+    let productData =  JSON.stringify('{{products|safe}}');
+
+    let product = JSON.parse(productData)
+
+    console.log(product);
+
+    let container_product = document.getElementById('container_product');
+
+    let delete_product = document.querySelectorAll('.delete-product');
+
+    delete_product.forEach(ele =>{
+
+        ele.addEventListener('click' ,(e)=>{
+
+            e.preventDefault()
+
+            axios.delete(ele.href)
+            .then(function(response){
+
+                if(response.data.success){
+                    let product_box = document.getElementById(ele.dataset.target);
+                    container_product.removeChild(product_box);
+                }
+                else{
+                    console.log('error');
+                }
+            })
+            .catch(function(error){
+                console.error(error)
+            })
+
+            
+        })
+    })
+
+
+</script> -->
+
+{% endblock %}

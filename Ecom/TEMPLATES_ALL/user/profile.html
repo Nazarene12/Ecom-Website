@@ -1,0 +1,356 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/nav.css' %}">
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+
+<style>
+    body{
+        display: block;
+    }
+
+
+    .like-button{
+        position: absolute;
+        top:0px;
+        right:0px;
+        padding:5px;
+        background: rgba(63, 61, 61, 0.274);
+        margin:20px;
+        border-radius:50%;
+    }
+
+    .main-background{
+
+        background-color: var(--main-color);
+    }
+
+    ol { list-style: none;}
+    .breadcrumb { width: 100%; float: left; margin: 20px 0; padding: 7px; position: relative; display: block; background: rgba(0,0,0,.05)}
+    .breadcrumb ol { list-style: none;}
+    .breadcrumb li { height: 30px; line-height: 30px; float: left; padding: 0 12px;}
+    .breadcrumb li a { text-decoration: none;}
+    .breadcrumb li .fa { width: 30px; height: 30px; line-height: 30px;}
+    .breadcrumb a:hover { text-decoration: none;}
+
+    .breadcrumb-fill2.style3 { border-radius: 30px; background: #bb123c;}
+    .breadcrumb-fill2.style3 .fa { background: #F62459;}
+
+    
+
+    .card-img-top{
+        height:300px;
+    }
+
+    .card-no-border .card {
+        border-color: #d7dfe3;
+        border-radius: 4px;
+        margin-bottom: 30px;
+        -webkit-box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05);
+        box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05)
+    }
+
+    .card-body {
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+        padding: 1.25rem
+    }
+
+    .pro-img {
+        margin-top: -80px;
+        margin-bottom: 20px
+    }
+
+    .little-profile .pro-img img {
+        width: 128px;
+        height: 128px;
+        -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        border-radius: 100%
+    }
+
+    html body .m-b-0 {
+        margin-bottom: 0px
+    }
+
+    h3 {
+        line-height: 30px;
+        font-size: 21px
+    }
+
+    .btn-rounded.btn-md {
+        padding: 12px 35px;
+        font-size: 16px
+    }
+
+    html body .m-t-10 {
+        margin-top: 10px
+    }
+
+    .btn-rounded {
+        border-radius: 60px;
+        padding: 7px 18px
+    }
+
+   
+
+    .text-center {
+        text-align: center !important
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        color: #455a64;
+        font-family: "Poppins", sans-serif;
+        font-weight: 400
+    }
+
+ 
+
+</style>
+
+{% endblock %}
+
+
+{% block main %}
+
+{% include 'base/loader.html' %}
+
+{% include 'base/nav.html' %}
+
+
+
+<!-- <div class="container">
+    <div class="verticals ten offset-by-one">
+        <ol class="breadcrumb breadcrumb-fill1">
+            <li><a href="{% url 'Ecom:home' %}">Home</a></li>
+            <li><a href="{% url 'Ecom:products' %}" class="maincolor">Products</a></li>
+            
+        </ol>
+    </div>
+    
+</div> -->
+
+
+            <div class="container-fluid p-0">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div >
+                            <div >
+                                <!-- Column -->
+                                <div class="card"> <img class="card-img-top" src="https://img.freepik.com/premium-photo/umbrella-with-rain-hd-8k-wallpaper-stock-photographic-image_890746-37067.jpg" style="object-fit: cover;" alt="Card image cap">
+                                    <div class="card-body little-profile text-center">
+                                        <div class="pro-img">
+                                            {% if user.user.picture %}
+                                            <img src="{{user.user.picture.url}}" alt="user">
+                                            {% else %}
+                                            <img src="{% static 'default/noprofile.png' %}" alt="user">
+                                            {% endif %}
+                                        </div>
+                                        <button class="btn btn-outline-dark">
+                                            CHANGE
+                                        </button>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row justify-content-around my-4 p-5">
+                    <div class="col-lg-3 col-md-5 col-6">
+                        <div>
+                            <small style="font-size: 12px;" class="maincolor">NAME</small>
+                            <p class="fs-4">{{user.user.first_name}} {{user.user.last_name}}</p>
+                        </div>
+                        {% if user.user.email %}
+                        <div>
+                            <small style="font-size: 12px;" class="maincolor">EMAIL</small>
+                            <p class="fs-4">{{user.user.email}}</p>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <small style="font-size: 12px;" class="maincolor">GENDER</small>
+                            <p class="fs-4">{{user.user.gender}}</p>
+                        </div>
+                        {% if user.user.phone_number %}
+                        <div>
+                            <small style="font-size: 12px;" class="maincolor">NUMBER</small>
+                            <p class="fs-4">{{user.user.phone_number}}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-lg-3 col-md-5 col-6 text-center" id="adress_container">
+                        <a href="{% url 'Ecom:addaddress' %}" class="btn btn-outline-dark mb-2 w-100">
+                            ADD ADDRESS
+                        </a>
+                        {% if user.addresses.all %}
+
+                        {% for each_address in user.addresses.all %}
+
+                        <div id="address{{each_address.id}}" class="d-flex border rounded p-3 justify-content-between align-items-center" style="gap:20px;">
+                            <div>
+                                {% if each_address.primary_address %}
+                                <input type="checkbox" name="primary" data-target="{% url 'Ecom:setprimary' pk=each_address.id %}" data-active="1" class="set_primary" checked>
+                                {% else %}
+                                <input type="checkbox" name="primary" data-target="{% url 'Ecom:setprimary' pk=each_address.id %}" data-active="0" class="set_primary">
+                                {% endif %}
+                            </div>
+    
+                            <div class="text-start">
+                                <p class="m-0" >{{each_address.village}}</p>
+                                <p class="m-0">{{each_address.city}}</p>
+                                <div class="d-flex">
+                                    <p class="m-0 me-2">{{each_address.district}} - </p>
+                                    <p class="m-0">{{each_address.pincode}}</p>
+                                </div>
+                                {% if each_address.landmark %}
+                                <p class="m-0">{{each_address.landmark}}</p>
+                                {% else %}
+                                <p class="m-0">land mark is not added</p>
+                                {% endif %}
+                                <p class="m-0">{{each_address.first_phone_number}}</p>
+                                {% if each_address.second_phone_number %}
+                                <p class="m-0">{{each_address.second_phone_number}}</p>
+                                {% else %}
+                                <p class="m-0">secondary number is not added</p>
+                                {% endif %}
+                            </div>
+    
+                            <div class="d-flex flex-column" style="gap:10px;">
+                                <a href="{% url 'Ecom:addressupdate' pk=each_address.id %}" class="btn btn-outline-dark fs-6">EDIT</a>
+                                <a href="{% url 'Ecom:deleteaddress' pk=each_address.id %}" data-target="address{{each_address.id}}"  class="btn btn-outline-dark fs-6 delete_button_address">DELETE</a>
+                            </div>
+                        </div>
+
+                        {% endfor %}
+
+                        {% else %}
+
+                        <p class="text-secondary">no address added</p>
+
+                        {% endif %}
+                        
+                    </div>
+
+                    <div class="col-lg-3 col-md-5 col-6 d-flex flex-column">
+                        <a href="{% url 'Ecom:editprofile' %}" class="btn btn-outline-dark mb-2">
+                            EDIT PROFILR
+                        </a>
+                        <a href="{% url 'Ecom:changepassword' %}" class="btn btn-outline-dark mb-2">
+                            CHANGE PASSWORD
+                        </a>
+                        <a href="{% url 'Ecom:userorder' %}" class="btn btn-outline-dark mb-2">
+                            ORDERS
+                        </a>
+                        
+                    </div>
+                </div>
+            </div>
+    
+
+
+
+
+{% endblock %}
+
+
+{% block script %}
+
+
+
+
+<!-- script for scroll -->
+<script src="{% static 'js/navscroll.js' %}"></script>
+
+<!-- loader  -->
+<script src="{% static 'js/loader.js' %}"></script>
+
+<script>
+
+axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+axios.defaults.xsrfCookieName = "csrftoken"
+
+    let set_primary = document.querySelectorAll('.set_primary');
+
+    set_primary.forEach(ele =>{
+
+        ele.addEventListener('click' ,(e)=>{
+            if (! ele.checked){
+                ele.checked = true
+            }
+
+            else{
+                console.log("enter");
+                axios.get(ele.dataset.target)
+                .then(function(response){
+                    console.log(response.data);
+                    if(response.data.success){
+                        ele.checked = true
+                        let old_ele = document.querySelector("input[data-active='1']");
+                        old_ele.checked = false
+                        old_ele.dataset.active = '0'
+                        ele.dataset.active = '1'
+
+                    }
+                    else{
+                        ele.checked = false
+                    }
+                })
+                .catch(function(error){
+                    console.error(error)
+                })
+            }
+        })
+    })
+
+    let delete_button_address = document.querySelectorAll('.delete_button_address');
+    let adress_container = document.getElementById('adress_container');
+    delete_button_address.forEach(ele =>{
+
+        ele.addEventListener('click',(e)=>{
+            e.preventDefault();
+
+            axios.get(ele.href)
+            .then(function(response){
+
+                if(response.data.success){
+                    let current = document.getElementById(ele.dataset.target);
+                    adress_container.removeChild(current);
+                    if(response.data.next){
+                        console.log(response.data.next);
+                        let next = document.getElementById(`address${response.data.next}`);
+                        let new_address = next.querySelector("input[type='checkbox']");
+                        console.log(new_address);
+                        new_address.dataset.active = '1';
+                        new_address.checked = true;
+                    }
+                }
+                else{
+                    console.log("there is a issue");    
+                }
+            })
+            .catch(function(error){
+                    console.error(error)
+                })
+        })
+    })
+</script>
+
+
+
+{% endblock %}

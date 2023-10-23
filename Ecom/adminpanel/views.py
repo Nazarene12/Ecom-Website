@@ -8,10 +8,10 @@ from django.views import View
 from django.contrib import messages
 from django.views.decorators.cache import cache_control
 from django.core import signing 
-from django.urls import reverse
+from django.urls import reverse , reverse_lazy
 from django.contrib.auth import authenticate , login ,logout
 from django.contrib import messages
-from django.views.generic import ListView , DetailView ,CreateView
+from django.views.generic import ListView , DetailView ,CreateView , UpdateView
 from django.views.generic.edit import ModelFormMixin
 from django.contrib.auth.models import User
 from django.http import HttpResponse, JsonResponse
@@ -31,11 +31,23 @@ from django.templatetags.static import static
 
 
 from Ecom_Web import form
-from.forms import CategoryForm,ProductForm,SizeCountForm,UpdateProductVarient,UpdatedProductAddForm,VarientForm,VarientCountFormSetFactory,SizeCountFormSetFactory,VarientCountColorFormSet,SizeCountFormSet, AddAditionVarientForm,AddAditionVarientColorForm
-from Ecom_Web.models import UserProfile
+from.forms import CategoryForm,ProductForm,SizeCountForm,UpdateProductVarient,UpdatedProductAddForm,VarientForm,VarientCountFormSetFactory,SizeCountFormSetFactory,VarientCountColorFormSet,SizeCountFormSet, AddAditionVarientForm,AddAditionVarientColorForm,OredrFormStatus
+from Ecom_Web.models import UserProfile,Order
 from .models import Category,Product,Connector,ProductImage
 
 # Create your views here.
+
+from django.contrib.auth.mixins import UserPassesTestMixin
+
+class SuperUserRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return redirect('Ecom:home')  # Redirect to home if user is not a superuser
+        else:
+            return redirect('admins:login') 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=False)
 def AdminLogin(request):
@@ -147,6 +159,40 @@ class CategoryDeleteView(DeleteView):
 
         except Exception as e:
             return JsonResponse({'success': False, 'error_message': 'User not found'})
+        
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')        
+@method_decorator(login_required, name='dispatch')
+class DeleteProduct(DeleteView):
+    model = Product
+    http_method_names=['delete']
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        try:
+            self.object.active = False
+            self.object.save()
+            return JsonResponse({'success': True})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error_message': 'Product not found'})
+        
+
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')        
+@method_decorator(login_required, name='dispatch')
+class UpdateProduct(UpdateView):
+
+    model=Product
+
+    template_name = 'admin/updateproduct2.html'
+
+    context_object_name = 'product'
+
+    form_class = UpdatedProductAddForm
+    def get_success_url(self):
+        return reverse('admins:productvarient',kwargs={'pk':self.kwargs['pk'] })
+
+
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
 @method_decorator(login_required, name='dispatch')
 class ProductList(ListView):
@@ -154,6 +200,8 @@ class ProductList(ListView):
     template_name= 'admin/productlist.html'
     context_object_name ='products'
 
+    def get_queryset(self):
+        return Product.objects.filter(active = True)
 
 class ProductVarient( CreateView ):
     model = Connector
@@ -317,6 +365,49 @@ def update_product(request,pk):
 
     return render(request,'admin/updateproduct.html',{'form' :forms,'product':product})
 
+
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
+@method_decorator(login_required, name='dispatch')
+class OrderList(ListView):
+    model = Order
+    template_name= 'admin/orderlist.html'
+    context_object_name ='orders'
+
+
+
+    
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
+@method_decorator(login_required, name='dispatch')
+class OrderDetail(DetailView):
+    model = Order
+    template_name= 'admin/orderdetail.html'
+    context_object_name ='order'  
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        order_instance = self.get_object()  # Get the instance of the Order model
+        form = OredrFormStatus(instance=order_instance)  # Pass the instance to the form
+        context['form'] = form
+        return context
+    
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
+@method_decorator(login_required, name='dispatch')   
+class OrderUpdate(UpdateView):
+
+    http_method_names = ['post']
+
+    def post(self, *args, **kwargs):
+        try:
+            # print(self.request.PUT)
+            order = Order.objects.get(id = kwargs.get('pk') )
+            order.status = self.request.POST.get('status')
+            order.save()
+            return JsonResponse({'success': True , 'value':order.status})
+
+        except order.DoesNotExist:
+            return JsonResponse({'success': False})
+
+    
 def logouts(request):
 
     logout(request)
