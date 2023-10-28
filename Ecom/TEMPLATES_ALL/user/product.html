@@ -24,7 +24,7 @@
         height:150px
     }
 
-    .like-button{
+    .like_button{
         position: absolute;
         top:0px;
         right:0px;
@@ -73,12 +73,18 @@
     <div class="verticals ten offset-by-one">
         <ol class="breadcrumb breadcrumb-fill1">
             <li><a href="{% url 'Ecom:home' %}">Home</a></li>
-            <li><a href="{% url 'Ecom:products' %}" class="maincolor">Products</a></li>
-            
+            <li><a href="{% url 'Ecom:products' %}" class="maincolor">Products</a></li>           
         </ol>
     </div>
     
 </div>
+
+<!-- <div class="container">
+    <form  method="get" class="d-flex">
+        <input type="text" class="form-control me-3" name="search" id="search">
+        <input type="submit" value="SEARCH" class="btn btn-outline-dark">
+    </form>
+</div> -->
 
 <div class="container">
     <div class="row">
@@ -193,9 +199,21 @@
                                 <a href="{% url 'Ecom:product_detail' pk=ele.varient.id %}" class="btn btn-primary">DETAIL</a>
                               </div>
                             </div>
-                            <div class="like-button ">
-                                <i class="fa-solid fa-heart fs-3 text-light"></i>
+                            {% if liked_products != 'empty' %}
+                            {% if ele.id in liked_products %}
+                            <div class="like_button" data-like="True" data-target="{{ele.id}}">
+                                
+                                <i class="fa-solid fa-heart fs-3 text-warning"></i>
+                                                               
                             </div>
+                            {% else %}
+                            <div class="like_button unliked" data-like="False" data-target="{{ele.id}}">
+                                
+                                <i class="fa-solid fa-heart fs-3 text-light"></i>                               
+                                
+                            </div>
+                            {% endif %}
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
@@ -251,6 +269,8 @@
 
 
 <script>
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
     const filter_button = document.querySelectorAll(".f-item")
 
     const apply_btn = document.getElementById('options')
@@ -312,8 +332,39 @@
         })
     })
 
+const like_button = document.querySelectorAll('.like_button');
 
-    
+like_button.forEach(ele=>{
+
+    ele.addEventListener('click' , (e)=>{
+
+        var formData = new FormData();
+        formData.append("pk", ele.dataset.target )
+
+        axios.post("{% url 'Ecom:userlike' %}",formData)
+        .then(function(res){
+            if (res.data.success){
+
+                if (res.data.liked){
+                    ele.firstElementChild.classList.remove('text-light')
+
+                    ele.firstElementChild.classList.add('text-warning')
+                }
+                else{
+                    ele.firstElementChild.classList.add('text-light')
+                    ele.firstElementChild.classList.remove('text-warning')
+
+                }
+            }
+            else{
+                console.log('error');
+            }
+        })
+        .catch(function(error){
+            console.error(error);
+        })
+    })
+})
    
 </script>
 

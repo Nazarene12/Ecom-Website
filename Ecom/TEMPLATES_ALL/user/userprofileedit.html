@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <link rel="stylesheet" href="{% static 'css/loader.css' %}">
 <link rel="stylesheet" href="{% static 'css/form.css' %}">
+<link rel="stylesheet" href="{% static 'css/nav.css' %}">
+
 
 <style>
 
@@ -99,6 +101,9 @@
 
 {% include 'base/loader.html' %}
 
+{% include 'base/nav.html' %}
+
+
 <div class="container-fluid p-0">
     <div class="row">
         <div class="col-lg-12">
@@ -107,7 +112,7 @@
                     <!-- Column -->
                     <div class="card"> <img class="card-img-top" src="https://img.freepik.com/premium-photo/umbrella-with-rain-hd-8k-wallpaper-stock-photographic-image_890746-37067.jpg" style="object-fit: cover;" alt="Card image cap">
                         <div class="card-body little-profile text-center">
-                            <div class="pro-img">
+                            <div class="pro-img" id="img_container">
                                 {% if request.user.user.picture %}
                                 <img src="{{user.user.picture.url}}" alt="user">
                                 {% else %}
@@ -115,7 +120,7 @@
                                 {% endif %}
                             </div>
                             
-                            
+                    
                         </div>
                     </div>
                 </div>
@@ -200,6 +205,9 @@
 
 <!-- form validation  -->
 <script src="{% static 'js/form.js' %}"></script>
+
+<script src="{% static 'js/navscroll.js' %}"></script>
+
 
 
 {% endblock %}

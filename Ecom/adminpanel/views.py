@@ -32,9 +32,12 @@ from django.templatetags.static import static
 
 from Ecom_Web import form
 from.forms import CategoryForm,ProductForm,SizeCountForm,UpdateProductVarient,UpdatedProductAddForm,VarientForm,VarientCountFormSetFactory,SizeCountFormSetFactory,VarientCountColorFormSet,SizeCountFormSet, AddAditionVarientForm,AddAditionVarientColorForm,OredrFormStatus
-from Ecom_Web.models import UserProfile,Order
+from Ecom_Web.models import UserProfile,Order,Coupon,UserWallet
 from .models import Category,Product,Connector,ProductImage
 
+
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
 # Create your views here.
 
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -63,13 +66,81 @@ def AdminLogin(request):
 
     return render (request , 'admin/login.html', {'form':loginform})
 
+def get_orders_per_month(year):
+    orders_per_month = Order.objects.filter(
+        order_date__year=year
+    ).annotate(
+        month=TruncMonth('order_date')
+    ).values(
+        'month'
+    ).annotate(
+        count=Count('pk')
+    ).order_by(
+        'month'
+    )
+
+    months = {
+        'January': 0,
+        'February': 0,
+        'March': 0,
+        'April': 0,
+        'May': 0,
+        'June': 0,
+        'July': 0,
+        'August': 0,
+        'September': 0,
+        'October': 0,
+        'November': 0,
+        'December': 0,
+    }
+
+    # Update the count for each month
+    for order in orders_per_month:
+        month = order['month'].strftime('%B')
+        count = order['count']
+        months[month] = count
+
+    return list(months.values())
+
+from django.db.models.functions import ExtractYear
+
+def get_distinct_years():
+    years = Order.objects.annotate(
+        year=ExtractYear('order_date')
+    ).values_list('year',flat=True).distinct()
+
+    return list(years)
+
+
+def SaleReport(request):
+    if request.method == 'POST':
+        try:
+            year = int(request.POST.get('year'))
+            data = get_orders_per_month(year)
+            return JsonResponse({'success':True , 'dataset' : data})
+        except:
+            return JsonResponse({'success':False})
+from django.utils import timezone
+
+def get_today_sale():
+    count = Order.objects.filter(order_date = timezone.now()).count()
+    target = 50
+    return {'target':target , 'sale' : count}
+
+from datetime import datetime
+
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=False)
 def home(request):
     if not request.user.is_authenticated:
         return redirect('Ecom:login')
     if request.user.is_authenticated and not request.user.is_superuser:
         return redirect('Ecom:home')
-    return render(request , 'admin/home.html')
+    current_year =datetime.now().year
+    today_sale = get_today_sale()
+    dataset = get_orders_per_month(current_year)
+    years = get_distinct_years()
+    return render(request , 'admin/home.html' ,{'dataset':dataset , 'years' : years , 'currentyear':current_year , 'today_sale':today_sale})
 
 
 # def Users(request):
@@ -401,13 +472,66 @@ class OrderUpdate(UpdateView):
             # print(self.request.PUT)
             order = Order.objects.get(id = kwargs.get('pk') )
             order.status = self.request.POST.get('status')
+            if self.request.POST.get('status') == 'cancel':
+                print('yes')
+                for i in order.product_cover.all():
+                    obj = i.products
+                    obj.count += 1
+                    obj.sale -= 1
+                    obj.save()
+                if UserWallet.objects.filter(user = order.user).exists():
+                    wallet = UserWallet.objects.get(user = order.user)
+                else:
+                    wallet = UserWallet(user = order.user)
+                wallet.balance = wallet.balance+ order.total_price
+                wallet.save()
             order.save()
             return JsonResponse({'success': True , 'value':order.status})
 
         except order.DoesNotExist:
             return JsonResponse({'success': False})
 
-    
+def  CouponManager(request):
+    coupon = form.CouponForm()
+    if request.method == "POST":
+        coupon = form.CouponForm(request.POST)
+        if coupon.is_valid():
+            coupon.save()
+            messages.success(request, 'Coupon is added')
+            return redirect('admins:coupon')
+    all_coupon  = Coupon.objects.all()
+    return render(request,'admin/coupon.html' , {'form':coupon , 'coupon' : all_coupon}) 
+
+
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')        
+@method_decorator(login_required, name='dispatch')
+class DeleteCoupon(DeleteView):
+    model = Coupon
+    http_method_names=['delete']
+
+    def delete(self, request, *args, **kwargs):
+        
+
+        try:
+            self.object = self.get_object()
+            self.object.delete()
+            return JsonResponse({'success':True})
+        except Coupon.DoesNotExist:
+            return JsonResponse({'success':False , 'error' : 'invalid coupon id'})
+
+def UpdateCoupon(request , pk):
+    obj = Coupon.objects.get(pk =pk)
+    coupon = form.CouponForm(instance=obj)
+
+    if request.method == 'POST':
+        coupon = form.CouponForm(request.POST , instance=obj)
+        if coupon.is_valid():
+            coupon.save()
+            messages.success(request, 'Coupon is updated')
+            return redirect('admins:coupon')
+        print(coupon.cleaned_data)
+    return render(request,'admin/updatecoupon.html',{'form':coupon}) 
+
 def logouts(request):
 
     logout(request)
@@ -508,7 +632,6 @@ class AddAdditionProductVarient(CreateView):
         
         form.size_count_formset = SizeCountFormSetFactory(instance=self.request.POST or None, prefix=0)
         if not form.size_count_formset.is_valid():
-            print("error")
             return self.render_to_response(self.get_context_data(form=form))
 
         

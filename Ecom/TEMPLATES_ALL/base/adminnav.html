@@ -31,6 +31,9 @@
                     <a class="nav-link" href="{% url 'admins:order' %}">Order</a>
                 </li>
                 <li class="nav-item {% if page == 'product' %} active {% endif %}">
+                    <a class="nav-link" href="{% url 'admins:coupon' %}">Coupon</a>
+                </li>
+                <li class="nav-item {% if page == 'product' %} active {% endif %}">
                     <a class="nav-link" href="{% url 'admins:logout' %}">logout</a>
                 </li>
                 

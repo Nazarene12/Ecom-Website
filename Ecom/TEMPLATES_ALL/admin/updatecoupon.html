@@ -1,0 +1,129 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.css">
+
+
+
+<style>
+
+input.form-control:focus{
+   
+    color:black;
+}
+
+</style>
+{% endblock %}
+
+{% block main %}
+{% if messages %}
+
+{% for message in messages %}
+<div style="z-index: 9999;" class="toast position-fixed top-0 start-50 translate-middle m-5 {% if message.tags == 'success' %} text-bg-success {% elif message.tags == 'error' %} text-bg-danger {% endif %} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        {{ message }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+</div>
+
+{% endfor %}
+
+
+<script>
+    const option = {
+        animation:true,
+        delay : 2000,
+    }
+    const toastElList = document.querySelector('.toast')
+    const toast = () =>{
+        const t = new bootstrap.Toast(toastElList, option)
+        t.show()
+    }
+    toast();
+</script>
+{% endif %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='category' %}
+        <div class="col-lg-8 bodysection">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-12 p-4 rounded">
+                        <h5 class="text-center text-light">ADD CATEGORY</h5>
+                        <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded mt-3"></p>
+                        {% if form.non_field_errors %}
+                        <p class="text-light p-2 bg-danger rounded">{{form.non_field_errors|join:", "}}</p>
+                        {% endif %}
+                        <form method="post" class="text-center forms" id="categoryform" novalidate>
+                            {% csrf_token %}
+                            <!-- import for form validation js in front end -->
+        
+                            <div class="container-fluid">
+                                <div class="row justify-content-center align-items-center p-5 rounded" style="background: rgba(128, 128, 128, 0.281);">
+                                   <div class="col-12">
+                                    <p>ADD COUPON</p>
+                                   </div> 
+                                   {% for ele in form %}
+                                   <div class="col-4 mb-4">
+                                       <div>
+                                           <div class="form-floating">
+                                               {% if ele.widget_type == 'datetime' and ele.value|date:'Y-m-d' %}
+                                                   <input type="date" name="{{ ele.html_name }}" class="form-control customclass" placeholder="date" value="{{ ele.value|date:'Y-m-d' }}" id="{{ ele.auto_id }}">
+                                                   
+                                               {% else %}
+                                                   {{ ele }}
+                                               {% endif %}
+                                               <label for="{{ ele.id_for_label }}" class="bg-transparent">{{ ele.label }}</label>
+                                           </div>
+                                           {% if ele.errors %}
+                                               <p class="p-2 bg-danger rounded">{{ele.errors|join:", "}}</p>
+                                           {% endif %}
+                                       </div>
+                                   </div>
+                               {% endfor %}
+                                    <input type="submit" class="btn btn-outline-dark w-100 p-2" name="add" value="ADD">
+
+
+                                    
+                                </div>
+                            </div>
+                            
+        
+                            
+        
+        
+                        </form>
+                    </div>
+                   
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+<script src="{% static 'js/adminnav.js' %}"></script>
+<!-- form validation  -->
+<script src="{% static 'js/form.js' %}"></script>
+
+
+{% endblock %}

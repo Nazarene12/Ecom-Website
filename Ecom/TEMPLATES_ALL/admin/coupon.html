@@ -1,0 +1,236 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.css">
+
+
+
+<style>
+
+input.form-control:focus{
+   
+    color:black;
+}
+
+</style>
+{% endblock %}
+
+{% block main %}
+{% if messages %}
+
+{% for message in messages %}
+<div style="z-index: 9999;" class="toast position-fixed top-0 start-50 translate-middle m-5 {% if message.tags == 'success' %} text-bg-success {% elif message.tags == 'error' %} text-bg-danger {% endif %} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        {{ message }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+</div>
+
+{% endfor %}
+
+
+<script>
+    const option = {
+        animation:true,
+        delay : 2000,
+    }
+    const toastElList = document.querySelector('.toast')
+    const toast = () =>{
+        const t = new bootstrap.Toast(toastElList, option)
+        t.show()
+    }
+    toast();
+</script>
+{% endif %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='category' %}
+        <div class="col-lg-8 bodysection">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-12 p-4 rounded">
+                        <h5 class="text-center text-light">ADD CATEGORY</h5>
+                        <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded mt-3"></p>
+                        {% if form.non_field_errors %}
+                        <p class="text-light p-2 bg-danger rounded">{{form.non_field_errors|join:", "}}</p>
+                        {% endif %}
+                        <form method="post" class="text-center forms" id="categoryform" novalidate>
+                            {% csrf_token %}
+        
+                            <!-- import for form validation js in front end -->
+        
+                            <div class="container-fluid">
+                                <div class="row justify-content-center align-items-center p-5 rounded" style="background: rgba(128, 128, 128, 0.281);">
+                                   <div class="col-12">
+                                    <p>ADD COUPON</p>
+                                   </div> 
+                                        {% for ele in form %}
+                                    <div class="col-4 mb-4">
+                            
+                                        <div>
+                                            <div class="form-floating">
+                                            
+                                                {{ ele }}
+                                                <label for="{{ ele.id_for_label }}" class="bg-transparent">{{ ele.label }}</label>
+                                            </div>
+                        
+                                            {% if ele.errors %}
+                                            <p class=" p-2 bg-danger rounded">{{ele.errors|join:", "}}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+        
+                                        {% endfor %}
+                                    <input type="submit" class="btn btn-outline-dark w-100 p-2" name="add" value="ADD">
+
+
+                                    
+                                </div>
+                            </div>
+                            
+        
+                            
+        
+        
+                        </form>
+                    </div>
+                    <div class="col-lg-12 col-md-10 col-12 mt-5">
+                        <div class="table-responsive bg-dark p-3 rounded">
+                            <h5 class="text-center text-light mb-4">CATEGORYS</h5>
+                            <table id="categoryTable" class="table table-hover align-middle ">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="fw-normal text-light">ID</th>
+                                        <th scope="col" class="fw-normal text-light">COUPON CODE</th>
+                                        <th scope="col" class="fw-normal text-light">EXPIRE DATE</th>
+                                        <th scope="col" class="fw-normal text-light">AMOUNT</th>
+                                        <th scope="col" class="fw-normal text-light">PURCHASE</th>
+                                        <th scope="col" class="fw-normal text-light">TOTAL COUPON</th>
+                                        <th scope="col" class="fw-normal text-light">DELETE</th>
+                                        <th scope="col" class="fw-normal text-light">UPDATE</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="row_container_coupon">
+                                    {% for ele in coupon %}
+                                    <tr id="row{{forloop.counter}}">
+                                        <th  class="fw-normal text-light s_no_ro">{{ forloop.counter }}</th>
+                                        <td class="fw-normal text-light">{{ ele.coupon_code }}</td>
+                                        <td class="fw-normal text-light">{{ ele.expire_date }}</td>
+                                        <td class="fw-normal text-light">{{ ele.amount_to_reduce }}</td>
+                                        <td class="fw-normal text-light">{{ ele.minimum_purchase }}</td>
+                                        <td class="fw-normal text-light">{{ ele.maximum_apply }}</td>
+                                        <td class="fw-normal text-light">
+                                            <a class="btn btn-light coupon_delete" data-target="row{{forloop.counter}}" href="{% url 'admins:deletecoupon' pk=ele.id %}" >DELETE</a>
+                                        </td>
+                                        <td class="fw-normal text-light">
+                                            <a class="btn btn-light deletecategory" href="{% url 'admins:updatecoupon' pk=ele.pk %}">UPDATE</a>
+                                        </td>
+                                     </tr>   
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script src="{% static 'js/adminnav.js' %}"></script>
+<!-- form validation  -->
+<script src="{% static 'js/form.js' %}"></script>
+
+ <script>
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
+
+    let coupon_deletes = document.querySelectorAll('.coupon_delete');
+    console.log(coupon_deletes);
+    let row_container_coupon = document.getElementById('row_container_coupon')
+
+    coupon_deletes.forEach(coupon_delete=>{
+        coupon_delete.addEventListener('click' , (e)=>{
+
+            e.preventDefault()
+            Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete(coupon_delete.href)
+
+                .then (function(res){
+
+                    if (res.data.success){
+                        Swal.fire(
+                        'Deleted!',
+                        'Your file has been deleted.',
+                        'success'
+                        )
+                        let row = document.getElementById(coupon_delete.dataset.target)
+                        row_container_coupon.removeChild(row)
+                        rearrange_s_no_ro()
+                    }
+                    else{
+                        Toastify({
+                            text: `${res.data.error}`,
+                            duration: 3000, 
+                            gravity: 'bottom', 
+                            position: 'bottom', 
+                            backgroundColor: 'red',
+                         }).showToast();
+                    }
+                })
+                
+            }
+            })
+
+        })
+
+    })
+
+    
+    let rearrange_s_no_ro = ()=>{
+        let val = 1
+        let all_s_no_ro = document.querySelectorAll('.s_no_ro');
+        all_s_no_ro.forEach(ele =>{
+
+            ele.innerText = val;
+            val +=1;
+        })
+    }
+    
+    
+   
+        
+</script> 
+
+{% endblock %}

@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from adminpanel.models import Product , Connector
 from django.core.validators import MaxValueValidator
 from django.utils import timezone
+from django.db.models import Q, F
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE , related_name="user")
@@ -27,6 +28,18 @@ class UserCart(models.Model):
     def __str__(self):
         return self.connect.product.name
 
+class UserWishList(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE , related_name='user_liked')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE , related_name='product_liked')
+
+    def __str__(self):
+        return self.product.name
+    
+class UserWallet(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE , related_name='user_wallet')
+    balance = models.DecimalField(max_digits=10, decimal_places=2,default=0.0, blank=True, null=True)
+    def __str__(self):
+        return self.user.username
     
 class Address(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
@@ -48,11 +61,32 @@ def get_delivery_date():
     return timezone.now() + timezone.timedelta(days=7)
 
 
+class ProductOrdered(models.Model):
+    products = models.ForeignKey(Connector,related_name='order_product' , on_delete=models.SET_NULL , null=True , blank = True)
+    quantity = models.IntegerField(blank=False , null=False , default=1)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+class Coupon(models.Model):
+    coupon_code = models.CharField(max_length=20 )
+    expire_date = models.DateField()
+    amount_to_reduce = models.DecimalField(max_digits=8, decimal_places=2)
+    minimum_purchase = models.DecimalField(max_digits=8, decimal_places=2)
+    maximum_apply = models.IntegerField(default=10)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=Q(amount_to_reduce__lte=F('minimum_purchase')), name="check_amount_to_reduce")
+        ]
+    
+    def __str__(self):
+        return self.coupon_code
+    
 class Order(models.Model):
     ORDER_STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('cancel', 'Canceled'),
         ('delivered', 'Delivered'),
+        
     )
 
     PAYMENT_METHOD_CHOICES = (
@@ -62,13 +96,15 @@ class Order(models.Model):
 
     order_date = models.DateTimeField(default=timezone.now)
     delivery_date = models.DateTimeField(default=get_delivery_date)
-    products = models.ManyToManyField(Connector,related_name='order_product')
+    product_cover = models.ManyToManyField(ProductOrdered,related_name='product_cover'  , default=None ,blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE , related_name='order_user')
     address = models.ForeignKey(Address, on_delete=models.CASCADE , related_name='order_user_address')
-    total_price = models.CharField(max_length=10)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     total_item = models.CharField(max_length=10)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
     status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
+    coupon = models.ForeignKey(Coupon , on_delete=models.SET_NULL , null=True,blank=True, related_name='order_coupon')
+    return_product = models.BooleanField(default=False)
 
     def __str__(self):
         return f'Order #{self.pk}'
@@ -86,3 +122,4 @@ class CancelOrder(models.Model):
 
     def __str__(self):
         return f"Order {self.pk}"
+

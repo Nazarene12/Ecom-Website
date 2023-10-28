@@ -1,0 +1,306 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %}
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+<link rel="stylesheet" href="{% static 'css/nav.css' %}">
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.css">
+
+
+
+<style>
+    body {
+        display: block
+    }
+
+    input.form-control {
+        color: black;
+    }
+
+    input.form-control:focus {
+        color: black;
+    }
+
+    .card-img-top {
+        height: 300px;
+    }
+
+    .card-no-border .card {
+        border-color: #d7dfe3;
+        border-radius: 4px;
+        margin-bottom: 30px;
+        -webkit-box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05);
+        box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05)
+    }
+
+    .card-body {
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+        padding: 1.25rem
+    }
+
+    .pro-img {
+        margin-top: -80px;
+        margin-bottom: 20px
+    }
+
+    .little-profile .pro-img img {
+        width: 128px;
+        height: 128px;
+        -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        border-radius: 100%
+    }
+
+    html body .m-b-0 {
+        margin-bottom: 0px
+    }
+
+    h3 {
+        line-height: 30px;
+        font-size: 21px
+    }
+
+    .btn-rounded.btn-md {
+        padding: 12px 35px;
+        font-size: 16px
+    }
+
+    html body .m-t-10 {
+        margin-top: 10px
+    }
+
+    .btn-rounded {
+        border-radius: 60px;
+        padding: 7px 18px
+    }
+
+
+
+    .text-center {
+        text-align: center !important
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        color: #455a64;
+        font-family: "Poppins", sans-serif;
+        font-weight: 400
+    }
+</style>
+
+{% endblock %}
+
+{% block main %}
+
+{% include 'base/loader.html' %}
+
+{% include 'base/nav.html' %}
+
+<div class="container-fluid p-0">
+    <div class="row">
+        <div class="col-lg-12">
+            <div>
+                <div>
+                    <!-- Column -->
+                    <div class="card"> <img class="card-img-top"
+                            src="https://img.freepik.com/premium-photo/umbrella-with-rain-hd-8k-wallpaper-stock-photographic-image_890746-37067.jpg"
+                            style="object-fit: cover;" alt="Card image cap">
+                        <div class="card-body little-profile text-center">
+                            <div class="pro-img" id="img_container">
+                                {% if request.user.user.picture %}
+                                <img src="{{user.user.picture.url}}" alt="user">
+                                {% else %}
+                                <img src="{% static 'default/noprofile.png' %}" alt="user">
+                                {% endif %}
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        
+        <div class="col-lg-4 col-md-7 col-10  d-flex bg-light p-4 rounded">
+            
+            <input type="number" placeholder="AMOUNT" class="form-control" id="amount" name="amount" style="padding:10px">
+            <button id="pay_button" class="ms-3 btn btn-outline-dark">Pay</button>
+            
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+
+<script src="{% static 'js/loader.js' %}"></script>
+
+
+<script>
+    let amount = document.getElementById('amount')
+
+    let pay_button = document.getElementById('pay_button')
+
+    pay_button.addEventListener('click',(e)=>{
+
+        e.preventDefault()
+        const value = amount.value;
+        if (value.trim() === ''){
+            Toastify({
+                text: "enter the amount",
+                duration: 3000, 
+                gravity: 'bottom', 
+                position: 'center', 
+                backgroundColor: 'red',
+             }).showToast();
+            return ;
+        }
+
+        if (Number(value) <= 0) {
+            Toastify({
+                text: "invaild zero or neagtive amount",
+                duration: 3000, 
+                gravity: 'bottom', 
+                position: 'center', 
+                backgroundColor: 'red',
+             }).showToast();
+            return;
+        }
+
+        let formData = new FormData()
+        formData.append('amount' , amount.value);
+
+        axios.post('{% url "Ecom:getrazerpayid" %}' , formData)
+
+        .then(function(res){
+            if (res.data.success){
+
+
+                var options = {
+                    "key": "rzp_test_hjG9C59EJBeKxG", // Enter the Key ID generated from the Dashboard
+                    "amount": res.data.order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                    "currency": "INR",
+                    "name": "Nivya",
+                    "description": "Transaction to Wallet",
+                    "image": "{% static 'default/logo.png' %}",
+                    "order_id": res.data.order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                    "handler": function (response){
+                        let paymentData = {
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature
+                        };
+
+                        let formData = new FormData()
+                        formData.append('razorpay_payment_id' ,response.razorpay_payment_id )
+                        formData.append('razorpay_order_id' ,response.razorpay_order_id )
+                        formData.append('razorpay_signature' ,response.razorpay_signature )
+
+                        axios.post('{% url "Ecom:razerpayformhandler" %}', formData)
+                            .then(function(response) {
+                                // Handle the response from the server
+                                if (response.data.success) {
+                                    Swal.fire(
+                                        'payment success',
+                                        'amount added to wallet',
+                                        'success'
+                                    ).then((result) => {
+                                        let formDataAdd = new FormData()
+                                        formDataAdd.append('amount' , amount.value)
+                                        axios.post('{% url "Ecom:addwallet" %}',formDataAdd)
+                                        .then(function(res){
+
+                                            if(res.data.success){
+                                                window.location.href = '{% url "Ecom:profile" %}'
+                                            }
+                                            else{
+                                                console.log('error');
+                                            }
+                                        })
+                                        .catch(function(error){
+                                            console.error(error)
+                                        })
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        'payment fail',
+                                        response.data.error,
+                                        'error'
+                                    )
+                                    amount.value = '';
+                                }
+                            })
+                            .catch(function(error) {
+                                console.log(error);
+                            });
+                        
+                    },
+                    "callback_url": "",
+
+                    "theme": {
+                        "color": "#3399cc"
+                    }
+                };
+                    var rzp1 = new Razorpay(options);
+                    rzp1.open();
+                    rzp1.on('payment.failed',function (response){
+
+                            amount.value = ''
+                            rzp1.close()
+                            
+                        axios.get('{% url "Ecom:piperestart" %}')
+                        .then(function(res){
+
+                            if (res.data.success){
+                                const razerContainer = document.querySelector('.razorpay-container');
+                                if (razerContainer) {
+                                    razerContainer.remove();
+                                }
+                                Swal.fire(
+                                'payment fail',
+                                'try again later',
+                                'error',
+                            )
+                            .then((result)=>{
+                                console.log('entered');
+                                window.location.href = '{% url "Ecom:profile" %}'
+                            })
+                           
+                            }
+                        })
+
+                       
+                        
+                    
+                            
+                            
+                    });
+                    
+
+            }
+        })
+    })
+</script>
+
+
+{% endblock %}

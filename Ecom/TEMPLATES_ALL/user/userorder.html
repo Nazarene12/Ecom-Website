@@ -130,25 +130,25 @@
 
             <div class="container-fluid">
                 <div class="row">
-                    {% for ele in each.products.all %}
-
+                    {% for ele in each.product_cover.all %}
+                    
                     <div class="col-lg-6 mb-3">
         
                         <div>
-                            <img src="{{ele.image.normal_image.url}}" alt="image" class="rounded" style="width:150px;height:150px;object-fit: cover;">
+                            <img src="{{ele.products.image.normal_image.url}}" alt="image" class="rounded" style="width:150px;height:150px;object-fit: cover;">
                         </div>
                         <div>
-                            <p class="fs-4 m-0">{{ele.product.name}}</p>
-                            <p class="fs-5 m-0" style="width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ele.product.description}}</p>
+                            <p class="fs-4 m-0">{{ele.products.product.name}}</p>
+                            <p class="fs-5 m-0" style="width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ele.products.product.description}}</p>
                             <div class="d-flex align-items-center" style="gap:30px;">
-                                <p class="fs-6 m-0 text-success"> ₹ {{ele.product.price}}</p>
-                                <p class="text-secondary m-0">Size : {{ele.size.size}}</p>
+                                <p class="fs-6 m-0 text-success"> ₹ {{ele.products.product.price}}</p>
+                                <p class="text-secondary m-0">Size : {{ele.products.size.size}}</p>
                             </div>
         
                             <div class="d-flex flex-wrap" style="gap:10px;">
-                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.color.name}}</p>
-                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.product.brand.name}}</p>
-                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.product.category.name}}</p>
+                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.products.color.name}}</p>
+                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.products.product.brand.name}}</p>
+                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.products.product.category.name}}</p>
                             </div>
                         </div>
         
@@ -166,13 +166,14 @@
             <p class="fs-4 m-0">Total amount : ₹ {{each.total_price}}</p>
             <p class="fs-5 m-0">Total items : {{each.total_item}}</p>
             <p class="fs-5 m-0">Order Date : {{each.order_date}}</p>
-            <p class="fs-5 m-0" id="status{{forloop.counter}}">Status : {{each.status}}</p>
+            
+            <p class="fs-5 m-0" id ="status{{forloop.counter}}">Status :{% if each.return_product %} Returned {% else %} {{each.status}} {% endif %} </p>
             <p class="fs-5 m-0">Payment : {{each.payment_method}}</p>
 
             
         </div>
 
-        <div class="col-lg-3" id="conatiner_button{{foorloop.counter}}">
+        <div class="col-lg-3">
             <p class="fs-4 m-0">Delivery Address :</p>
             <div class="p-3 " style="width: max-content;">
                 <p class="m-0">{{each.address.village}}</p>
@@ -191,10 +192,14 @@
                 {% endif %}
 
             </div>
-            {% if each.status == 'delivered' or each.status == 'cancel' %}
+            {% if each.status == 'delivered' or each.status == 'cancel' or each.return_product %}
             {% else %}
-            <a href="{% url 'Ecom:cancelorder' pk=each.id %}" data-set="{{foorloop.counter}}" class="btn btn-outline-dark cancel_button">Cancel Order</a>
+            <a href="{% url 'Ecom:cancelorder' pk=each.id %}" data-set="{{forloop.counter}}" class="btn btn-outline-dark cancel_button">Cancel Order</a>
             {% endif %}
+            {% if each.status == 'delivered' and not each.return_product %}
+            <a href="{% url 'Ecom:returnorder' pk=each.id %}" data-set="{{forloop.counter}}" class="btn btn-outline-dark return_button">Return</a>
+            {% endif %}
+
         </div>
         
 
@@ -218,44 +223,129 @@
 
 <!-- script for scroll -->
 <script src="{% static 'js/navscroll.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
     axios.defaults.xsrfCookieName = "csrftoken"
-    let cancel_button = document.querySelectorAll('cancel_button')
+    let cancel_button = document.querySelectorAll('.cancel_button')
 
-    // cancel_button.forEach(ele=>{
+    cancel_button.forEach(ele=>{
 
-    //     ele.addEventListener('click' ,(e)=>{
+        ele.addEventListener('click' ,(e)=>{
 
-    //         e.preventDefault()
+            e.preventDefault()
 
-    //         axios.get(ele.href )
-    //         .then(function(response){
+            Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                axios.post(ele.href)
+                .then(function(response){
 
-    //             if(response.data.success){
-    //                 let conatiner_button = document.getElementById(`conatiner_button${ele.dataset.set}`)
-    //                 container_button.removeChild(ele);
-    //                 let status_update = document.getElementById(`status${ele.dataset.set}`)
-    //                 status_update.innerText = 'cancel'
-    //                 for (var i = 0; i < id_status.options.length; i++) {
-    //                 var option = id_status.options[i];
-                    
-    //                 // Disable the option if its value is not equal to the desired value
-    //                 if (option.value !== response.data.value) {
-    //                     option.disabled = true;
-    //                 }
-    //                 }
-    //             }
-    //             else{
-    //                 console.log('error');
-    //             }
-    //         })
-    //         .catch(function(error){
-    //             console.error(error)
-    //         })
-    //     })
-    // })
+                    if(response.data.success){
+                        Swal.fire(
+                            'Cancelled!',
+                            'Your Order has been cancelled',
+                            'success'
+                            )
+                        ele.classList.add('visually-hidden');
+                        let status = document.getElementById(`status${ele.dataset.set}`)
+                        console.log(`status${ele.dataset.set}`);
+                        status.innerText='status : cancel';
+                    }
+                    else{
+                        Swal.fire(
+                            'error!',
+                            'Try again after some time',
+                            'error'
+                        )
+                    }
+                })
+                .catch(function(error){
+                    console.error(error)
+                }) 
+            }
+            })
+            
+        })
+    })
+    let return_button = document.querySelectorAll('.return_button')
+
+    return_button.forEach(ele=>{
+
+        ele.addEventListener('click' ,(e)=>{
+
+            e.preventDefault()
+
+            Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                axios.post(ele.href)
+                .then(function(response){
+
+                    if(response.data.success){
+                        Swal.fire(
+                            'Returned!',
+                            'Your Order has been returned',
+                            'success'
+                            )
+                        ele.classList.add('visually-hidden');
+                        let status = document.getElementById(`status${ele.dataset.set}`)
+                        status.innerText='status : Returned';
+                    }
+                    else{
+                        Swal.fire(
+                            'error!',
+                            'Try again after some time',
+                            'error'
+                        )
+                    }
+                })
+                .catch(function(error){
+                    console.error(error)
+                })
+            }
+            })
+            axios.post(ele.href)
+            .then(function(response){
+
+                if(response.data.success){
+                    Swal.fire(
+                        'Returned!',
+                        'Your Order has been returned',
+                        'success'
+                        )
+                    ele.classList.add('visually-hidden');
+                    let status = document.getElementById(`status${ele.dataset.set}`)
+                    status.innerText='status : Returned';
+                }
+                else{
+                    Swal.fire(
+                        'error!',
+                        'Try again after some time',
+                        'error'
+                    )
+                }
+            })
+            .catch(function(error){
+                console.error(error)
+            })
+        })
+    })
 </script>
 
 {% endblock %}

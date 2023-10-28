@@ -24,8 +24,15 @@ urlpatterns = [
     path('address/<int:pk>/update' , views.UpdateAdress.as_view() , name='addressupdate'),
     path('f_handlecart',views.FormHandlerCart , name='f_handlecart'),
     path('checkout',views.CheckOut , name='checkout'),
-    path('ordersuccess',views.SuccessPage , name='successpage'),
+    path('ordersuccess/<int:pk>',views.SuccessPage , name='successpage'),
     path('userorder' , views.UserOrder.as_view() , name='userorder'),
+    path('online_payment/<int:pk>' , views.OnlinePayment , name='online_payment'),
+    path('paymenthandler/<int:pk>' , views.PaymentHandler , name='paymenthandler'),
+    path('invoice/<int:pk>' , views.render_pdf_view , name="invoice"),
+    path('addwallet' , views.AddWallet , name='addwallet'),
+    path('getrazerpayid' , views.create_razerpay_order , name='getrazerpayid'),
+    path ('razerpayformhandler' , views.RazerPaymentHandler , name="razerpayformhandler"),
+    path('piperestart' , views.RestartPipe , name='piperestart'),
 
     #json url
 
@@ -36,7 +43,10 @@ urlpatterns = [
     path('setprimary/<int:pk>' , views.SetPrimary.as_view() , name='setprimary'),
     path('address/<int:pk>/delete',views.DeleteAddress.as_view() , name='deleteaddress'),
     path('order/<int:pk>/cancel',views.CancelOrder.as_view() , name='cancelorder'),
-
+    path('order/<int:pk>/return' , views.ReturnOrder.as_view() , name='returnorder'),
+    path('userlike',views.LikeProduct.as_view() , name='userlike'),
+    path('coupon',views.CouponManager.as_view() , name='coupon'),
+    path('profileimage' ,views.ProfileImage , name='profileimage'),
 
     path('logouts',views.logouts , name='logouts') ,
     

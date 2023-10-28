@@ -22,16 +22,41 @@ from django.views import View
 from django.core import serializers
 from django.db.models import Sum
 
+from xhtml2pdf import pisa
+from django.template.loader import get_template
+from django.http import HttpResponse
+
+
 
 from . import form
-from .models import UserProfile,UserCart,Address,Order
+from .models import UserProfile,UserCart,Address,Order,ProductOrdered,UserWishList,Coupon,UserWallet
 from .mixin import sendOTP , createUser ,conformationmail
 from adminpanel.models import Connector,Category , Brand , Size , Color , Product , ProductImage
 # Create your views here.
 from .mixin import UserPermissionCustomMixin
 
+import razorpay
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+import sys
 
-        
+def write_to_pipe():
+    try:
+        # Code that writes to the pipe
+        # ...
+        sys.stdout.flush()  # Flush the output to the pipe
+    except BrokenPipeError:
+        # Handle the broken pipe error
+        # Restart or resume execution here
+        print("Pipe is broken. Restarting...")
+        write_to_pipe()  # Restart the function
+
+def RestartPipe(request):
+    write_to_pipe()
+    return JsonResponse({'success' :True})
+
+razorpay_client = razorpay.Client(
+    auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))       
 
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
 class HomeTemplate(TemplateView):
@@ -189,7 +214,10 @@ class ProductList(ListView ):
         context['category'] = Category.objects.all()
         context['brand'] = Brand.objects.all()
         context['color'] = Color.objects.all()
-
+        if self.request.user.is_authenticated:
+            context['liked_products'] = UserWishList.objects.filter(user = self.request.user).values_list('product' , flat=True)
+        else:
+            context['liked_products'] = 'empty'
         # Add filter parameters to context
         context['price_param'] = self.request.GET.get("price")
         context['brand_param'] = int(self.request.GET.get("brand")) if self.request.GET.get("brand") else None
@@ -227,7 +255,8 @@ class productDetail(DetailView):
         size_dict ={}
         obj = self.get_object()
         product = obj.product
-        values = Connector.objects.filter(product = product , color = obj.color).values_list('size__size','id').order_by('size')
+        values = Connector.objects.filter(product = product , color = obj.color).filter(count__gt = 1).values_list('size__size','id').order_by('size')
+        print(values)
         for i in values:
             size_dict[i[0]] = i[1]
         context['all_size'] = Size.objects.all()
@@ -256,6 +285,76 @@ class Profile(UserPermissionCustomMixin,DetailView):
     def get_object(self, queryset=None):
         return self.request.user 
 
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        if not UserWallet.objects.filter(user = self.request.user).exists():
+            obj = UserWallet(user=self.request.user)
+            obj.save()
+            context['wallet'] = obj
+        else:
+            context['wallet'] = UserWallet.objects.get(user = self.request.user)
+        return context
+    
+@csrf_exempt
+def AddWallet(request):
+    if request.method == 'POST':
+        try:
+            amount = int(request.POST.get('amount'))
+            wallet = None
+            if UserWallet.objects.filter(user = request.user).exists():
+                wallet = UserWallet.objects.get(user = request.user)
+            else:
+                wallet = UserWallet(user = request.user)
+            
+            wallet.balance = wallet.balance + amount
+            wallet.save()
+            return JsonResponse({'success':True})   
+        except UserWallet.DoesNotExist:
+            return JsonResponse({'success' : False})
+        
+    return render(request , 'user/addwallet.html')
+
+@csrf_exempt
+def create_razerpay_order(request):
+    if request.method == "POST":
+        try:
+            amount = int(request.POST.get('amount')) * 100  # Convert to paise           
+            data = { "amount": amount, "currency": "INR", "receipt": "order_rcptid_11" }
+            order = razorpay_client.order.create(data=data)
+            # print('done')
+            return JsonResponse({'success' : True ,"order":order})
+        except Exception as e:
+            return JsonResponse({'error': str(e)})
+
+@csrf_exempt
+def RazerPaymentHandler(request):
+
+    if request.method == "POST":
+        try:
+            payment_id = request.POST.get('razorpay_payment_id', '')
+            razorpay_order_id = request.POST.get('razorpay_order_id', '')
+            signature = request.POST.get('razorpay_signature', '')
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': payment_id,
+                'razorpay_signature': signature
+            }
+
+
+            
+            try:
+                razorpay_client.utility.verify_payment_signature(params_dict)
+            except razorpay.errors.SignatureVerificationError:
+
+                return JsonResponse({'success':False ,'error':'unauthorized payments to process'})
+            
+            return JsonResponse({'success':True})
+        
+        except:
+            return JsonResponse({'success':False ,'error':'error in transaction try again later'})
+            
+
+            
 
 def FormHandlerCart(request):
     if not request.user.is_authenticated and not request.user.is_active:
@@ -265,57 +364,235 @@ def FormHandlerCart(request):
         request.session['checkout_product'] = ids
         request.session['total_amount'] = request.POST.get('total_price')
         request.session['total_items'] = request.POST.get('total_items')
+        request.session['coupon'] = request.POST.get('coupon')
         return JsonResponse({'success':True})
-    
+
+from django.db.models import Q
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=False)
 def CheckOut(request):
     previous_path = request.session.get('previous_url',None)
     current_path = request.session.get('current_url',None)
-    print(previous_path,current_path)
-    # print(request.META.get('HTTP_REFERER'))
-    # if previous_path:
-    #     print("entered")
-    #     return redirect(previous_path)
+
+    print(previous_path , current_path)
+
     if not request.user.is_authenticated or not request.user.is_active:
         return redirect('Ecom:home')
+    
     data = UserCart.objects.filter(id__in = request.session['checkout_product'])
+    for i in data:
+        if i.quantity > i.connect.count:
+            i.quantity = i.connect.count
+            i.connect.count = 0
+            i.connect.first_preference = False
+            i.connect.save()
+            if Connector.objects.filter(Q(product=i.connect.product) & Q(count__gt=0)).exists():
+                variant = Connector.objects.filter(Q(product=i.connect.product) & Q(count__gt=0)).first()
+                variant.first_preference = True
+                variant.save()
+            else:
+                i.connect.product.active = False
+                i.connect.product.save()
+        i.save()
     address = Address.objects.filter(user = request.user)
 
     if request.method == 'POST':
-        address = request.POST.get('address')
-        obj = Order()
-        obj.user = request.user
-        obj.address = Address.objects.get(id = address)
+        try:
+            address = request.POST.get('address')
+            obj = Order()
+            obj.user = request.user
+            obj.address = Address.objects.get(id = address)
+            
+            obj.total_price = request.session.get('total_amount')
+            obj.total_item = request.session.get('total_items')
+            coupon_id = request.session.get('coupon')
+            if int(coupon_id) != 0:
+                coupon = Coupon.objects.get(pk = coupon_id)
+                obj.coupon = coupon
+            payment_method  = request.POST.get('payment_method')
+            if payment_method =='1':
+
+                obj.payment_method = 'cash_on_delivery'
+            else:
+                obj.payment_method = 'online'
+            obj.status = 'pending'
+            obj.save()
+            for i in data:
+                productCover = ProductOrdered(products =i.connect , quantity = i.quantity , total_price =  i.connect.product.price * i.quantity )
+                productCover.save()
+                obj.product_cover.add(productCover)
+                i.connect.count = i.connect.count-i.quantity
+                i.connect.sale = i.connect.sale + i.quantity
+                i.connect.save()
+                if i.connect.count == 0:
+                    i.connect.first_preference = False
+                    i.connect.save()
+                    if Connector.objects.filter(Q(product=i.connect.product) & Q(count__gt=0)).exists():
+                        variant = Connector.objects.filter(Q(product=i.connect.product) & Q(count__gt=0)).first()
+                        variant.first_preference = True
+                        variant.save()
+                    else:
+                        i.connect.product.active = False
+                        i.connect.product.save()
+                        
+                i.delete_cart = True
+                i.save()
+
+            obj.save()
+            
+            conformationmail(request.user.email)
+
+            return JsonResponse({'success':True , 'pk' : obj.pk})
+        except:
+            return JsonResponse({'success':False })
         
-        obj.total_price = request.session.get('total_amount')
-        obj.total_item = request.session.get('total_items')
-        obj.payment_method = 'cash_on_delivery'
-        obj.status = 'pending'
-        obj.save()
-        total_count = 0
-        for i in data:
-            # print(i.connect)
-            obj.products.add(i.connect.id)
-            i.connect.count = i.connect.count-i.quantity
-            i.connect.sale = i.connect.sale + i.quantity
-            total_count = total_count + i.connect.count
-            i.connect.save()
-            i.delete_cart = True
-            i.save()
-        # if total_count == 0:
-
-        obj.save()
-        conformationmail(request.user.email)
-        return redirect('Ecom:successpage')
-
+        # return redirect('Ecom:successpage',pk=obj.pk)
 
     return render(request,"user/checkout.html" ,{'products':data , 'total_amount':request.session['total_amount'] , 'address':address})
 
+
+# @cache_control(no_cache=True, must_revalidate=True, no_store=False)
+# def CheckOut(request):
+#     previous_path = request.session.get('previous_url',None)
+#     current_path = request.session.get('current_url',None)
+
+#     print(previous_path , current_path)
+
+#     if not request.user.is_authenticated or not request.user.is_active:
+#         return redirect('Ecom:home')
+#     data = UserCart.objects.filter(id__in = request.session['checkout_product'])
+#     address = Address.objects.filter(user = request.user)
+
+#     if request.method == 'POST':
+#         address = request.POST.get('address')
+#         obj = Order()
+#         obj.user = request.user
+#         obj.address = Address.objects.get(id = address)
+        
+#         obj.total_price = request.session.get('total_amount')
+#         obj.total_item = request.session.get('total_items')
+#         coupon_id = request.session.get('coupon')
+#         if int(coupon_id) != 0:
+#             coupon = Coupon.objects.get(pk = coupon_id)
+#             obj.coupon = coupon
+#         payment_method  = request.POST.get('payment_method')
+#         if payment_method =='1':
+
+#             obj.payment_method = 'cash_on_delivery'
+#         else:
+#             obj.payment_method = 'online'
+#         obj.status = 'pending'
+#         obj.save()
+#         total_count = 0
+#         for i in data:
+#             productCover = ProductOrdered(products =i.connect , quantity = i.quantity , total_price =  i.connect.product.price * i.quantity )
+#             productCover.save()
+#             obj.product_cover.add(productCover)
+#             i.connect.count = i.connect.count-i.quantity
+#             i.connect.sale = i.connect.sale + i.quantity
+#             i.connect.save()
+#             i.delete_cart = True
+#             i.save()
+
+#         obj.save()
+#         if payment_method == '2':
+#             return redirect('Ecom:online_payment' ,pk = obj.pk)
+#         conformationmail(request.user.email)
+#         return redirect('Ecom:successpage',pk=obj.pk)
+
+#     return render(request,"user/checkout.html" ,{'products':data , 'total_amount':request.session['total_amount'] , 'address':address})
+
+
+
+
+def OnlinePayment(request , pk):
+    order_product  = Order.objects.get(pk = pk)
+    
+    payment = razorpay_client.order.create({'amount':int(order_product.total_price)*100 , 'currency' : 'INR','payment_capture': 0})
+    context = {}
+    context['callback_url'] = reverse('Ecom:paymenthandler',kwargs={'pk':pk})
+    # context['callback_url'] =pk
+    return render(request , 'user/payment.html',{'payment' : payment , 'context':context})
+
+@csrf_exempt
+def PaymentHandler(request , pk):
+    order_product  = Order.objects.get(pk = pk)
+    if request.method == "POST":
+        try:
+            
+            # get the required parameters from post request.
+            payment_id = request.POST.get('razorpay_payment_id', '')
+            razorpay_order_id = request.POST.get('razorpay_order_id', '')
+            signature = request.POST.get('razorpay_signature', '')
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': payment_id,
+                'razorpay_signature': signature
+            }
+
+            # print(params_dict)
+ 
+            # verify the payment signature.
+            result = razorpay_client.utility.verify_payment_signature(
+                params_dict)
+            if result is not None:
+                amount = int(order_product.total_price)*100 
+                try:
+                    # capture the payemt
+                    razorpay_client.payment.capture(payment_id, amount)
+ 
+                    # render success page on successful caputre of payment
+                    return redirect('Ecom:successpage',pk=pk)
+                except:
+                    order_product.delete()
+                    # if there is an error while capturing payment.
+                    return render(request, 'user/paymentfail.html')
+            else:
+                order_product.delete()
+                # if signature verification fails.
+                return render(request, 'user/paymentfail.html')
+        except:
+            order_product.delete()
+            # if we don't find the required parameters in POST data
+            return render(request, 'user/paymentfail.html')
+
+
+
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
+class InvoiceTemplate(TemplateView):
+    template_name = "user/invoice.html" 
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context =  super().get_context_data(**kwargs)
+        context['order'] = Order.objects.get(pk = kwargs['pk'])
+        return context
+
+def render_pdf_view(request , pk):
+    
+    template_path = 'user/invoice.html'
+    order = Order.objects.get(pk = pk)
+    context = {'order': order}
+   
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+    
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response ,encoding='UTF-8')
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=False)
-def SuccessPage(request):
+def SuccessPage(request,pk):
     if not request.user.is_authenticated and not request.user.is_active:
         return redirect('Ecom:login')
-    return render(request,'user/successpage.html')
+    # order_product = Order.objects.get(pk = pk)
+    return render(request,'user/successpage.html' , {'pk_id':pk})
 
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
 class UserOrder(UserPermissionCustomMixin,ListView):
@@ -453,6 +730,13 @@ class AddCart(UserPermissionCustomMixin,CreateView):
                 if( obj.quantity + int(request.GET.get('quantity'))) >= 5 :
                     obj.quantity = 5
                     obj.save()
+                # if( obj.quantity + int(request.GET.get('quantity'))) >= 5 and connect.count >=5 :
+                #     obj.quantity = 5
+                #     obj.save()
+                #     return JsonResponse({'success':True })
+                # if ( obj.quantity + int(request.GET.get('quantity'))) >= 5 and connect.count < 5:
+                #     obj.quantity = connect.count
+                #     obj.save()
                     return JsonResponse({'success':True })
                 obj.quantity = obj.quantity + int(request.GET.get('quantity'))
                 obj.save()
@@ -477,8 +761,9 @@ class UpdateCart(UserPermissionCustomMixin,UpdateView):
             action= self.request.POST.get('action')
 
             if action == '1':
-                cart.quantity = cart.quantity  + 1
-            if action == '0':
+                if cart.connect.count >= 1:
+                    cart.quantity = cart.quantity  + 1
+            if action == '0':                
                 cart.quantity = cart.quantity  - 1
             cart.save()
             return JsonResponse({'success': True})
@@ -549,24 +834,118 @@ class DeleteAddress(UserPermissionCustomMixin,CreateView):
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
 class CancelOrder(UserPermissionCustomMixin,UpdateView):
 
-    http_method_names = ['post','get']
+    http_method_names = ['post']
 
-    def get(self, request, *args, **kwargs) :
-        try:
-            order = Order.objects.get(id = kwargs.get('pk') )
-            order.status = 'cancel'
-            order.save()
-            return redirect('Ecom:userorder')
-
-        except order.DoesNotExist:
-            return JsonResponse({'success': False})
-
+    
     def post(self, *args, **kwargs):
         try:
             order = Order.objects.get(id = kwargs.get('pk') )
             order.status = 'cancel'
+            for i in order.product_cover.all():
+                obj = i.products
+                obj.count += 1
+                obj.sale -= 1
+                obj.save()
+            if UserWallet.objects.filter(user = order.user).exists():
+                wallet = UserWallet.objects.get(user = order.user)
+            else:
+                wallet = UserWallet(user = order.user)
+            wallet.balance = wallet.balance + order.total_price
+            wallet.save()
             order.save()
             return JsonResponse({'success': True })
 
         except order.DoesNotExist:
             return JsonResponse({'success': False})
+        
+
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
+class ReturnOrder(UserPermissionCustomMixin,UpdateView):
+
+    http_method_names = ['post']
+
+    
+    def post(self, *args, **kwargs):
+        try:
+            order = Order.objects.get(id = kwargs.get('pk') )
+            order.return_product = True
+            for i in order.product_cover.all():
+                obj = i.products
+                obj.count += 1
+                obj.sale -= 1
+                obj.save()
+            if UserWallet.objects.filter(user = order.user).exists():
+                wallet = UserWallet.objects.get(user = order.user)
+            else:
+                wallet = UserWallet(user = order.user)
+            wallet.balance = wallet.balance + order.total_price
+            wallet.save()
+            order.save()
+            return JsonResponse({'success': True })
+
+        except order.DoesNotExist:
+            return JsonResponse({'success': False})
+
+
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
+class LikeProduct(UserPermissionCustomMixin,UpdateView):
+
+    http_method_names = ['post']
+
+    def post(self, *args, **kwargs):
+        try:
+
+            product = Product.objects.get(pk =self.request.POST.get('pk'))
+            if UserWishList.objects.filter(product= product , user = self.request.user).exists():
+                obj = UserWishList.objects.get(product= product , user = self.request.user)
+                obj.delete()
+                return JsonResponse({'success': True , 'liked':False})
+            else:
+                obj = UserWishList(product= product , user = self.request.user)
+                obj.save()
+                return JsonResponse({'success': True , 'liked':True})
+
+        except Product.DoesNotExist:
+            return JsonResponse({'success': False})
+        
+from datetime import datetime
+      
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
+class CouponManager(UserPermissionCustomMixin,UpdateView):
+
+    http_method_names = ['post']
+
+    def post(self, *args, **kwargs):
+        try:
+
+            # print(self.request.POST.get('code'))
+            if Coupon.objects.filter( coupon_code=self.request.POST.get('code')).exists():
+                code = Coupon.objects.get( coupon_code=self.request.POST.get('code'))
+                amount = int(self.request.POST.get('amount'))
+                current_date = datetime.now().date()
+                if current_date > code.expire_date:
+                    return JsonResponse({'success': True , 'coupon':False , 'error' : 'Coupon Expired'})
+                if code.maximum_apply <=0:
+                    return JsonResponse({'success': True , 'coupon':False , 'error' : 'Coupon Maximum Reached'})
+                if code.minimum_purchase > amount:
+                    return JsonResponse({'success': True , 'coupon':False , 'error' : f'Max Purchase {code.minimum_purchase}'})
+                code.maximum_apply += 1
+                code.save()
+                return JsonResponse({'success': True , 'coupon':True , 'dicount' : code.amount_to_reduce , 'couponId':code.id})
+            else:
+                return JsonResponse({'success': True , 'coupon':False , 'error' : 'Wrong Coupon'})
+
+        except Coupon.DoesNotExist:
+            return JsonResponse({'success': False})
+        
+@csrf_exempt
+def ProfileImage(request):
+
+    if request.method == 'POST':
+        print('hi')
+        uploaded_file = request.FILES['file']
+        obj = UserProfile.objects.get(user = request.user)
+        obj.picture = uploaded_file
+        obj.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False})

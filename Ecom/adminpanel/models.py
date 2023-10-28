@@ -44,6 +44,7 @@ class Size(models.Model):
 
 class Color(models.Model):
     name = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    
 
     def __str__(self):
         return self.name

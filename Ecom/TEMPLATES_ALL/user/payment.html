@@ -1,0 +1,64 @@
+
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+
+{% endblock %}
+
+{% block main %}
+
+
+<div class="bg-gray-100 h-screen">
+    <div class="bg-white p-6  md:mx-auto">
+      
+      <div class="text-center">
+          <h3 class="md:text-2xl text-base text-gray-900 font-semibold text-center">Payment</h3>
+          <p class="text-gray-600 my-2">Click the button to process the online payment</p>
+          <div class="py-10 text-center">
+             <button id="rzp-button1" class="px-12 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3">PAY</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "rzp_test_hjG9C59EJBeKxG", // Enter the Key ID generated from the Dashboard
+        "amount": "{{payment.amount}}", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+        "currency": "INR",
+        "name": "Nivya",
+        "description": "Purchase",
+        "image": "{% static 'default/logo.png' %}",
+        "order_id": "{{payment.id}}", //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+        "callback_url": "{{ context.callback_url }}",
+    //     "handler": function (response){
+    //     window.location.href = ''
+    // },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response){
+            console.log("payment cancelled");
+    });
+    document.getElementById('rzp-button1').onclick = function(e){
+        rzp1.open();
+        e.preventDefault();
+    }
+    </script>
+
+{% endblock %}

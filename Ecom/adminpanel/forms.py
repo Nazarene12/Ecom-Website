@@ -394,6 +394,10 @@ class OredrFormStatus(forms.ModelForm):
         model = Order
         fields = ['status']
 
+        widgets = {
+            'status': forms.Select(attrs={'class': 'form-select form-control', 'required': 'required'}),
+        }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         instance = kwargs.pop('instance',None)

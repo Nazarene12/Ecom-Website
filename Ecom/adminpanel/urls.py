@@ -27,6 +27,12 @@ urlpatterns = [
     path('order/<int:pk>',views.OrderDetail.as_view() , name='orderdetail'),
     path('order/<int:pk>/update',views.OrderUpdate.as_view() , name='orderupdate'),
 
+    path('coupon' , views.CouponManager , name = 'coupon'),
+    path('coupon/<int:pk>/delete' , views.DeleteCoupon.as_view() , name='deletecoupon'),
+    path('coupon/<int:pk>/update' , views.UpdateCoupon , name='updatecoupon'),
+
+    path('salesreport' , views.SaleReport , name="salesreport"),
+
     path('logout',views.logouts , name='logout'),
 
 ]

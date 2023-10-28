@@ -154,8 +154,11 @@
                             {% for each_size in all_size %}
 
                             {% if each_size.size == product.size.size %}
+                                {% if product.count > 0%}
                                 <option class="size_option" value="{{product.id}}" selected>{{product.size.size}}</option>
-
+                                {% else %}
+                                <option class="size_option" value="{{product.id}}" disabled>{{product.size.size}}</option>
+                                {% endif %}
                             {% elif each_size.size in product.sizes %}
                                 <option class="size_option" value="{{size_id|get_item:each_size.size}}" >{{each_size.size}}</option>
                             {% else %}

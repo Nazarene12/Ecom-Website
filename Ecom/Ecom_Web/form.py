@@ -3,9 +3,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate , login
 import re
 from django.contrib.auth.hashers import check_password
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
-
-from .models import UserProfile,Address
+from .models import UserProfile,Address,Coupon
 
 
 class LoginForm(forms.Form):
@@ -235,6 +236,51 @@ class ChangePassword(forms.Form):
         
         return cleaned_data
 
+class CouponForm(forms.ModelForm):
+    class Meta:
+        model = Coupon
+        fields = ['coupon_code','expire_date','amount_to_reduce','minimum_purchase','maximum_apply']
+
+        widgets = {
+            'coupon_code': forms.TextInput(attrs={'class': 'form-control customclass' ,'placeholder':'code', 'required': 'required'}),
+            'expire_date' : forms.DateTimeInput(attrs={'class': 'form-control customclass','placeholder':'pincode number', 'required': 'required', 'type': 'date'}),
+            'amount_to_reduce': forms.NumberInput(attrs={'class': 'form-control customclass' ,'placeholder':'amount_reduce', 'required': 'required'}),
+            'minimum_purchase': forms.NumberInput(attrs={'class': 'form-control customclass' ,'placeholder':'min_purchase', 'required': 'required'}),
+            'maximum_apply' : forms.NumberInput(attrs={'class': 'form-control customclass','placeholder':'apply_number', 'required': 'required'}),
+
+        }
+        
+    def clean_coupon_code(self):
+        coupon_code = self.cleaned_data.get('coupon_code')
+        if not self.instance and Coupon.objects.filter(coupon_code=coupon_code).exists():
+            raise ValidationError("A coupon with this code already exists.")
+        return coupon_code
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        expire_date = cleaned_data.get('expire_date')
+        amount_to_reduce = cleaned_data.get('amount_to_reduce')
+        minimum_purchase = cleaned_data.get('minimum_purchase')
+        maximum_apply = cleaned_data.get('maximum_apply')
+        print(expire_date , amount_to_reduce , minimum_purchase , maximum_apply)
+
+        if expire_date and expire_date <= timezone.now().date():
+            self.add_error("expire_date","Expire date should be greater than today's date.")
+
+        if  maximum_apply < 10:
+            self.add_error('maximum_apply',"Maximum apply should be greater than 10.")
+
+        if  amount_to_reduce < 10:
+            self.add_error('amount_to_reduce',"Amount apply should be greater than Zero.")
+
+        elif  minimum_purchase < 10:
+            self.add_error('minimum_purchase',"minimum Amount apply should be greater than Zero.")
+
+        elif amount_to_reduce and minimum_purchase and amount_to_reduce >= minimum_purchase:
+            self.add_error('amount_to_reduce',"Amount to reduce should be less than minimum purchase.")
+
+        return cleaned_data
 
 class AddressForm(forms.ModelForm):
     class Meta:
