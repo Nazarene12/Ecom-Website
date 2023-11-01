@@ -1,0 +1,227 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+
+{% block css %}
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+<style>
+    input.form-control:focus {
+
+        color: black;
+    }
+
+    input.form-control {
+
+        color: black;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='category' %}
+        <div class="col-lg-8 bodysection">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+
+                    <div class="col-8">
+
+                        <div class="container">
+                            <div class="row p-3">
+                                {% for each in offerproduct %}
+
+                                <div class="col-lg-4 mb-4" id = 'box{{forloop.counter}}'>
+                                    <div class="bg-white rounded shadow-sm">
+                                        <img src="{{each.varient.image.front_image.url}}" alt="" class="img-fluid card-img-top" style="height:150px;object-fit: cover;">
+                                            
+                                        <div class="p-4">
+                                            <h5> {{each.name}}</h5>
+                                            <p class="small text-muted mb-0">{{each.description}}</p>
+                                            <div
+                                                class="d-flex align-items-center justify-content-between rounded-pill   py-2 mt-4">
+                                                <div>
+                                                    <p class="discount_percentage text-success m-0">Discount {{each.discount}} %</p>
+                                                    <p><small class="text-decoration-line-through me-2">₹ {{each.maximum_retail_price}}</small> <small class="sale_price">₹ {{each.price}}</small></p>
+
+                                                    
+                                                    <a href="{% url 'admins:offerproduct' pk=each.id %}" data-target="box{{forloop.counter}}" class="btn btn-outline-dark offer">offer</a>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3">
+                        <h3 class="mb-2">CATEGORY</h3>
+                        {% for each in category %}
+
+                        <a href="{% url 'admins:offercategory' pk=each.id %}" class="btn btn-dark my-3 rounded d-block offer_category">{{each.name}}</a>
+
+                        {% endfor %}
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="{% static 'js/adminnav.js' %}"></script>
+<!-- form validation  -->
+<!-- <script src="{% static 'js/form.js' %}"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
+    let offer = document.querySelectorAll('.offer');
+
+    let offer_category = document.querySelectorAll('.offer_category')
+
+    offer_category.forEach(ele=>{
+
+        ele.addEventListener('click' ,async (e)=>{
+
+            e.preventDefault()
+
+            const { value: discount } = await Swal.fire({
+                title: 'Percentage',
+                input: 'number',
+                inputLabel: 'Enter the Discount'
+                
+                })
+
+                if (! discount) {
+                    Swal.fire(
+                        'invalid !',
+                        'Entered Discount Percentage',
+                        'error'
+                        )
+                }
+                else if(discount > 100){
+                    Swal.fire(
+                        'invalid !',
+                        'Entered greater than 100',
+                        'error'
+                        )
+                }
+                else{
+                    let formData = new FormData()
+                    formData.append('discount' , discount)
+                    axios.post(ele.href , formData)
+                    .then(function(res){
+
+                        if (res.data.success){
+                            
+                            Swal.fire(
+                            'Success !',
+                            'Discount Added',
+                            'success'
+                            )
+                            .then((result) => {
+                                if (result.isConfirmed) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                        else{
+                            Swal.fire(
+                            'invalid !',
+                            'There is a issue try again some time',
+                            'error'
+                            )
+                        }
+                    })
+                    .catch(function(error){
+                        console.error(error)
+                    })
+                }
+        })
+    })
+
+    offer.forEach(ele=>{
+
+        ele.addEventListener('click' , async (e)=>{
+
+            e.preventDefault()
+
+            const { value: discount } = await Swal.fire({
+                title: 'Percentage',
+                input: 'number',
+                inputLabel: 'Enter the Discount'
+                
+                })
+
+                if (! discount) {
+                    Swal.fire(
+                        'invalid !',
+                        'Entered Discount Percentage',
+                        'error'
+                        )
+                }
+                else if(discount > 100){
+                    Swal.fire(
+                        'invalid !',
+                        'Entered greater than 100',
+                        'error'
+                        )
+                }
+                else{
+                    let formData = new FormData()
+                    formData.append('discount' , discount)
+                    axios.post(ele.href , formData)
+                    .then(function(res){
+
+                        if (res.data.success){
+                            let box = document.getElementById(ele.dataset.target)
+                            console.log(box , ele.dataset.target);
+                            let discount_percentage = box.querySelector('.discount_percentage')
+                            let sale_price = box.querySelector('.sale_price')
+                            discount_percentage.innerText = `Discount ${discount} %`
+                            sale_price.innerText = `₹ ${res.data.sale_price}`
+                            Swal.fire(
+                            'Success !',
+                            'Discount Added',
+                            'success'
+                            )
+                        }
+                        else{
+                            Swal.fire(
+                            'invalid !',
+                            'There is a issue try again some time',
+                            'error'
+                            )
+                        }
+                    })
+                    .catch(function(error){
+                        console.error(error)
+                    })
+                }
+        })
+    })
+</script>
+
+
+{% endblock %}

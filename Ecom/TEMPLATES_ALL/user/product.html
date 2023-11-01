@@ -79,42 +79,114 @@
     
 </div>
 
-<!-- <div class="container">
-    <form  method="get" class="d-flex">
-        <input type="text" class="form-control me-3" name="search" id="search">
-        <input type="submit" value="SEARCH" class="btn btn-outline-dark">
-    </form>
-</div> -->
+<style>
 
+form {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  transition: all 1s;
+  width: 50px;
+  height: 50px;
+  background: white;
+  box-sizing: border-box;
+  border-radius: 25px;
+  border: 4px solid white;
+  padding: 5px;
+}
+
+input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 42.5px;
+  line-height: 30px;
+  outline: 0;
+  border: 0;
+  display: none;
+  font-size: 1em;
+  border-radius: 20px;
+  padding: 0 20px;
+}
+
+.fa {
+  box-sizing: border-box;
+  padding: 10px;
+  width: 42.5px;
+  height: 42.5px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-radius: 50%;
+  color: #07051a;
+  text-align: center;
+  font-size: 1.2em;
+  transition: all 1s;
+}
+
+form:hover,
+form:valid {
+  width: 200px;
+  cursor: pointer;
+}
+
+form:hover input,
+form:valid input {
+  display: block;
+}
+
+form:hover .fa,
+form:valid .fa {
+  background: #07051a;
+  color: white;
+}
+
+
+
+
+
+</style>
 <div class="container">
     <div class="row">
         <div class="col-lg-2 col-5 navsection p-2">
             <div>
                 <div class="card mb-2 rounded" >
+                    <div class="bg-secondary p-2 rounded">
+                        <form>
+                            <input type="search" id="search_value" required>
+                            <i class="fa fa-search" id="submit_search"></i>
+                        </form>
+
+                        <script>
+                           
+                        </script>
+                    </div>
                     <div class="card-header text-center">
                       Price
                     </div>
                     <ul class="list-group list-group-flush text-center">
-                    {% if price_param == '200' %}
+                    {% if price_param == '1000' %}
                     
 
-                        <li class="list-group-item f-item main-background" data-option = 'price' data-select = 'True' data-value="200">200</li>
+                        <li class="list-group-item f-item main-background" data-option = 'price' data-select = 'True' data-value="1000">1000</li>
                     {% else %}
-                        <li class="list-group-item f-item" data-option = 'price' data-select = 'False' data-value="200">200</li>
+                        <li class="list-group-item f-item" data-option = 'price' data-select = 'False' data-value="1000">1000</li>
 
                     {% endif %}
 
-                    {% if price_param == '400' %}
-                        <li class="list-group-item   f-item main-background" data-option = 'price' data-select = 'True' data-value="400">400</li>
+                    {% if price_param == '2000' %}
+                        <li class="list-group-item   f-item main-background" data-option = 'price' data-select = 'True' data-value="2000">2000</li>
                     {% else %}
-                        <li class="list-group-item   f-item" data-option = 'price' data-select = 'False' data-value="400">400</li>
+                        <li class="list-group-item   f-item" data-option = 'price' data-select = 'False' data-value="2000">2000</li>
 
                     {% endif %}
 
-                    {% if price_param == '500' %}
-                        <li class="list-group-item   f-item main-background" data-option = 'price' data-select = 'True' data-value="500">500+</li>
+                    {% if price_param == '3000' %}
+                        <li class="list-group-item   f-item main-background" data-option = 'price' data-select = 'True' data-value="3000">3000</li>
                     {% else %}
-                        <li class="list-group-item   f-item" data-option = 'price' data-select = 'False' data-value="500">500+</li>
+                        <li class="list-group-item   f-item" data-option = 'price' data-select = 'False' data-value="3000">3000</li>
 
                     {% endif %}
                     </ul>
@@ -180,17 +252,48 @@
         <div class="col-lg-9 col-7 bodysection">
             <div class="container-fluid">
                 <div class="row">
-                    {% for ele in products %}
+                    {% if products %}
 
+                    {% for ele in products %}
                     <div class="col-lg-4 p-2">
+
                         <div class="card position-relative">
                             <img src="{{ele.varient.image.normal_image.url}}" class="card-img-top" alt="products" style="height:20rem;object-fit: cover;">
                             <div class="card-body">
+                                <div class="d-flex my-2">
+                                    {% if ele.rating >= 1 %}
+                                    <i class="fa-solid fa-star text-warning"></i>
+                                    {% else %}
+                                    <i class="fa-solid fa-star text-secondary"></i>
+                                    {% endif %}
+                                    {% if ele.rating >= 2 %}
+                                    <i class="fa-solid fa-star text-warning"></i>
+                                    {% else %}
+                                    <i class="fa-solid fa-star text-secondary"></i>
+                                    {% endif %}
+                                    {% if ele.rating >= 3 %}
+                                    <i class="fa-solid fa-star text-warning"></i>
+                                    {% else %}
+                                    <i class="fa-solid fa-star text-secondary"></i>
+                                    {% endif %}
+                                    {% if ele.rating >= 4 %}
+                                    <i class="fa-solid fa-star text-warning"></i>
+                                    {% else %}
+                                    <i class="fa-solid fa-star text-secondary"></i>
+                                    {% endif %}
+                                    {% if ele.rating == 5 %}
+                                    <i class="fa-solid fa-star text-warning"></i>
+                                    {% else %}
+                                    <i class="fa-solid fa-star text-secondary"></i>
+                                    {% endif %}
+
+                                </div>
                               <h5 class="card-title">{{ele.name}}</h5>
                               <p class="card-text">{{ele.description}}</p>
-                              <p class="card-text">$ {{ele.price}}</p>
+                              <p class="card-text text-success">discount {{ele.discount}} %</p>
+                              <p class="card-text">₹ <small class="text-decoration-line-through me-2">{{ele.maximum_retail_price}}</small> ₹ {{ele.price}}</p>
                               <p class="card-text">Brand : {{ele.brand.name}}</p>
-                              <p class="card-text">Ctegory : {{ele.category.name}}</p>
+                              <p class="card-text">Category : {{ele.category.name}}</p>
                               <div class="d-flex  align-items-center">
                                 <p class="m-0 me-2">color : </p>
                                 <table style="width:20px;height:20px; border-radius:50%; " bgcolor="{{ele.varient.color.name}}"></table>
@@ -217,6 +320,14 @@
                         </div>
                     </div>
                     {% endfor %}
+
+                    {% else %}
+
+                    <div class="alert alert-warning" role="alert">
+                        no products matches the search
+                    </div>
+
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -364,6 +475,17 @@ like_button.forEach(ele=>{
             console.error(error);
         })
     })
+})
+
+const submit_search = document.getElementById('submit_search');
+
+submit_search.addEventListener('click' ,()=>{
+    const search_value = document.getElementById('search_value')
+
+    if (search_value.value != ''){
+        window.location = `products?name=${search_value.value}`
+    }
+    
 })
    
 </script>

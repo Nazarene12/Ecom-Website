@@ -15,7 +15,12 @@
 
 input.form-control:focus{
    
-    color:black;
+   color:black;
+}
+
+input.form-control{
+  
+  color:black;
 }
 
 </style>
@@ -107,24 +112,43 @@ input.form-control:focus{
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{% static 'js/adminnav.js' %}"></script>
 <!-- form validation  -->
-<script src="{% static 'js/form.js' %}"></script>
+<!-- <script src="{% static 'js/form.js' %}"></script> -->
 
 <script>
     axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
     axios.defaults.xsrfCookieName = "csrftoken"
 
+
     let inputfeild = document.querySelector(".form-control");
     
+    let front_end_error = document.querySelector(".front_end_error_validation")
+
+
+
+    if (! front_end_error.classList.contains("visually-hidden")){
+        front_end_error.classList.add('visually-hidden')
+    }
 
     document.addEventListener("DOMContentLoaded", function() {
         const categoryForm = document.getElementById("categoryform");
         categoryForm.addEventListener("submit", function(e) {
             e.preventDefault();
+            event.stopPropagation();
+            if (!categoryForm.checkValidity()) {
+            
+                front_end_error.classList.remove('visually-hidden')
+                front_end_error.innerText = "please enter the field"
+                return;
+            }
             const formData = new FormData(categoryForm);
             axios.post('{% url "admins:add_category" %}', formData)
                 .then(function(response) {
+                    if (! front_end_error.classList.contains("visually-hidden")){
+                        front_end_error.classList.add('visually-hidden')
+                    }
                     if (response.data.success) {
                         // Handle a successful response, e.g., close the modal
                         console.log(response.data.category_data)
@@ -155,9 +179,18 @@ input.form-control:focus{
 
                         cell3.appendChild(anchor);
                         inputfeild.value = '';
+                        Swal.fire(
+                        'Category',
+                        'category has added successful.',
+                        'success'
+                        )
                     } else {
                         // Handle an error response, e.g., display an error message
-                        console.error('Error:', response.data.error_message);
+                        Swal.fire(
+                                'Category',
+                                'there is already this category',
+                                'error'
+                        )
                     }
                 })
                 .catch(function(error) {
@@ -167,22 +200,47 @@ input.form-control:focus{
         });
 
         deleteevent = (event)=>{
+            event.preventDefault();
+
+            Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+            if (result.isConfirmed) {
                 const url = event.target.getAttribute('href');
-                event.preventDefault();
                 axios.delete(url)
                 .then(function(response) {
                     if (response.data.success){
                         event.target.parentElement.parentElement.remove();
                         counterupdate()
+                        Swal.fire(
+                        'Category',
+                        'category has deleted successful.',
+                        'success'
+                        )
                     }
                     else{
-                        console.log(response.data);
+                        Swal.fire(
+                                'Category',
+                                'category not found',
+                                'error'
+                        )
                     }
                 })
                 .catch(function(error) {
                     // Handle errors
                     console.error('An error occurred:', error);
                 });
+
+
+            }
+        })
+                
            }
 
         const deletecategory = document.querySelectorAll('.deletecategory')

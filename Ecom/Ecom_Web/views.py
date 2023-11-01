@@ -31,7 +31,7 @@ from django.http import HttpResponse
 from . import form
 from .models import UserProfile,UserCart,Address,Order,ProductOrdered,UserWishList,Coupon,UserWallet
 from .mixin import sendOTP , createUser ,conformationmail
-from adminpanel.models import Connector,Category , Brand , Size , Color , Product , ProductImage
+from adminpanel.models import Connector,Category , Brand , Size , Color , Product , ProductImage ,Ratting,Comment
 # Create your views here.
 from .mixin import UserPermissionCustomMixin
 
@@ -184,13 +184,14 @@ class ProductList(ListView ):
 
     def get_queryset(self):
         # Specify the default ordering for the queryset
-        queryset = Product.objects.filter(active = True).order_by('id')
+        queryset = Product.objects.filter(active = True , category__active = True , brand__active = True).order_by('id')
 
-        
+        if self.request.GET.get('name'):
+            queryset  = queryset.filter(name__icontains = self.request.GET.get('name'))
 
         # Apply filters based on query parameters if they exist
         if self.request.GET.get('price'):
-            queryset = queryset.filter(price__lt=self.request.GET.get('price'))
+            queryset = queryset.filter(price__lt=self.request.GET.get('price')).order_by('price')
 
         if self.request.GET.get('brand'):
             queryset = queryset.filter(brand__id=self.request.GET.get('brand'))
@@ -211,9 +212,9 @@ class ProductList(ListView ):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['category'] = Category.objects.all()
-        context['brand'] = Brand.objects.all()
-        context['color'] = Color.objects.all()
+        context['category'] = Category.objects.filter(active = True)
+        context['brand'] = Brand.objects.filter(active = True)
+        context['color'] = Color.objects.filter(active = True)
         if self.request.user.is_authenticated:
             context['liked_products'] = UserWishList.objects.filter(user = self.request.user).values_list('product' , flat=True)
         else:
@@ -245,9 +246,10 @@ class productDetail(DetailView):
 
         product = obj.product
 
-        obj.colors = Connector.objects.filter(product = product).exclude(color = obj.color).values('color__name','image').distinct()
+        obj.colors = Connector.objects.filter(product = product,active=True).exclude(color = obj.color).values('color__name','image').distinct()
 
-        obj.sizes = Connector.objects.filter(product = product , color = obj.color , count__gt = 0).values_list('size__size',flat=True).order_by('size')
+        obj.sizes = Connector.objects.filter(product = product ,active=True, color = obj.color ).values_list('size__size',flat=True).order_by('size')
+        print(obj.sizes)
         return obj
     
     def get_context_data(self, **kwargs):
@@ -255,11 +257,11 @@ class productDetail(DetailView):
         size_dict ={}
         obj = self.get_object()
         product = obj.product
-        values = Connector.objects.filter(product = product , color = obj.color).filter(count__gt = 1).values_list('size__size','id').order_by('size')
+        values = Connector.objects.filter(product = product , color = obj.color , active=True).filter(count__gt = 1).values_list('size__size','id').order_by('size')
         print(values)
         for i in values:
             size_dict[i[0]] = i[1]
-        context['all_size'] = Size.objects.all()
+        context['all_size'] = Size.objects.filter(active = True)
         context['size_id'] = size_dict
         return context
     
@@ -273,6 +275,10 @@ class CartList(UserPermissionCustomMixin,ListView):
     def get_queryset(self):
         # Specify the default ordering for the queryset
         queryset = UserCart.objects.filter(user = self.request.user , delete_cart = False).order_by('-id')
+        for i in queryset:
+            if i.quantity > i.connect.count:
+                i.quantity = i.connect.count
+                i.save()
         return queryset
 
 
@@ -376,24 +382,14 @@ def CheckOut(request):
 
     print(previous_path , current_path)
 
+    if not previous_path:
+        return redirect('Ecom:home')
+
     if not request.user.is_authenticated or not request.user.is_active:
         return redirect('Ecom:home')
     
     data = UserCart.objects.filter(id__in = request.session['checkout_product'])
-    for i in data:
-        if i.quantity > i.connect.count:
-            i.quantity = i.connect.count
-            i.connect.count = 0
-            i.connect.first_preference = False
-            i.connect.save()
-            if Connector.objects.filter(Q(product=i.connect.product) & Q(count__gt=0)).exists():
-                variant = Connector.objects.filter(Q(product=i.connect.product) & Q(count__gt=0)).first()
-                variant.first_preference = True
-                variant.save()
-            else:
-                i.connect.product.active = False
-                i.connect.product.save()
-        i.save()
+    
     address = Address.objects.filter(user = request.user)
 
     if request.method == 'POST':
@@ -409,6 +405,8 @@ def CheckOut(request):
             if int(coupon_id) != 0:
                 coupon = Coupon.objects.get(pk = coupon_id)
                 obj.coupon = coupon
+                coupon.maximum_apply = coupon.maximum_apply -1
+                coupon.save()
             payment_method  = request.POST.get('payment_method')
             if payment_method =='1':
 
@@ -424,16 +422,7 @@ def CheckOut(request):
                 i.connect.count = i.connect.count-i.quantity
                 i.connect.sale = i.connect.sale + i.quantity
                 i.connect.save()
-                if i.connect.count == 0:
-                    i.connect.first_preference = False
-                    i.connect.save()
-                    if Connector.objects.filter(Q(product=i.connect.product) & Q(count__gt=0)).exists():
-                        variant = Connector.objects.filter(Q(product=i.connect.product) & Q(count__gt=0)).first()
-                        variant.first_preference = True
-                        variant.save()
-                    else:
-                        i.connect.product.active = False
-                        i.connect.product.save()
+                
                         
                 i.delete_cart = True
                 i.save()
@@ -441,6 +430,8 @@ def CheckOut(request):
             obj.save()
             
             conformationmail(request.user.email)
+            messages.success(request, 'success')
+
 
             return JsonResponse({'success':True , 'pk' : obj.pk})
         except:
@@ -450,57 +441,6 @@ def CheckOut(request):
 
     return render(request,"user/checkout.html" ,{'products':data , 'total_amount':request.session['total_amount'] , 'address':address})
 
-
-# @cache_control(no_cache=True, must_revalidate=True, no_store=False)
-# def CheckOut(request):
-#     previous_path = request.session.get('previous_url',None)
-#     current_path = request.session.get('current_url',None)
-
-#     print(previous_path , current_path)
-
-#     if not request.user.is_authenticated or not request.user.is_active:
-#         return redirect('Ecom:home')
-#     data = UserCart.objects.filter(id__in = request.session['checkout_product'])
-#     address = Address.objects.filter(user = request.user)
-
-#     if request.method == 'POST':
-#         address = request.POST.get('address')
-#         obj = Order()
-#         obj.user = request.user
-#         obj.address = Address.objects.get(id = address)
-        
-#         obj.total_price = request.session.get('total_amount')
-#         obj.total_item = request.session.get('total_items')
-#         coupon_id = request.session.get('coupon')
-#         if int(coupon_id) != 0:
-#             coupon = Coupon.objects.get(pk = coupon_id)
-#             obj.coupon = coupon
-#         payment_method  = request.POST.get('payment_method')
-#         if payment_method =='1':
-
-#             obj.payment_method = 'cash_on_delivery'
-#         else:
-#             obj.payment_method = 'online'
-#         obj.status = 'pending'
-#         obj.save()
-#         total_count = 0
-#         for i in data:
-#             productCover = ProductOrdered(products =i.connect , quantity = i.quantity , total_price =  i.connect.product.price * i.quantity )
-#             productCover.save()
-#             obj.product_cover.add(productCover)
-#             i.connect.count = i.connect.count-i.quantity
-#             i.connect.sale = i.connect.sale + i.quantity
-#             i.connect.save()
-#             i.delete_cart = True
-#             i.save()
-
-#         obj.save()
-#         if payment_method == '2':
-#             return redirect('Ecom:online_payment' ,pk = obj.pk)
-#         conformationmail(request.user.email)
-#         return redirect('Ecom:successpage',pk=obj.pk)
-
-#     return render(request,"user/checkout.html" ,{'products':data , 'total_amount':request.session['total_amount'] , 'address':address})
 
 
 
@@ -594,6 +534,12 @@ def SuccessPage(request,pk):
     # order_product = Order.objects.get(pk = pk)
     return render(request,'user/successpage.html' , {'pk_id':pk})
 
+
+from django.db.models import F, ExpressionWrapper, IntegerField
+from django.db.models.functions import Now,Trunc
+from django.db import models
+
+from django.utils.timezone import now
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
 class UserOrder(UserPermissionCustomMixin,ListView):
 
@@ -602,7 +548,25 @@ class UserOrder(UserPermissionCustomMixin,ListView):
     context_object_name = 'orders'
 
     def get_queryset(self) :
-        return Order.objects.filter(user = self.request.user)
+        orders = Order.objects.all()
+        for i in orders:
+            i.days_since_order = (i.order_date.date() - now().date()).days
+        return orders
+    
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
+class UserWishlist(UserPermissionCustomMixin,ListView):
+
+    model = UserWishList
+    template_name = 'user/userwishlist.html'
+    context_object_name = 'wishlist'
+
+    def get_queryset(self) :
+
+        queryset = UserWishList.objects.filter(user = self.request.user , product__active = True , product__category__active = True , product__brand__active = True)
+        for each in queryset:
+            each.product.varient = each.product.detail_product.filter(first_preference = True).first()
+        
+        return queryset
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=False)
 def logouts(request):
@@ -697,11 +661,10 @@ class GetProductData (UserPermissionCustomMixin,View):
         try:
             image = ProductImage.objects.get(id = kwargs['pk'])
             obj = Connector.objects.filter(image = image).first()
-            all_size = Connector.objects.filter(product = obj.product , color=obj.color).values_list('size__size','id').order_by('size')
+            all_size = Connector.objects.filter(product = obj.product,active=True , color=obj.color).values_list('size__size','id').order_by('size')
             size_dict={}
             for eachsize in all_size:
                 size_dict[eachsize[0]] = eachsize[1]
-            print(size_dict)
             # serialized_data = serializers.serialize('json', all_size)
             return JsonResponse({
                                 'success':True ,
@@ -723,7 +686,6 @@ class AddCart(UserPermissionCustomMixin,CreateView):
         try:
             connect = Connector.objects.get(id = request.GET.get('pk'))
             if UserCart.objects.filter(user = request.user , connect =connect , delete_cart = False).exists():
-                
                 obj = UserCart.objects.get(user = request.user , connect =connect , delete_cart = False)
                 if obj.quantity == 5:
                     return JsonResponse({'success':False , 'error':'reached max..'})
@@ -758,11 +720,14 @@ class UpdateCart(UserPermissionCustomMixin,UpdateView):
         try:
             # print(self.request.PUT)
             cart = UserCart.objects.get(id = self.request.POST.get('pk'))
+            varient = Connector.objects.get(id = cart.connect.id)
             action= self.request.POST.get('action')
 
             if action == '1':
-                if cart.connect.count >= 1:
+                if cart.quantity + 1 <= varient.count :
                     cart.quantity = cart.quantity  + 1
+                else:
+                    return JsonResponse({'success':True , 'limit' : True})
             if action == '0':                
                 cart.quantity = cart.quantity  - 1
             cart.save()
@@ -949,3 +914,88 @@ def ProfileImage(request):
         obj.save()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
+
+
+from django.db.models import Avg
+
+def Ratting_Product(request , pk):
+    if request.method == 'POST':
+        try:
+            value = request.POST.get('value')
+            order  = Order.objects.get(id = pk)
+            for i in order.product_cover.all():
+                obj = Product.objects.get(id = i.products.product.id)
+                rate = Ratting(product =obj , rating = value )
+                rate.save()
+                average_rating = Ratting.objects.filter(product=i.products.product).aggregate(Avg('rating'))['rating__avg']
+                print(average_rating)
+                i.products.product.rating = average_rating
+                i.products.product.save()
+            return JsonResponse({'success' :True})
+        except:
+            return JsonResponse({'success':False})
+        
+def Comment_Product(request , pk):
+
+    if request.method == 'POST':
+
+        try:
+            value = request.POST.get('value')
+            product = Product.objects.get(id = pk)
+            obj = Comment(product = product , comment = value)
+            obj.save()
+            return JsonResponse({'success':True})
+        except:
+            return JsonResponse({'success' : False})
+        
+        # @cache_control(no_cache=True, must_revalidate=True, no_store=False)
+# def CheckOut(request):
+#     previous_path = request.session.get('previous_url',None)
+#     current_path = request.session.get('current_url',None)
+
+#     print(previous_path , current_path)
+
+#     if not request.user.is_authenticated or not request.user.is_active:
+#         return redirect('Ecom:home')
+#     data = UserCart.objects.filter(id__in = request.session['checkout_product'])
+#     address = Address.objects.filter(user = request.user)
+
+#     if request.method == 'POST':
+#         address = request.POST.get('address')
+#         obj = Order()
+#         obj.user = request.user
+#         obj.address = Address.objects.get(id = address)
+        
+#         obj.total_price = request.session.get('total_amount')
+#         obj.total_item = request.session.get('total_items')
+#         coupon_id = request.session.get('coupon')
+#         if int(coupon_id) != 0:
+#             coupon = Coupon.objects.get(pk = coupon_id)
+#             obj.coupon = coupon
+#         payment_method  = request.POST.get('payment_method')
+#         if payment_method =='1':
+
+#             obj.payment_method = 'cash_on_delivery'
+#         else:
+#             obj.payment_method = 'online'
+#         obj.status = 'pending'
+#         obj.save()
+#         total_count = 0
+#         for i in data:
+#             productCover = ProductOrdered(products =i.connect , quantity = i.quantity , total_price =  i.connect.product.price * i.quantity )
+#             productCover.save()
+#             obj.product_cover.add(productCover)
+#             i.connect.count = i.connect.count-i.quantity
+#             i.connect.sale = i.connect.sale + i.quantity
+#             i.connect.save()
+#             i.delete_cart = True
+#             i.save()
+
+#         obj.save()
+#         if payment_method == '2':
+#             return redirect('Ecom:online_payment' ,pk = obj.pk)
+#         conformationmail(request.user.email)
+#         return redirect('Ecom:successpage',pk=obj.pk)
+
+#     return render(request,"user/checkout.html" ,{'products':data , 'total_amount':request.session['total_amount'] , 'address':address})
+

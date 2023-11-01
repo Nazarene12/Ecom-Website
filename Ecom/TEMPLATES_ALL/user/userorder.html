@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="{% static 'css/loader.css' %}">
 <link rel="stylesheet" href="{% static 'css/nav.css' %}">
 <link rel="stylesheet" href="{% static 'css/form.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.css">
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 
@@ -87,8 +88,78 @@
         text-align: center !important
     }
 
+    ol.progtrckr {
+    margin: 0;
+    padding: 0;
+    list-style-type :none;
+}
+
+ol.progtrckr li {
+    display: inline-block;
+    text-align: center;
+    line-height: 3.5em;
+}
+
+ol.progtrckr[data-progtrckr-steps="2"] li { width: 49%; }
+ol.progtrckr[data-progtrckr-steps="3"] li { width: 30%; }
+ol.progtrckr[data-progtrckr-steps="4"] li { width: 20%; }
+ol.progtrckr[data-progtrckr-steps="5"] li { width: 19%; }
+ol.progtrckr[data-progtrckr-steps="6"] li { width: 16%; }
+ol.progtrckr[data-progtrckr-steps="7"] li { width: 14%; }
+ol.progtrckr[data-progtrckr-steps="8"] li { width: 12%; }
+ol.progtrckr[data-progtrckr-steps="9"] li { width: 11%; }
+
+ol.progtrckr li.progtrckr-done {
+    color: black;
+    border-bottom: 4px solid yellowgreen;
+}
+ol.progtrckr li.progtrckr-todo {
+    color: silver; 
+    border-bottom: 4px solid silver;
+}
+
+ol.progtrckr li:after {
+    content: "\00a0\00a0";
+}
+ol.progtrckr li:before {
+    position: relative;
+    bottom: -2.5em;
+    float: left;
+    left: 50%;
+    line-height: 1em;
+}
+ol.progtrckr li.progtrckr-done:before {
+    content: "\2713";
+    color: white;
+    background-color: yellowgreen;
+    height: 2.2em;
+    width: 2.2em;
+    line-height: 2.2em;
+    border: none;
+    border-radius: 2.2em;
+    position:absolute;
+    top:100%;
+    left:100%;
+    z-index: 100;
+    transform: translate(-50%, -50%);
+
+}
+ol.progtrckr li.progtrckr-todo:before {
+    content: "\039F";
+    color: silver;
+    background-color: white;
+    font-size: 2.2em;
+    height:max-content;
+    position:absolute;
+    top:100%;
+    left:100%;
+    transform: translate(-50%, -30%);
+}
+
 
 </style>
+
+
 {% endblock %}
 
 
@@ -151,7 +222,11 @@
                                 <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.products.product.category.name}}</p>
                             </div>
                         </div>
-        
+
+                        <div class="mt-3">
+                            <button class="btn btn-outline-dark review" data-target="{% url 'Ecom:comment' pk=ele.products.product.id %}">REVIEW</button>
+                        </div>
+                        
         
                     </div>
                     {% endfor %}
@@ -162,7 +237,7 @@
             
         </div>
 
-        <div class="col-lg-4">
+        <div class="col-lg-5">
             <p class="fs-4 m-0">Total amount : ₹ {{each.total_price}}</p>
             <p class="fs-5 m-0">Total items : {{each.total_item}}</p>
             <p class="fs-5 m-0">Order Date : {{each.order_date}}</p>
@@ -170,10 +245,39 @@
             <p class="fs-5 m-0" id ="status{{forloop.counter}}">Status :{% if each.return_product %} Returned {% else %} {{each.status}} {% endif %} </p>
             <p class="fs-5 m-0">Payment : {{each.payment_method}}</p>
 
-            
+            <div>
+                <ol class="progtrckr position-relative" data-progtrckr-steps="4">
+                    <li class="progtrckr-done position-relative">
+                        Order
+                    </li>
+                    {% if each.status == 'cancel' %}
+                    <li class="progtrckr-done position-relative">Cancel</li>
+                    {% elif each.return_product %}
+                    <li class="progtrckr-done position-relative">Return</li>
+                    {% else %}
+                        {% if each.status == 'delivered' %}
+                        <li class="progtrckr-done position-relative">Production</li>
+                        <li class="progtrckr-done position-relative">Shipped</li>
+                        <li class="progtrckr-done position-relative">Delivered</li>
+                        {% elif each.days_since_order > 4 %}
+                        <li class="progtrckr-done position-relative">Production</li>
+                        <li class="progtrckr-todo position-relative">Shipped</li>
+                        <li class="progtrckr-todo position-relative">Delivered</li>
+                        {% elif each.days_since_order > 2 %}
+                        <li class="progtrckr-done position-relative">Production</li>
+                        <li class="progtrckr-done position-relative">Shipped</li>
+                        <li class="progtrckr-todo position-relative">Delivered</li>
+                        {% else %}
+                        <li class="progtrckr-todo position-relative">Production</li>
+                        <li class="progtrckr-todo position-relative">Shipped</li>
+                        <li class="progtrckr-todo position-relative">Delivered</li>
+                        {% endif %}
+                    {% endif %}
+                </ol>
+            </div>
         </div>
 
-        <div class="col-lg-3">
+        <div class="col-lg-2">
             <p class="fs-4 m-0">Delivery Address :</p>
             <div class="p-3 " style="width: max-content;">
                 <p class="m-0">{{each.address.village}}</p>
@@ -208,6 +312,25 @@
 
 </div>
 
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header text-center">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body d-flex flex-column justify-content-center align-items-center">
+
+            <h1>Review</h1>
+
+            <textarea name="review" id="review_message" cols="30" rows="10" class="form-control"></textarea>
+            <button class="btn btn-outline-dark mt-4" id="add_review">ENTER</button>
+        </div>          
+          
+        
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
 
 
@@ -225,9 +348,13 @@
 <script src="{% static 'js/navscroll.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+
 <script>
     axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
     axios.defaults.xsrfCookieName = "csrftoken"
+   
     let cancel_button = document.querySelectorAll('.cancel_button')
 
     cancel_button.forEach(ele=>{
@@ -346,6 +473,80 @@
             })
         })
     })
+
+
+    const myModal = new bootstrap.Modal(document.getElementById('exampleModal'))
+    let review_message = document.getElementById('review_message')
+    const myModalEl = document.getElementById('exampleModal')
+    myModalEl.addEventListener('hidden.bs.modal', event => {
+        review_message.value = ''
+        review_message.dataset.target=''
+    })
+    let review = document.querySelectorAll('.review');
+
+    review.forEach(ele=>{
+
+        ele.addEventListener('click' , ()=>{
+
+            myModal.toggle()
+            review_message.dataset.target = ele.dataset.target
+
+        })
+    })
+
+    let add_review = document.getElementById('add_review')
+
+    add_review.addEventListener('click',()=>{
+
+        
+        if (review_message.value.trim()){
+            let formData = new FormData()
+            formData.append('value' , review_message.value.trim())
+
+            myModal.toggle()
+            
+
+            axios.post(review_message.dataset.target , formData)
+
+            .then(function(res){
+
+                if(res.data.success){
+                    review_message.value = ''
+                    review_message.dataset.target=''
+                    Toastify({
+                        text: `Thanks for the review`,
+                        duration: 3000, 
+                        gravity: 'top', 
+                        position: 'center', 
+                        backgroundColor: 'green',
+                     }).showToast();
+                }
+                else{
+                    Toastify({
+                        text: `there is an issue try again later`,
+                        duration: 3000, 
+                        gravity: 'top', 
+                        position: 'center', 
+                        backgroundColor: 'red',
+                     }).showToast();
+                }
+            })
+            .catch(function(error){
+
+                console.error(error)
+            })
+        }
+        else{
+            Toastify({
+                text: `add review`,
+                duration: 3000, 
+                gravity: 'top', 
+                position: 'center', 
+                backgroundColor: 'red',
+             }).showToast();
+        }
+    })
+
 </script>
 
 {% endblock %}

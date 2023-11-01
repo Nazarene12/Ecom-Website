@@ -103,7 +103,7 @@
         <div class="col-lg-12 ">
 
             <div class="container-fluid">
-                <div class="row justify-content-around align-items-center">
+                <div class="row justify-content-around align-items-start">
                    
                     <div class="col-lg-6  d-flex justify-content-around">
                         <div class="d-flex flex-column justify-content-between">
@@ -125,8 +125,8 @@
                             </div>
                         </div>
 
-                        <div class="mb-3" >
-                            <img id="zoom_01"  src="{{product.image.normal_image.url}}" style="height:40rem; object-fit: contain;" alt="normal-view" class=" main_img">
+                        <div class="mb-3 " >
+                            <img id="zoom_01"  src="{{product.image.normal_image.url}}" style="object-fit: contain;" alt="normal-view" class="img-fluid main_img">
                         </div>
 
                         
@@ -134,7 +134,37 @@
                     </div>
                     <div class="col-lg-3 col-md-3 col-3">
                         <h3>{{product.product.name}}</h3>
-                        <p>₹ {{product.product.price}}</p>
+                        <p>{{product.product.description}}</p>
+                        <div class="d-flex my-2">
+                            {% if product.product.rating >= 1 %}
+                            <i class="fa-solid fa-star text-warning"></i>
+                            {% else %}
+                            <i class="fa-solid fa-star text-secondary"></i>
+                            {% endif %}
+                            {% if product.product.rating >= 2 %}
+                            <i class="fa-solid fa-star text-warning"></i>
+                            {% else %}
+                            <i class="fa-solid fa-star text-secondary"></i>
+                            {% endif %}
+                            {% if product.product.rating >= 3 %}
+                            <i class="fa-solid fa-star text-warning"></i>
+                            {% else %}
+                            <i class="fa-solid fa-star text-secondary"></i>
+                            {% endif %}
+                            {% if product.product.rating >= 4 %}
+                            <i class="fa-solid fa-star text-warning"></i>
+                            {% else %}
+                            <i class="fa-solid fa-star text-secondary"></i>
+                            {% endif %}
+                            {% if product.product.rating == 5 %}
+                            <i class="fa-solid fa-star text-warning"></i>
+                            {% else %}
+                            <i class="fa-solid fa-star text-secondary"></i>
+                            {% endif %}
+
+                        </div>
+                        <p class="card-text text-success">discount {{product.product.discount}} %</p>
+                              <p class="card-text">₹ <small class="text-decoration-line-through me-2">{{product.product.maximum_retail_price}}</small> ₹ {{product.product.price}}</p>
                         <p>Brand :{{product.product.brand.name}}</p>
                         <p>Category :{{product.product.category.name}}</p>
                         <div class="d-flex  align-items-center mb-2">
@@ -154,7 +184,7 @@
                             {% for each_size in all_size %}
 
                             {% if each_size.size == product.size.size %}
-                                {% if product.count > 0%}
+                                {% if product.count > 0 %}
                                 <option class="size_option" value="{{product.id}}" selected>{{product.size.size}}</option>
                                 {% else %}
                                 <option class="size_option" value="{{product.id}}" disabled>{{product.size.size}}</option>
@@ -185,6 +215,23 @@
                             <a href="{% url 'Ecom:addcart' %}" class="btn btn-primary" id="cart_button">add cart</a>
 
                         </div>
+                    </div>
+                    <div class="col-lg-2 overflow-scroll">
+                        <div class="border border-warning rounded h-100 w-100 p-1" >
+                            <h4 class="my-2">Comments</h4>
+                            {% if product.product.comment_product.all %}
+                            {% for review in product.product.comment_product.all %}
+
+                            <p class="p-2 my-2 bg-warning rounded">{{review.comment}}</p>
+
+                            {% endfor %}
+
+                            {% else %}
+                            <p class="text-secondary">No review..</p>
+                            {% endif %}
+
+                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -305,14 +352,18 @@
 
         ele.addEventListener('click' ,(e)=>{
 
-            if (e.target.dataset.active == 'True') return 
+            console.log('clicked' ,e.target );
+
+            if (ele.dataset.active == 'True') return 
 
             let current_active = document.querySelector('[data-active="True"].all_color');
+
             current_active.dataset.active = 'False';
+
             current_active.classList.remove('selected_color');
             ele.dataset.active = 'True';
             ele.classList.add('selected_color');
-
+            // console.log('hjgjhk');
             axios.get(ele.dataset.image)
             .then(function(response){
                 
@@ -339,6 +390,10 @@
                         }
                         
                     })
+                }
+
+                else{
+                    console.log('error');
                 }
             })
             .catch(function(error){

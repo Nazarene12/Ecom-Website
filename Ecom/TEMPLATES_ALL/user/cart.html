@@ -133,7 +133,7 @@
                                     </div>
                                     {% if each_ele.quantity > each_ele.connect.count %}
                                     <input type="number" data-pk="{{each_ele.id}}" value="{{each_ele.connect.count}}"
-                                        name="count" class="needed_count" style="width:50px;padding:5px;">
+                                        name="count" class="needed_count sufficient" style="width:50px;padding:5px;">
                                     <div class="plus_button" data-max="{{each_ele.connect.count}}">
                                         <i class="fa-solid fa-plus"></i>
                                     </div>
@@ -379,8 +379,23 @@
                 .then(function (response) {
 
                     if (response.data.success) {
-                        ele.previousElementSibling.value = parseInt(ele.previousElementSibling.value) + 1
-                        total_amount()
+
+                        if(response.data.limit){
+                            Toastify({
+                            text: `Out of Stock`,
+                            duration: 3000, 
+                            gravity: 'bottom', 
+                            position: 'bottom', 
+                            backgroundColor: 'red',
+                         }).showToast();
+                        }
+                        else{
+
+                            ele.previousElementSibling.value = parseInt(ele.previousElementSibling.value) + 1
+                            total_amount()
+
+                        }
+                        
                     }
                     else {
                         console.log("there is a error...")

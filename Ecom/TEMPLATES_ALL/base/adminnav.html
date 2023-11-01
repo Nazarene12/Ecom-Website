@@ -24,11 +24,32 @@
                 <li class="nav-item {% if page == 'category' %} active {% endif %}">
                     <a class="nav-link" href="{% url 'admins:category' %}">Caterogy</a>
                 </li>
+                <div class="accordion accordion-flush" id="accordionFlushExample">
+                  <div class="accordion-item">
+                    <p class="p-2 collapsed m-0 nav-link" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree">
+                        Requirments
+                    </p>
+                    <div id="flush-collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                      <li class=" {% if page == 'product' %} active {% endif %}">
+                        <a class="nav-link" href="{% url 'admins:brand' %}">Brand</a>
+                      </li>
+                      <li class=" {% if page == 'product' %} active {% endif %}">
+                        <a class="nav-link" href="{% url 'admins:color' %}">Color</a>
+                      </li>
+                      <li class="nav-item {% if page == 'product' %} active {% endif %}">
+                          <a class="nav-link" href="{% url 'admins:size' %}">Size</a>
+                      </li>
+                    </div>
+                  </div>
+                </div>
                 <li class="nav-item {% if page == 'product' %} active {% endif %}">
                     <a class="nav-link" href="{% url 'admins:productlist' %}">Product</a>
                 </li>
                 <li class="nav-item {% if page == 'product' %} active {% endif %}">
                     <a class="nav-link" href="{% url 'admins:order' %}">Order</a>
+                </li>
+                <li class="nav-item {% if page == 'product' %} active {% endif %}">
+                    <a class="nav-link" href="{% url 'admins:offer' %}">Offer</a>
                 </li>
                 <li class="nav-item {% if page == 'product' %} active {% endif %}">
                     <a class="nav-link" href="{% url 'admins:coupon' %}">Coupon</a>

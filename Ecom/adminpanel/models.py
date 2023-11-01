@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.db.models import Q
 
 
 
@@ -8,23 +9,22 @@ from django.utils import timezone
 
 
 class Brand(models.Model):
-    name = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    name = models.CharField(max_length=255, blank=False, null=False)
     logo = models.ImageField(upload_to='brand/', blank=True, null=True)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
     
 class Category(models.Model):
-    name = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    name = models.CharField(max_length=255,  blank=False, null=False)
+    active = models.BooleanField(default=True)
+    offer = models.IntegerField(  blank=True, default=0, null=True)
 
     def __str__(self):
         return self.name
     
-    def clean(self):
-        # Custom validation logic to check for uniqueness
-        existing_category = Category.objects.filter(name=self.name).exclude(pk=self.pk)
-        if existing_category.exists():
-            raise ValidationError("A category with this name already exists.")
+    
     
 class ProductImage(models.Model):
     front_image = models.ImageField(upload_to='product_images/', blank=True, null=True)
@@ -36,18 +36,26 @@ class ProductImage(models.Model):
         return f"ProductImage #{self.pk}"
     
 class Size(models.Model):
-    size = models.IntegerField(unique=True)
+    size = models.IntegerField(help_text='required*')
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return str(self.size)
+    
+    
 
 
 class Color(models.Model):
-    name = models.CharField(max_length=255, unique=True, blank=False, null=False)
-    
+    name = models.CharField(max_length=255,  blank=False , help_text='required*')
+    color = models.CharField(max_length=255,  blank=False , help_text='required*')
+    active = models.BooleanField(default=True)
+
+      
 
     def __str__(self):
         return self.name
+    
+
     
 class Product(models.Model):
     name = models.CharField(max_length=255, unique=True, blank=False, null=False , help_text='required*')
@@ -55,7 +63,12 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False, help_text='required*')
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE,blank=False,null=False, help_text='required*')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,help_text='required*' , null=True)  # Default to 'normal' category
+    maximum_retail_price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, default=0.0, null=False, help_text='required*')
+    discount = models.IntegerField(  blank=True, default=0, null=True,help_text='optional')
+    offer = models.IntegerField(  blank=True, default=0, null=True)
     active = models.BooleanField(default=True)
+    rating = models.IntegerField(default=5)
+    
 
     def __str__(self):
         return self.name
@@ -72,10 +85,20 @@ class Connector(models.Model):
     count = models.IntegerField(blank=False,null=False ,default=0)
     first_preference = models.BooleanField(default=False)
     sale = models.IntegerField(default=0)
+    active = models.BooleanField(default=True)
+    
+
 
     def __str__(self):
         return self.product.name
 
+class Ratting(models.Model):
+    product = models.ForeignKey(Product,on_delete=models.CASCADE,related_name='ratting_product')
+    rating = models.IntegerField(default=5)
 
+
+class Comment(models.Model):
+    product = models.ForeignKey(Product,on_delete=models.CASCADE,related_name='comment_product')
+    comment = models.CharField(max_length=100 , blank=False, null=False)
 
 

@@ -3,6 +3,7 @@ from django import forms
 from .models import Product, Color, Brand, Category ,Size,Connector
 from .mixins import get_count
 from django.core.exceptions import ValidationError
+from webcolors import hex_to_name
 
 from Ecom_Web.models import Order
 
@@ -16,6 +17,100 @@ class CategoryForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control customclass' ,'placeholder':'name', 'required': 'required'}),
 
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get('name')
+        
+        if name:
+            existing_name = Category.objects.filter(name=name, active=True).exists()
+            print(existing_name)
+            
+            if existing_name:
+                self.add_error('name', 'Name already exists with an active status of True.')
+
+        return cleaned_data
+
+class ColorForm(forms.ModelForm):
+    class Meta:
+        model = Color
+        fields = ['color' , 'name']
+
+        widgets = {
+            'color': forms.TextInput(attrs={'class': 'form-control customclass' ,'placeholder':'name', 'required': 'required' ,'type':'color'}),
+            'name': forms.TextInput(attrs={'class': 'form-control customclass' ,'placeholder':'name', 'required': 'required' }),
+
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        color = cleaned_data.get('color')
+        name = cleaned_data.get('name')
+
+        if color and name:
+            existing_color = Color.objects.filter(color=color, active=True).exists()
+            existing_name = Color.objects.filter(name=name, active=True).exists()
+
+            if existing_color:
+                self.add_error('color', 'Color already exists with an active status of True.')
+            if existing_name:
+                self.add_error('name', 'Name already exists with an active status of True.')
+
+        return cleaned_data
+
+class BrandForm(forms.ModelForm):
+    class Meta:
+        model = Brand
+        fields = ['name' , 'logo']
+
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control customclass' ,'placeholder':'name', 'required': 'required' }),
+            'logo': forms.FileInput(attrs={'required': 'required' }),
+
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get('name')
+        
+        if name:
+            existing_name = Brand.objects.filter(name=name, active=True).exists()
+
+            
+            if existing_name:
+                self.add_error('name', 'Name already exists with an active status of True.')
+
+        return cleaned_data
+
+class SizeForm(forms.ModelForm):
+    class Meta:
+        model = Size
+        fields = ['size' ]
+
+        widgets = {
+            'size': forms.TextInput(attrs={'class': 'form-control customclass' ,'placeholder':'name', 'required': 'required' }),
+
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        size = cleaned_data.get('size')
+
+        if size:
+            existing_size = Size.objects.filter(size = size, active=True).exists()
+
+            if existing_size:
+                self.add_error('color', 'Color already exists with an active status of True.')
+            
+
+        return cleaned_data
+
+
+
+        
+
+
+
 class SizeCountFormSet(forms.BaseFormSet):
     def clean(self):
         if any(self.errors):
@@ -47,7 +142,7 @@ class VarientCountColorFormSet(forms.BaseFormSet):
 
 class SizeCountForm(forms.Form):
     size = forms.ModelChoiceField(
-        queryset=Size.objects.all(),
+        queryset=Size.objects.filter(active = True),
         widget=forms.Select(
             attrs={'class': 'form-select form-control'}
         ),
@@ -69,12 +164,14 @@ class SizeCountForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         count = cleaned_data.get('count')
-        if count and  count <= 0:
+        if not count or  count <= 0:
             self.add_error('count', 'it can not bee zero or negative number')
         return cleaned_data
     
 def SizeCountFormSetFactory(instance = None ,prefix=0):
-    size_count = Size.objects.count()  # Count the number of sizes in the database
+    size_count = Size.objects.filter(active=True).count()  # Count the number of sizes in the database
+    if size_count == 0 :
+        size_count = 1
     size_count_factory = forms.formset_factory(SizeCountForm,formset=SizeCountFormSet, extra=size_count)
     if instance:
         return size_count_factory(instance, prefix=f'varientsize{prefix}')
@@ -184,6 +281,15 @@ class UpdateProductVarient(forms.ModelForm):
             'size': forms.Select(attrs={'class': 'form-select form-control', 'required': 'required'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super(UpdateProductVarient, self).__init__(*args, **kwargs)
+        
+        self.fields['color'].empty_label = 'Select a Color'
+        self.fields['size'].empty_label = 'Select a Size'
+
+        self.fields['color'].queryset = Color.objects.filter(active=True)
+        self.fields['size'].queryset = Size.objects.filter(active=True)
+
     def clean(self):
         
         cleaned_data = super().clean()
@@ -226,7 +332,7 @@ class UpdateProductVarient(forms.ModelForm):
 class VarientForm(forms.Form):
     
     color = forms.ModelChoiceField(
-        queryset=Color.objects.all(),
+        queryset=Color.objects.filter(active=True),
         widget=forms.Select(
             attrs={'class': 'form-select form-control', 'required': True}
         ),
@@ -263,12 +369,13 @@ class UpdatedProductAddForm(forms.ModelForm):
     
     class Meta:
         model = Product
-        fields = ['name', 'description', 'price' , 'brand' , 'category']
+        fields = ['name', 'description' , 'brand' , 'category' , 'maximum_retail_price' , 'discount']
 
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control customclass' ,'placeholder':'name', 'required': 'required'}),
             'description': forms.Textarea(attrs={'class': 'form-control customclass','placeholder':'discription' , 'required': 'required'}),
-            'price' : forms.NumberInput(attrs={'class': 'form-control customclass','placeholder':'number' , 'required': 'required' }),
+            'maximum_retail_price' : forms.NumberInput(attrs={'class': 'form-control customclass','placeholder':'number' , 'required': 'required' }),
+            'discount' : forms.NumberInput(attrs={'class': 'form-control customclass','placeholder':'number' , 'required': 'required' }),
             'brand': forms.Select(attrs={'class': 'form-select form-control', 'required': 'required'}),
             'category': forms.Select(attrs={'class': 'form-select form-control', 'required': 'required'}),
         }
@@ -280,13 +387,30 @@ class UpdatedProductAddForm(forms.ModelForm):
         self.fields['brand'].empty_label = 'Select a Brand'
         self.fields['category'].empty_label = 'Select a Category'
 
+        self.fields['brand'].queryset = Brand.objects.filter(active=True)
+        self.fields['category'].queryset = Category.objects.filter(active=True)
 
 
-    def clean_price(self):
-        price = self.cleaned_data.get('price')
-        if int(price) <= 0 :
+
+    def clean_maximum_retail_price(self):
+        price = self.cleaned_data.get('maximum_retail_price')
+        if not price or int(price) <= 0 :
             raise forms.ValidationError("this can not be zero or negative ..")
         return price
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        clean_data = self.cleaned_data
+        maximum_retail_price = self.cleaned_data.get('maximum_retail_price')
+        discount = self.cleaned_data.get('discount')
+        if maximum_retail_price and discount:
+            discount_price = maximum_retail_price - (maximum_retail_price * discount / 100)
+            instance.price = discount_price
+        if commit:
+            instance.save()
+        return instance
+
+    
 
 class  AddAditionVarientColorForm(forms.ModelForm):
 
@@ -321,6 +445,14 @@ class  AddAditionVarientColorForm(forms.ModelForm):
             'color': forms.Select(attrs={'class': 'form-select form-control', 'required': 'required'}),
             'product':forms.HiddenInput(),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(AddAditionVarientColorForm, self).__init__(*args, **kwargs)
+        
+        # Set custom placeholder text for brand and category fields
+        self.fields['color'].empty_label = 'Select a Brand'
+
+        self.fields['color'].queryset = Color.objects.filter(active=True)
 
     def clean(self):
         clean_data = super().clean()
@@ -362,6 +494,7 @@ class AddAditionVarientForm(forms.ModelForm):
         
         # Set custom placeholder text for brand and category fields
         self.fields['size'].empty_label = 'Select a size'
+        self.fields['size'].queryset = Size.objects.filter(active=True)
 
 
     def clean(self):

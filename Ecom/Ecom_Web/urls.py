@@ -14,7 +14,8 @@ urlpatterns = [
     path('forgot' , views.forgot , name='forgot'),
     path('resetpassword',views.resetpassword,name='resetpassword'),
 
-    path('products' , views.ProductList.as_view() , name='products'),
+    path('products' , views.ProductList.as_view() , name='products'), #verified
+
     path('products/<int:pk>' , views.productDetail.as_view() , name='product_detail'),
     path('cart',views.CartList.as_view() , name='cart'),
     path('profile',views.Profile.as_view() , name='profile'),
@@ -33,6 +34,7 @@ urlpatterns = [
     path('getrazerpayid' , views.create_razerpay_order , name='getrazerpayid'),
     path ('razerpayformhandler' , views.RazerPaymentHandler , name="razerpayformhandler"),
     path('piperestart' , views.RestartPipe , name='piperestart'),
+    path('wishlist' , views.UserWishlist.as_view() , name='wishlist'),
 
     #json url
 
@@ -47,6 +49,8 @@ urlpatterns = [
     path('userlike',views.LikeProduct.as_view() , name='userlike'),
     path('coupon',views.CouponManager.as_view() , name='coupon'),
     path('profileimage' ,views.ProfileImage , name='profileimage'),
+    path('ratting/<int:pk>' , views.Ratting_Product , name='ratting'),
+    path('comment/<int:pk>' , views.Comment_Product , name='comment'), 
 
     path('logouts',views.logouts , name='logouts') ,
     

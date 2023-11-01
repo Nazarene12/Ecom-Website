@@ -1,4 +1,5 @@
 from typing import Any
+from django.db import models
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.shortcuts import render
@@ -31,9 +32,9 @@ from django.templatetags.static import static
 
 
 from Ecom_Web import form
-from.forms import CategoryForm,ProductForm,SizeCountForm,UpdateProductVarient,UpdatedProductAddForm,VarientForm,VarientCountFormSetFactory,SizeCountFormSetFactory,VarientCountColorFormSet,SizeCountFormSet, AddAditionVarientForm,AddAditionVarientColorForm,OredrFormStatus
+from.forms import CategoryForm,ProductForm,SizeCountForm,UpdateProductVarient,UpdatedProductAddForm,VarientForm,VarientCountFormSetFactory,SizeCountFormSetFactory,VarientCountColorFormSet,SizeCountFormSet, AddAditionVarientForm,AddAditionVarientColorForm,OredrFormStatus,ColorForm,SizeForm,BrandForm
 from Ecom_Web.models import UserProfile,Order,Coupon,UserWallet
-from .models import Category,Product,Connector,ProductImage
+from .models import Category,Product,Connector,ProductImage,Color,Size,Brand
 
 
 from django.db.models import Count
@@ -142,9 +143,51 @@ def home(request):
     years = get_distinct_years()
     return render(request , 'admin/home.html' ,{'dataset':dataset , 'years' : years , 'currentyear':current_year , 'today_sale':today_sale})
 
+class Offer(TemplateView):
+    template_name = "admin/offer.html" 
 
-# def Users(request):
-#     return render(request , "admin/users.html")
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context =  super().get_context_data(**kwargs)
+        offer_querset =  Product.objects.filter(category__active = True , brand__active = True)
+        for each in offer_querset:
+
+            each.varient  = each.detail_product.filter(active = True).first()
+
+        context['offerproduct'] = offer_querset
+
+        category = Category.objects.filter(active = True)
+        context['category'] = category
+        return context
+
+def OfferProduct(request,pk):
+    if request.method== 'POST':
+        try:
+            obj = Product.objects.get(pk =pk)
+            discount = request.POST.get('discount')
+            obj.discount = discount
+            obj.price = obj.maximum_retail_price - (obj.maximum_retail_price* int(discount) /100)
+            obj.save()
+            return JsonResponse({'success':True , 'sale_price':obj.price})
+        except:
+            return JsonResponse({'success':False})
+        
+def OfferCategory(request,pk):
+    if request.method== 'POST':
+        try:
+            print('g')
+            category = Category.objects.get(id = pk)
+            print(category)
+            obj = Product.objects.filter(category =category )
+            print(obj)
+            discount = request.POST.get('discount')
+            for i in obj:
+                i.discount = discount
+                i.price = i.maximum_retail_price - (i.maximum_retail_price* int(discount) /100)
+                i.save()
+            return JsonResponse({'success':True })
+        except:
+            return JsonResponse({'success':False})
+
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
 @method_decorator(login_required, name='dispatch')
 class UserList(ListView):
@@ -188,12 +231,10 @@ class CategoryList(ListView):
 
         return context
 
-@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')   
-@method_decorator(login_required, name='dispatch')   
-class CategoryDetail(DetailView):
-    model = UserProfile 
-    template_name="admin/categorydetail.html"
-    context_object_name = 'category'
+    def get_queryset(self) -> QuerySet[Any]:
+        return Category.objects.filter(active = True)
+
+
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')  
 @method_decorator(login_required, name='dispatch')
 class AddCategory(View):
@@ -213,8 +254,7 @@ class AddCategory(View):
         else:
             return JsonResponse({'success': False, 'error_message': 'Invalid form data'})
 
-    
-           
+
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')        
 @method_decorator(login_required, name='dispatch')
 class CategoryDeleteView(DeleteView):
@@ -222,14 +262,173 @@ class CategoryDeleteView(DeleteView):
     http_method_names=['delete']
 
     def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        
 
         try:
-            self.object.delete()
+            self.object = self.get_object()
+            self.object.active = False
+            self.object.save()
             return JsonResponse({'success': True})
 
         except Exception as e:
             return JsonResponse({'success': False, 'error_message': 'User not found'})
+        
+
+class ColorList(ListView) :
+    model = Color
+    template_name = 'admin/colorlist.html'
+    context_object_name ='colors'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Add the "modal" data to the context
+        context['form'] = ColorForm()  # Replace with your query
+
+        return context
+    
+    def get_queryset(self) -> QuerySet[Any]:
+        return Color.objects.filter(active = True)
+    
+class AddColor(View):
+    http_method_names=['post']
+    def post(self, request, *args, **kwargs):
+        form = ColorForm(request.POST)
+        if form.is_valid():
+            color = form.save()
+            
+            color_data = {
+                'id': color.id,
+                'name': color.name,
+                'color':color.color
+            }
+            
+            return JsonResponse({'success': True, 'color_data': color_data})
+        else:
+            errors = form.errors.as_json()
+            if 'color' in form.errors:
+                return JsonResponse({'success': False,'error':'color'})
+            return JsonResponse({'success': False,'error':'name'})
+
+class DeleteColor(DeleteView):
+    model = Color
+    http_method_names=['delete']
+
+    def delete(self, request, *args, **kwargs):
+        
+
+        try:
+            self.object = self.get_object()
+            self.object.active = False
+            self.object.save()
+            return JsonResponse({'success': True})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error_message': 'color not found'})
+        
+class BrandList(ListView) :
+    model = Brand
+    template_name = 'admin/Brandlist.html'
+    context_object_name ='brands'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Add the "modal" data to the context
+        context['form'] = BrandForm()  # Replace with your query
+
+        return context
+    
+    def get_queryset(self) -> QuerySet[Any]:
+        return Brand.objects.filter(active = True)
+    
+class AddBrand(View):
+    http_method_names=['post']
+    def post(self, request, *args, **kwargs):
+        form = BrandForm(request.POST , request.FILES)
+        if form.is_valid():
+            brand = form.save()
+            
+            brand_data = {
+                'id': brand.id,
+                'name': brand.name,
+                'brand':brand.logo.url
+            }
+            
+            return JsonResponse({'success': True, 'brand_data': brand_data})
+        
+            
+        return JsonResponse({'success': False})
+
+class DeleteBrand(DeleteView):
+    model = Brand
+    http_method_names=['delete']
+
+    def delete(self, request, *args, **kwargs):
+        
+
+        try:
+            self.object = self.get_object()
+            self.object.active = False
+            self.object.save()
+            return JsonResponse({'success': True})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error_message': 'brand not found'})
+        
+class SizeList(ListView) :
+    model = Size
+    template_name = 'admin/sizelist.html'
+    context_object_name ='sizes'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Add the "modal" data to the context
+        context['form'] = SizeForm()  # Replace with your query
+
+        return context
+    
+    def get_queryset(self) -> QuerySet[Any]:
+        return Size.objects.filter(active = True)
+    
+class AddSize(View):
+    http_method_names=['post']
+    def post(self, request, *args, **kwargs):
+        form = SizeForm(request.POST)
+        if form.is_valid():
+            size = form.save()
+            
+            size_data = {
+                'id': size.id,
+                'size':size.size
+            }
+            
+            return JsonResponse({'success': True, 'size_data': size_data})
+        
+        error_message = ''
+        for field, errors in form.errors.items():
+            if field == 'size':
+                error_message += ' '.join(errors)
+    
+        return JsonResponse({'success': False , 'error' :error_message })
+
+class DeleteSize(DeleteView):
+    model = Size
+    http_method_names=['delete']
+
+    def delete(self, request, *args, **kwargs):        
+
+        try:
+            self.object = self.get_object()
+            self.object.active = False
+            self.object.save()
+            return JsonResponse({'success': True})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error_message': 'size not found'})
+           
+
         
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')        
 @method_decorator(login_required, name='dispatch')
@@ -238,9 +437,9 @@ class DeleteProduct(DeleteView):
     http_method_names=['delete']
 
     def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-
+        
         try:
+            self.object = self.get_object()
             self.object.active = False
             self.object.save()
             return JsonResponse({'success': True})
@@ -285,13 +484,14 @@ class ProductVarient( CreateView ):
             return redirect('admins:productlist')
         return super().dispatch(request, *args, **kwargs)
 
-
+    
+    
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context =  super().get_context_data(**kwargs)
         product_id = self.kwargs['pk']
         product = Product.objects.get(id=product_id)
         context['product'] = product
-        context['varients'] = Connector.objects.filter(product=product)
+        context['varients'] = Connector.objects.filter(product=product , active = True)
         return context
     
     def form_invalid(self, form):
@@ -319,87 +519,87 @@ class ProductDetail(DetailView):
     #     return context
     
 
-def add_product(request):
-    product_form = ProductForm()
-    # size_count_formset = SizeCountForm(prefix='size_count')
-    if request.method == 'POST':
-        product_form = ProductForm(request.POST, request.FILES)
+# def add_product(request):
+#     product_form = ProductForm()
+#     # size_count_formset = SizeCountForm(prefix='size_count')
+#     if request.method == 'POST':
+#         product_form = ProductForm(request.POST, request.FILES)
 
-        size_count_formse = formset_factory(SizeCountForm)
-        size_count_formset = size_count_formse(request.POST)
+#         size_count_formse = formset_factory(SizeCountForm)
+#         size_count_formset = size_count_formse(request.POST)
 
-        if product_form.is_valid() and size_count_formset.is_valid():
-            # size_count_formset = product_form.cleaned_data['size_count_formset']
-            # Create Product and ProductImage objects
-            product = product_form.save(commit=False)
-            product.brand = product_form.cleaned_data['brand']
-            product.category = product_form.cleaned_data['category']
-            product.save()
+#         if product_form.is_valid() and size_count_formset.is_valid():
+#             # size_count_formset = product_form.cleaned_data['size_count_formset']
+#             # Create Product and ProductImage objects
+#             product = product_form.save(commit=False)
+#             product.brand = product_form.cleaned_data['brand']
+#             product.category = product_form.cleaned_data['category']
+#             product.save()
 
-            normal_image = product_form.cleaned_data['normal_image']
-            front_image = product_form.cleaned_data['front_image']
-            back_image = product_form.cleaned_data['back_image']
-            side_image = product_form.cleaned_data['side_image']
+#             normal_image = product_form.cleaned_data['normal_image']
+#             front_image = product_form.cleaned_data['front_image']
+#             back_image = product_form.cleaned_data['back_image']
+#             side_image = product_form.cleaned_data['side_image']
 
-            product_image = ProductImage(normal_image=normal_image, front_image=front_image, back_image=back_image, side_image=side_image)
-            product_image.save()
+#             product_image = ProductImage(normal_image=normal_image, front_image=front_image, back_image=back_image, side_image=side_image)
+#             product_image.save()
 
-            color = product_form.cleaned_data['color']
+#             color = product_form.cleaned_data['color']
 
-            # Create Connector objects for each size and count
-            for form in size_count_formset:
-                size = form.cleaned_data.get('size')
-                count = form.cleaned_data.get('count')
+#             # Create Connector objects for each size and count
+#             for form in size_count_formset:
+#                 size = form.cleaned_data.get('size')
+#                 count = form.cleaned_data.get('count')
 
-                connector = Connector(product=product, color=color, image=product_image, size=size, count=count)
-                connector.save()
+#                 connector = Connector(product=product, color=color, image=product_image, size=size, count=count)
+#                 connector.save()
 
-            return redirect('admins:productlist')  # Redirect to the product list page after successful creation
-
-
-    return render(request, 'admin/addproduct.html', {'product_form': product_form})
-@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
-@method_decorator(login_required, name='dispatch')
-class AddProduct(CreateView):
-    model = Product
-    form_class = ProductForm
-    template_name = 'admin/addproduct.html'
+#             return redirect('admins:productlist')  # Redirect to the product list page after successful creation
 
 
-    def form_valid(self, form):
-        size_count_formse = formset_factory(SizeCountForm)
-        size_count_formset = size_count_formse(self.request.POST)
-        if size_count_formset.is_valid():
-            # print("helo")
-            product = form.save(commit=False)
-            product.brand = form.cleaned_data['brand']
-            product.category = form.cleaned_data['category']
+#     return render(request, 'admin/addproduct.html', {'product_form': product_form})
+# @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
+# @method_decorator(login_required, name='dispatch')
+# class AddProduct(CreateView):
+#     model = Product
+#     form_class = ProductForm
+#     template_name = 'admin/addproduct.html'
+
+
+#     def form_valid(self, form):
+#         size_count_formse = formset_factory(SizeCountForm)
+#         size_count_formset = size_count_formse(self.request.POST)
+#         if size_count_formset.is_valid():
+#             # print("helo")
+#             product = form.save(commit=False)
+#             product.brand = form.cleaned_data['brand']
+#             product.category = form.cleaned_data['category']
             
-            product.save()
+#             product.save()
 
-            normal_image = form.cleaned_data['normal_image']
-            front_image = form.cleaned_data['front_image']
-            back_image = form.cleaned_data['back_image']
-            side_image = form.cleaned_data['side_image']
+#             normal_image = form.cleaned_data['normal_image']
+#             front_image = form.cleaned_data['front_image']
+#             back_image = form.cleaned_data['back_image']
+#             side_image = form.cleaned_data['side_image']
 
-            product_image = ProductImage(normal_image=normal_image, front_image=front_image, back_image=back_image, side_image=side_image)
-            product_image.save()
+#             product_image = ProductImage(normal_image=normal_image, front_image=front_image, back_image=back_image, side_image=side_image)
+#             product_image.save()
 
             
 
-            color = form.cleaned_data['color']
+#             color = form.cleaned_data['color']
 
-            for size_count_form in size_count_formset:
-                size = size_count_form.cleaned_data.get('size')
-                count = size_count_form.cleaned_data.get('count')
+#             for size_count_form in size_count_formset:
+#                 size = size_count_form.cleaned_data.get('size')
+#                 count = size_count_form.cleaned_data.get('count')
 
-                connector = Connector(product=product, color=color, image=product_image, size=size, count=count)
-                if not Connector.objects.filter(product = product).exists():
-                    connector.first_preference = True
-                connector.save()
+#                 connector = Connector(product=product, color=color, image=product_image, size=size, count=count)
+#                 if not Connector.objects.filter(product = product).exists():
+#                     connector.first_preference = True
+#                 connector.save()
 
-            return redirect('admins:productlist')
-        return self.render_to_response(self.get_context_data(form=form))
+#             return redirect('admins:productlist')
+#         return self.render_to_response(self.get_context_data(form=form))
 
 
 
@@ -603,9 +803,17 @@ def ProductVarientDelete(request , pk):
         
         try:
             varient = Connector.objects.get(id=pk)
-            if Connector.objects.filter(product = varient.product).count() ==1:
+            if Connector.objects.filter(product = varient.product , active = True).count() ==1:
                 return JsonResponse({'success': True , 'element_count' : False , 'error_message':'you need atleast one varient for a product.'})
-            varient.delete()    
+            varient.active = False
+            if varient.first_preference:
+                
+                other_varient = Connector.objects.filter(product=varient.product , active=True).exclude(id = varient.id).first()
+                other_varient.first_preference=True
+                
+                other_varient.save()
+            varient.first_preference = False
+            varient.save()   
             return JsonResponse({'success': True , 'element_count' : True})
         except User.DoesNotExist:
             return JsonResponse({'success': False, 'error_message': 'User not found'})

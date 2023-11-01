@@ -1,0 +1,263 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% load socialaccount %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+<link rel="stylesheet" href="{% static 'css/nav.css' %}">
+<link rel="stylesheet" href="{% static 'css/form.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.css">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+<style>
+
+    body{
+        display: block;
+    }
+
+    input.form-control{
+        color:black;
+    }
+
+    input.form-control:focus{
+        color:black;
+    }
+
+    .card-img-top{
+        height:300px;
+    }
+
+    .card-no-border .card {
+        border-color: #d7dfe3;
+        border-radius: 4px;
+        margin-bottom: 30px;
+        -webkit-box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05);
+        box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.05)
+    }
+
+    .card-body {
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+        padding: 1.25rem
+    }
+
+    .pro-img {
+        margin-top: -80px;
+        margin-bottom: 20px
+    }
+
+    .little-profile .pro-img img {
+        width: 128px;
+        height: 128px;
+        -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        border-radius: 100%
+    }
+
+    html body .m-b-0 {
+        margin-bottom: 0px
+    }
+
+    h3 {
+        line-height: 30px;
+        font-size: 21px
+    }
+
+    .btn-rounded.btn-md {
+        padding: 12px 35px;
+        font-size: 16px
+    }
+
+    html body .m-t-10 {
+        margin-top: 10px
+    }
+
+    .btn-rounded {
+        border-radius: 60px;
+        padding: 7px 18px
+    }
+
+   
+
+    .text-center {
+        text-align: center !important
+    }
+
+    .like_button{
+        position: absolute;
+        top:0px;
+        right:0px;
+        padding:5px;
+        background: rgba(63, 61, 61, 0.274);
+        margin:20px;
+        border-radius:50%;
+    }
+
+
+</style>
+
+
+{% endblock %}
+
+
+{% block main %}
+
+
+
+{% include 'base/loader.html' %}
+
+{% include 'base/nav.html' %}
+
+<div class="container-fluid p-0">
+    <div class="row">
+        <div class="col-lg-12">
+            <div >
+                <div >
+                    <!-- Column -->
+                    <div class="card"> <img class="card-img-top" src="https://img.freepik.com/premium-photo/umbrella-with-rain-hd-8k-wallpaper-stock-photographic-image_890746-37067.jpg" style="object-fit: cover;" alt="Card image cap">
+                        <div class="card-body little-profile text-center">
+                            <div class="pro-img">
+                                {% if request.user.user.picture %}
+                                <img src="{{user.user.picture.url}}" alt="user">
+                                {% else %}
+                                <img src="{% static 'default/noprofile.png' %}" alt="user">
+                                {% endif %}
+                            </div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row" id="box_container">
+        {% if wishlist %}
+
+        {% for ele in wishlist %}
+
+        <div class="col-lg-3 p-2" id="box{{forloop.counter}}">
+            <div class="card position-relative">
+                <img src="{{ele.product.varient.image.normal_image.url}}" class="card-img-top" alt="products" style="height:20rem;object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ele.product.name}}</h5>
+                    <p class="card-text">{{ele.product.description}}</p>
+                    <p class="card-text">$ {{ele.product.price}}</p>
+                    <p class="card-text">Brand : {{ele.product.brand.name}}</p>
+                    <p class="card-text">Ctegory : {{ele.product.category.name}}</p>
+                    <div class="d-flex  align-items-center">
+                    <p class="m-0 me-2">color : </p>
+                    <table style="width:20px;height:20px; border-radius:50%; " bgcolor="{{ele.product.varient.color.name}}"></table>
+                    </div>
+                    <div>
+                    <a href="{% url 'Ecom:product_detail' pk=ele.product.varient.id %}" class="btn btn-primary">DETAIL</a>
+                    </div>
+                </div>
+                
+                <div class="like_button" data-like="True" data-target="{{ele.product.id}}" data-remove = 'box{{forloop.counter}}'>
+                    
+                    <i class="fa-solid fa-heart fs-3 text-warning"></i>
+                                                    
+                </div>
+                
+            </div>
+        </div>
+        {% endfor %}
+
+        {% else %}
+
+        <div class="alert alert-warning" role="alert">
+            no products in wishlist
+        </div>
+
+        {% endif %}
+    </div>
+
+</div>
+
+
+
+{% endblock %}
+
+
+{% block script %}
+
+<!-- loader  -->
+<script src="{% static 'js/loader.js' %}"></script>
+
+<!-- form validation  -->
+<!-- <script src="{% static 'js/form.js' %}"></script> -->
+
+
+
+<!-- script for scroll -->
+<script src="{% static 'js/navscroll.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+
+<script>
+
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    axios.defaults.xsrfCookieName = "csrftoken"
+    const like_button = document.querySelectorAll('.like_button');
+
+    let box_container = document.getElementById('box_container')
+
+    like_button.forEach(ele=>{
+
+        ele.addEventListener('click' , (e)=>{
+
+            var formData = new FormData();
+            formData.append("pk", ele.dataset.target )
+
+            axios.post("{% url 'Ecom:userlike' %}",formData)
+            .then(function(res){
+                if (res.data.success){
+
+                    if (res.data.liked){
+                        ele.firstElementChild.classList.remove('text-light')
+
+                        ele.firstElementChild.classList.add('text-warning')
+
+                        
+                    }
+                    else{
+                        ele.firstElementChild.classList.add('text-light')
+                        ele.firstElementChild.classList.remove('text-warning')
+
+                        let box = document.getElementById(ele.dataset.remove)
+                        console.log(`box${ele.dataset.remove}`);
+                        box.remove()
+
+                        if (box_container.childElementCount == 0){
+                            box_container.innerHTML = `
+                            <div class="alert alert-warning text-center" role="alert" id="alert_size">
+                                <p class="m-0">
+                                    no products in wishlist
+                                </p> 
+                            </div>
+                            `
+                        }
+
+                    }
+                }
+                else{
+                    console.log('error');
+                }
+            })
+            .catch(function(error){
+                console.error(error);
+            })
+        })
+    })
+</script>
+
+{% endblock %}
