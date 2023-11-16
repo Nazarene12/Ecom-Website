@@ -196,37 +196,37 @@
 <script src="https://cdn.jsdelivr.net/npm/progressbar.js@1.1.0/dist/progressbar.min.js"></script>
 
 <script>
-      const ws = new WebSocket( 'ws://' + window.location.host+'/ws/admin/' )
+    //   const ws = new WebSocket( 'ws://' + window.location.host+'/ws/admin/' )
 
         
-      ws.onopen = function() {
-                // window.alert("open!");
-                console.log('connection success');
+    //   ws.onopen = function() {
+    //             // window.alert("open!");
+    //             console.log('connection success');
                 
-            }
+    //         }
 
-            ws.onmessage = function(event) {
+    //         ws.onmessage = function(event) {
 
-                var data = JSON.parse(event.data);
+    //             var data = JSON.parse(event.data);
 
-                Toastify({
-                    text: "new order placed",
-                    duration: 3000, 
-                    gravity: 'top', 
-                    position: 'top ', 
-                    backgroundColor: 'green',
-                 }).showToast();
+    //             Toastify({
+    //                 text: "new order placed",
+    //                 duration: 3000, 
+    //                 gravity: 'top', 
+    //                 position: 'top ', 
+    //                 backgroundColor: 'green',
+    //              }).showToast();
                 
                 
-            }
+    //         }
             
-            ws.onclose = function() {
-                console.log("Closed");
-            }   
+    //         ws.onclose = function() {
+    //             console.log("Closed");
+    //         }   
             
-            ws.onerror = function() {
-                console.log("error in connection");
-            } 
+    //         ws.onerror = function() {
+    //             console.log("error in connection");
+    //         } 
 
     let total_sales_today_value = parseInt(JSON.parse(document.getElementById('total_sales_today_value').textContent))
            

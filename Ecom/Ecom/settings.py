@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'django.contrib.sites',
-    'channels',
+    # 'channels',
 
 
     'Ecom_Web',
@@ -92,7 +92,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Ecom.wsgi.application'
-ASGI_APPLICATION = "Ecom.routing.application"
+# ASGI_APPLICATION = "Ecom.asgi.application"
+# ASGI_APPLICATION = "Ecom.routing.application"
 
 
 

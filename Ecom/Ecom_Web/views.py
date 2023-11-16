@@ -473,16 +473,16 @@ def CheckOut(request):
             conformationmail(request.user.email)
             messages.success(request, 'success')
 
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                'admin_group',
-                {
-                    'type': 'admin_message',
-                    'message': json.dumps({
-                        'message': 'A new order has been placed.'
-                    })
-                }
-            )
+            # channel_layer = get_channel_layer()
+            # async_to_sync(channel_layer.group_send)(
+            #     'admin_group',
+            #     {
+            #         'type': 'admin_message',
+            #         'message': json.dumps({
+            #             'message': 'A new order has been placed.'
+            #         })
+            #     }
+            # )
 
 
             return JsonResponse({'success':True , 'pk' : obj.pk})
