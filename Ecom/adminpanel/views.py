@@ -27,7 +27,6 @@ from django.db.models import Count
 from django.conf import settings
 import os
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.templatetags.static import static
 
 
 
