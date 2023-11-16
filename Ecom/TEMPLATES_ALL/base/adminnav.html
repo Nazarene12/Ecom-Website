@@ -1,11 +1,27 @@
+<style>
+
+  .active_nav{
+
+    background-color: var(--main-color);
+    border-radius: 10px;
+    width:max-content;
+    
+  }
+
+  .nav-item,.accordion{
+    padding: 0px 20px 0px 0px;
+  }
+
+</style>
+
 <div class="col-lg-3 p-0 navsection">
-    <nav class="navbar navbar-expand-lg  align-items-start ">
+    <nav class="navbar navbar-expand-lg  align-items-start " style="background-color: #302d2d98;">
         <div class="container-fluid flex-lg-column align-items-start">
-          <a class="navbar-brand" href="#">Offcanvas navbar</a>
+          <a class="navbar-brand text-light" href="#">DASH BOARD</a>
           <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
             <span class="navbar-toggler-icon"></span>
           </button>
-          <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+          <div class="offcanvas offcanvas-end " style="background-color: red;" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
             <div class="offcanvas-header">
               <h5 class="offcanvas-title" id="offcanvasNavbarLabel">NAVIGATION</h5>
               <button type="button" class="btn-close border-0 shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -13,49 +29,52 @@
             <div class="offcanvas-body flex-column">
               <ul class="navbar-nav justify-content-end flex-column pe-3">
                 
-                <li class="nav-item {% if page == 'home' %} active {% endif %}">
-                    <a class="nav-link " aria-current="page" href="{% url 'admins:home' %}">Home</a>
+                <li class="nav-item {% if page == 'home' %} active_nav {% endif %}">
+                    <a class="nav-link text-light " aria-current="page" href="{% url 'admins:home' %}">Home</a>
 
                 </li>
-                <li class="nav-item {% if page == 'user' %} active {% endif %}">
-                  <a class="nav-link" href="{% url 'admins:users' %}">User</a>
+                <li class="nav-item {% if page == 'user' %} active_nav {% endif %}">
+                  <a class="nav-link text-light" href="{% url 'admins:users' %}">User</a>
+                </li>
+                <li class="nav-item {% if page == 'stock' %} active_nav {% endif %}">
+                  <a class="nav-link text-light" href="{% url 'admins:stock' %}">Stockes</a>
                 </li>
 
-                <li class="nav-item {% if page == 'category' %} active {% endif %}">
-                    <a class="nav-link" href="{% url 'admins:category' %}">Caterogy</a>
+                <li class="nav-item {% if page == 'category' %} active_nav {% endif %}">
+                    <a class="nav-link text-light" href="{% url 'admins:category' %}">Caterogy</a>
                 </li>
-                <div class="accordion accordion-flush" id="accordionFlushExample">
-                  <div class="accordion-item">
-                    <p class="p-2 collapsed m-0 nav-link" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree">
+                <div class="accordion accordion-flush " id="accordionFlushExample">
+                  <div class="accordion-item bg-transparent ">
+                    <p class="p-2 collapsed m-0 nav-link text-light" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree">
                         Requirments
                     </p>
-                    <div id="flush-collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-                      <li class=" {% if page == 'product' %} active {% endif %}">
-                        <a class="nav-link" href="{% url 'admins:brand' %}">Brand</a>
+                    <div id="flush-collapseThree" class="accordion-collapse {% if page == 'brand' or page == 'color' or page == 'size' %} show {% else %}  collapse {% endif %}" data-bs-parent="#accordionFlushExample">
+                      <li class=" {% if page == 'brand' %} active_nav {% endif %}">
+                        <a class="nav-link text-light" href="{% url 'admins:brand' %}">Brand</a>
                       </li>
-                      <li class=" {% if page == 'product' %} active {% endif %}">
-                        <a class="nav-link" href="{% url 'admins:color' %}">Color</a>
+                      <li class=" {% if page == 'color' %} active_nav {% endif %}">
+                        <a class="nav-link text-light" href="{% url 'admins:color' %}">Color</a>
                       </li>
-                      <li class="nav-item {% if page == 'product' %} active {% endif %}">
-                          <a class="nav-link" href="{% url 'admins:size' %}">Size</a>
+                      <li class="nav-item {% if page == 'size' %} active_nav {% endif %}">
+                          <a class="nav-link text-light" href="{% url 'admins:size' %}">Size</a>
                       </li>
                     </div>
                   </div>
                 </div>
-                <li class="nav-item {% if page == 'product' %} active {% endif %}">
-                    <a class="nav-link" href="{% url 'admins:productlist' %}">Product</a>
+                <li class="nav-item {% if page == 'product' %} active_nav {% endif %}">
+                    <a class="nav-link text-light" href="{% url 'admins:productlist' %}">Product</a>
                 </li>
-                <li class="nav-item {% if page == 'product' %} active {% endif %}">
-                    <a class="nav-link" href="{% url 'admins:order' %}">Order</a>
+                <li class="nav-item {% if page == 'order' %} active_nav {% endif %}">
+                    <a class="nav-link text-light" href="{% url 'admins:order' %}">Order</a>
                 </li>
-                <li class="nav-item {% if page == 'product' %} active {% endif %}">
-                    <a class="nav-link" href="{% url 'admins:offer' %}">Offer</a>
+                <li class="nav-item {% if page == 'offer' %} active_nav {% endif %}">
+                    <a class="nav-link text-light" href="{% url 'admins:offer' %}">Offer</a>
                 </li>
-                <li class="nav-item {% if page == 'product' %} active {% endif %}">
-                    <a class="nav-link" href="{% url 'admins:coupon' %}">Coupon</a>
+                <li class="nav-item {% if page == 'coupon' %} active_nav {% endif %}">
+                    <a class="nav-link text-light" href="{% url 'admins:coupon' %}">Coupon</a>
                 </li>
-                <li class="nav-item {% if page == 'product' %} active {% endif %}">
-                    <a class="nav-link" href="{% url 'admins:logout' %}">logout</a>
+                <li class="nav-item {% if page == 'logout' %} active_nav {% endif %}">
+                    <a class="nav-link text-light" href="{% url 'admins:logout' %}">logout</a>
                 </li>
                 
               </ul>

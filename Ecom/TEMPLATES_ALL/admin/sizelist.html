@@ -6,7 +6,7 @@
 
 {% block css %} 
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base1.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
 <link rel="stylesheet" href="{% static 'css/form.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -31,11 +31,17 @@ input.form-control{
 
 <div class="container-fluid">
     <div class="row p-0">
-        {% include 'base/adminnav.html' with page='category' %}
+        {% include 'base/adminnav.html' with page='size' %}
         <div class="col-lg-8 bodysection">
             <div class="container-fluid">
-                <div class="row justify-content-center">
-                    <div class="col-12 p-4 rounded">
+                <div class="row ">
+                    <div class="col-12">
+                        {% include 'base/admin_top_nav.html' %}
+
+                    </div>
+                </div>
+                <div class="row my-5 justify-content-center">
+                    <div class="col-12 p-4 rounded" style="background-color: #302d2d98;">
                         <h5 class="text-center text-light">ADD COLOR</h5>
                         <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded mt-3"></p>
 
@@ -53,7 +59,7 @@ input.form-control{
                                             {% if ele.help_text %}
                     
                                                 <div class="text-start">
-                                                    <small class="text-danger">{{ele.help_text}}</small>
+                                                    <small class="text-light">{{ele.help_text}}</small>
                                                 </div>
                     
                                             {% endif %}
@@ -71,7 +77,7 @@ input.form-control{
                                         {% endfor %}
                                     </div>
                                     <div class="col-4">
-                                        <input type="submit" class="btn btn-outline-dark w-100 p-2" name="add" value="ADD">
+                                        <input type="submit" class="btn btn-outline-light w-100 p-2" name="add" value="ADD">
                                     </div>
                                 </div>
                             </div>
@@ -82,11 +88,11 @@ input.form-control{
         
                         </form>
                     </div>
-                    <div class="col-lg-12 mt-5">
-                            <h5 class="text-center text-dark mb-4">Size</h5>
+                    <div class="col-lg-12 mt-5 bg-secondary p-3 rounded">
+                            <h5 class="text-center text-light mb-4">Size</h5>
 
                             <div class="container">
-                                <div class="row bg-secondary p-3 rounded" id="main_container">
+                                <div class="row " id="main_container">
                                     <div class="col-lg-3 visually-hidden " id="basesize">
 
                                         <div class="bg-light d-flex justify-content-around align-items-start border rounded p-2">
@@ -107,11 +113,11 @@ input.form-control{
 
                                         <div class="bg-light d-flex justify-content-around align-items-start border rounded p-2">
                                             <div class="me-2">
-                                                <p class="fs-2 m-0">{{size.size}}</p>
+                                                <p class="fs-2 m-0 text-dark">{{size.size}}</p>
                                             </div>
 
                                             <div>
-                                                <a href="{% url 'admins:deletesize' pk=size.id %}" data-target="{{size.id}}" class="delete_size text-danger"><i class="fa-solid fa-xmark"></i></a>
+                                                <a href="{% url 'admins:deletesize' pk=size.id %}" data-target="{{size.id}}" class="delete_size "><i class="fa-solid fa-xmark text-danger"></i></a>
                                             </div>
                                         </div>
                                     </div>
@@ -121,7 +127,7 @@ input.form-control{
                                     {% else %}
 
                                     <div class="alert alert-warning text-center" role="alert" id="alert_size">
-                                        <p class="m-0">
+                                        <p class="m-0 ">
                                             No Size till now
                                         </p> 
                                     </div>

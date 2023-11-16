@@ -1,0 +1,139 @@
+<style>
+    .logo {
+  font-family: var(--logo-font);
+  font-weight: bold;
+  letter-spacing: 6px;
+  font-size: 25px;
+}
+
+#prepopulate{
+    background-color: #fff;
+    width:100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+    z-index: 9999;
+    
+}
+
+.prepopulate{
+    color:black;
+    padding:5px;
+    margin:0px;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
+</style>
+
+<div class="mt-2 p-3 rounded-2 d-flex justify-content-between align-items-center" style="background-color: #302d2d98;box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;">
+
+    <a class="navbar-brand logo text-light" href="#">
+        Niviya
+    </a>
+    <div style="border-bottom: 1px solid white;min-width: 300px;max-width: 400px;" class="position-relative d-flex align-items-center">       
+        <input type="search" style="border:none;border-radius: 0%;" class="form-control bg-transparent text-light shadow-none " id="searc_input" placeholder="search">
+        <a href="" class="btn border-0 disabled" id="redirect_button_nav">
+            <i class="fa-solid fa-magnifying-glass fs-5 text-light"></i>
+
+        </a>        
+        <div id="prepopulate" class="position-absolute visually-hidden top-100 left-0 mt-2 ">
+
+        </div>
+    </div>
+    <div class="d-flex align-items-center">
+        <p class="m-0">welcome <small class="text-warning">Admin</small></p>
+
+        <i class="fa-solid fa-bell fs-5 text-light mx-2"></i>
+    </div>
+</div>
+
+<script>
+    const searchInput = document.getElementById('searc_input');
+    const prepopulateDiv = document.getElementById('prepopulate');
+    const redirect_button_nav = document.getElementById('redirect_button_nav')
+
+console.log(prepopulateDiv);
+    
+
+    const all_prepopulate =  (e)=>{
+
+        searchInput.value = e.target.innerText;
+        prepopulateDiv.innerHTML = '';
+        prepopulateDiv.classList.add('visually-hidden')
+        redirect_button_nav.href = updated_nav[e.target.innerText]
+        if(redirect_button_nav.classList.contains("disabled")){
+            redirect_button_nav.classList.remove("disabled")
+
+        }
+
+    }
+    const nav = ['home', 'user', 'category', 'brand', 'color', 'size', 'product', 'order', 'offer', 'coupon'];
+    const updated_nav = {
+        'home':'{% url "admins:home" %}',
+        'user':'{% url "admins:users" %}',
+        'category':'{% url "admins:category" %}',
+        'brand':'{% url "admins:brand" %}',
+        'color':'{% url "admins:color" %}',
+        'size':'{% url "admins:size" %}',
+        'product':'{% url "admins:productlist" %}',
+        'order':'{% url "admins:order" %}',
+        'offer':'{% url "admins:offer" %}',
+        'coupon':'{% url "admins:coupon" %}',
+    }
+    searchInput.addEventListener('input', (e) => {
+        const searchText = e.target.value.toLowerCase();
+        const matchedItems = nav.filter(item => item.toLowerCase().includes(searchText));
+
+        // Clear previous search results
+
+        if (prepopulateDiv.classList.contains('visually-hidden')){
+            prepopulateDiv.classList.remove('visually-hidden')
+        }
+        prepopulateDiv.innerHTML = '';
+
+
+        if (! searchText){
+            redirect_button_nav.href = ""
+            if(! redirect_button_nav.classList.contains("disabled")){
+                redirect_button_nav.classList.add("disabled")
+
+            }
+            prepopulateDiv.classList.add('visually-hidden')
+            return
+        }
+
+        if (nav.includes(searchText)){
+            prepopulateDiv.innerHTML = '';
+            if (! prepopulateDiv.classList.contains('visually-hidden')){
+                prepopulateDiv.classList.add('visually-hidden')
+            }
+            redirect_button_nav.href = updated_nav[searchText]
+            if(redirect_button_nav.classList.contains("disabled")){
+                redirect_button_nav.classList.remove("disabled")
+
+            }
+            return 
+        }
+
+        if (matchedItems.length > 0) {
+            matchedItems.forEach(item => {
+                const matchedElement = document.createElement('p');
+                matchedElement.classList.add('prepopulate')
+                matchedElement.addEventListener('click',all_prepopulate)
+                matchedElement.textContent = item;
+                prepopulateDiv.appendChild(matchedElement);
+            });
+        } else {
+            redirect_button_nav.href = ""
+            if(! redirect_button_nav.classList.contains("disabled")){
+                redirect_button_nav.classList.add("disabled")
+
+            }
+            const noResultsElement = document.createElement('p');
+            noResultsElement.classList.add('prepopulate')
+
+            noResultsElement.textContent = 'No matching results';
+            prepopulateDiv.appendChild(noResultsElement);
+        }
+    });
+</script>

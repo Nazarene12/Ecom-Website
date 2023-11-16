@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [  ]  #'192.168.1.99'
 # Application definition
 
 INSTALLED_APPS = [
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'django.contrib.sites',
+    'channels',
+
 
     'Ecom_Web',
     'adminpanel',
@@ -47,6 +50,13 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 ]
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -59,6 +69,8 @@ MIDDLEWARE = [
     'Ecom_Web.custommiddleware.CheckoutRedirectMiddleware',
 
     'allauth.account.middleware.AccountMiddleware',
+    # 'channels.middleware.websocket.WebSocketMiddleware',
+
 ]
 
 ROOT_URLCONF = 'Ecom.urls'
@@ -80,6 +92,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Ecom.wsgi.application'
+ASGI_APPLICATION = "Ecom.routing.application"
+
 
 
 # Database
@@ -206,3 +220,6 @@ EMAIL_HOST_PASSWORD = 'lcjcsgffunxbzkhr'
 RAZOR_KEY_ID = 'rzp_test_hjG9C59EJBeKxG'
 
 RAZOR_KEY_SECRET = 'YGNkn0IMQYPYPpnwJ2EAwy9K'
+
+
+

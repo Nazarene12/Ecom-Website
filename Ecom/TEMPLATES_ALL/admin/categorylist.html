@@ -5,7 +5,7 @@
 
 {% block css %} 
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base1.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
 <link rel="stylesheet" href="{% static 'css/form.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -31,50 +31,17 @@ input.form-control{
 <div class="container-fluid">
     <div class="row p-0">
         {% include 'base/adminnav.html' with page='category' %}
-        <div class="col-lg-8 bodysection">
+        <div class="col-lg-8 ms-lg-5 ms-0 bodysection">
             <div class="container-fluid">
-                <div class="row justify-content-center">
-                    <div class="col-12 p-4 rounded">
-                        <h5 class="text-center text-light">ADD CATEGORY</h5>
-                        <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded mt-3"></p>
+                <div class="row ">
+                    <div class="col-12">
+                        {% include 'base/admin_top_nav.html' %}
 
-                        <form method="post" class="text-center forms" id="categoryform" novalidate>
-                            {% csrf_token %}
-        
-                            <!-- import for form validation js in front end -->
-        
-                            <div class="container-fluid">
-                                <div class="row justify-content-center align-items-center">
-                                    <div class="col-8">
-                                        {% for ele in form %}
-                            
-                                        <div>
-                                            <div class="form-floating">
-                                            
-                                                {{ ele }}
-                                                <label for="{{ ele.id_for_label }}" class="bg-transparent">{{ ele.label }}</label>
-                                            </div>
-                        
-                                            {% if ele.errors %}
-                                            <p class=" p-2 bg-danger rounded">{{ele.errors|join:", "}}</p>
-                                            {% endif %}
-                                        </div>
-        
-                                        {% endfor %}
-                                    </div>
-                                    <div class="col-4">
-                                        <input type="submit" class="btn btn-outline-dark w-100 p-2" name="add" value="ADD">
-                                    </div>
-                                </div>
-                            </div>
-                            
-        
-                            
-        
-        
-                        </form>
                     </div>
-                    <div class="col-lg-6 col-md-6 col-8 mt-5">
+                </div>
+                <div class="row justify-content-center my-5">
+                  
+                    <div class="col-lg-8 col-md-6 col-10 mb-lg-0 mb-md-0 mb-3">
                         <div class="table-responsive bg-dark p-3 rounded">
                             <h5 class="text-center text-light mb-4">CATEGORYS</h5>
                             <table id="categoryTable" class="table table-hover align-middle ">
@@ -99,6 +66,47 @@ input.form-control{
                             </table>
                         </div>
                     </div>
+
+                    <div class="col-lg-4 col-md-6 col-10 p-4 rounded" style="background-color: #302d2d98;">
+                        <h5 class="text-center text-light">ADD CATEGORY</h5>
+                        <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded mt-3"></p>
+
+                        <form method="post" class="text-center forms" id="categoryform" novalidate>
+                            {% csrf_token %}
+        
+                            <!-- import for form validation js in front end -->
+        
+                            <div class="container-fluid">
+                                <div class="row justify-content-center align-items-center">
+                                    <div class="col-12 mb-3">
+                                        {% for ele in form %}
+                            
+                                        <div>
+                                            <div class="form-floating">
+                                            
+                                                {{ ele }}
+                                                <label for="{{ ele.id_for_label }}" class="bg-transparent">{{ ele.label }}</label>
+                                            </div>
+                        
+                                            {% if ele.errors %}
+                                            <p class=" p-2 bg-danger rounded">{{ele.errors|join:", "}}</p>
+                                            {% endif %}
+                                        </div>
+        
+                                        {% endfor %}
+                                    </div>
+                                    <div class="col-12">
+                                        <input type="submit" class="btn btn-outline-light w-100 p-2" name="add" value="ADD">
+                                    </div>
+                                </div>
+                            </div>
+                            
+        
+                            
+        
+        
+                        </form>
+                    </div>
                     
                 </div>
             </div>
@@ -122,11 +130,10 @@ input.form-control{
     axios.defaults.xsrfCookieName = "csrftoken"
 
 
-    let inputfeild = document.querySelector(".form-control");
     
     let front_end_error = document.querySelector(".front_end_error_validation")
 
-
+    let input_category = document.getElementById('id_name')
 
     if (! front_end_error.classList.contains("visually-hidden")){
         front_end_error.classList.add('visually-hidden')
@@ -152,6 +159,7 @@ input.form-control{
                     if (response.data.success) {
                         // Handle a successful response, e.g., close the modal
                         console.log(response.data.category_data)
+                        input_category.value = ''
                         const newRow = categoryTable.insertRow(-1);
                         const cell1 = newRow.insertCell(0);
                         cell1.classList.add("text-light");
@@ -178,7 +186,7 @@ input.form-control{
                         cell3.classList.add("text-light");
 
                         cell3.appendChild(anchor);
-                        inputfeild.value = '';
+                        counterupdate()
                         Swal.fire(
                         'Category',
                         'category has added successful.',

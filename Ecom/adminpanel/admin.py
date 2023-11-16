@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category , Brand ,Color,Connector,Product,ProductImage,Size,Ratting,Comment
+from .models import Category , Brand ,Color,Connector,Product,ProductImage,Size,Ratting,Comment,Transaction
 
 # Register your models here.
 
@@ -14,3 +14,4 @@ admin.site.register(Size)
 admin.site.register(Connector)
 admin.site.register(Ratting)
 admin.site.register(Comment)
+admin.site.register(Transaction)

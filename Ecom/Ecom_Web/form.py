@@ -178,6 +178,10 @@ class EditProfileForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
+        number  = self.cleaned_data.get('phone_number')
+        print(number,self.cleaned_data)
+        if number and not len(number) == 10:
+            raise forms.ValidationError('Invalid Phone Number')
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(pattern, email):
             raise forms.ValidationError('invaild email eg (example@gmail.com )')

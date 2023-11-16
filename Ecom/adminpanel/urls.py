@@ -21,6 +21,9 @@ urlpatterns = [
     path('productdetail/<int:pk>', views.ProductDetail.as_view() , name='productdetail'),
     path('addproduct',views.UpdatedAddProduct.as_view() , name ='add_product'),
     path('updateproduct/<int:pk>',views.update_product , name='updateproduct'),
+    path('export/', views.export_to_excel, name='export_to_excel'),
+    path('exportpdf/', views.export_to_pdf, name='export_to_pdf'),
+    path('stock',views.StockList.as_view() , name='stock'),
 
 
     path('color' , views.ColorList.as_view() , name='color'),

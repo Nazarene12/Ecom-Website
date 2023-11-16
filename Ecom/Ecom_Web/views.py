@@ -25,13 +25,18 @@ from django.db.models import Sum
 from xhtml2pdf import pisa
 from django.template.loader import get_template
 from django.http import HttpResponse
+from django.utils.timezone import now
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 
 
 
 from . import form
 from .models import UserProfile,UserCart,Address,Order,ProductOrdered,UserWishList,Coupon,UserWallet
 from .mixin import sendOTP , createUser ,conformationmail
-from adminpanel.models import Connector,Category , Brand , Size , Color , Product , ProductImage ,Ratting,Comment
+from adminpanel.models import Connector,Category , Brand , Size , Color , Product , ProductImage ,Ratting,Comment,Transaction
 # Create your views here.
 from .mixin import UserPermissionCustomMixin
 
@@ -190,8 +195,12 @@ class ProductList(ListView ):
             queryset  = queryset.filter(name__icontains = self.request.GET.get('name'))
 
         # Apply filters based on query parameters if they exist
-        if self.request.GET.get('price'):
+        if self.request.GET.get('price') and not self.request.GET.get('start_price'):
             queryset = queryset.filter(price__lt=self.request.GET.get('price')).order_by('price')
+        if not self.request.GET.get('price') and self.request.GET.get('start_price'):
+            queryset = queryset.filter(price__gt=self.request.GET.get('start_price')).order_by('price')
+        if self.request.GET.get('price') and self.request.GET.get('start_price'):
+            queryset = queryset.filter(price__lt=self.request.GET.get('price') , price__gt=self.request.GET.get('start_price')).order_by('price')
 
         if self.request.GET.get('brand'):
             queryset = queryset.filter(brand__id=self.request.GET.get('brand'))
@@ -221,6 +230,7 @@ class ProductList(ListView ):
             context['liked_products'] = 'empty'
         # Add filter parameters to context
         context['price_param'] = self.request.GET.get("price")
+        context['price_start_param'] = self.request.GET.get('start_price')
         context['brand_param'] = int(self.request.GET.get("brand")) if self.request.GET.get("brand") else None
         context['category_param'] = int(self.request.GET.get("category")) if self.request.GET.get("category") else None
         context['color_param'] = int(self.request.GET.get("color")) if self.request.GET.get("color") else None
@@ -249,7 +259,6 @@ class productDetail(DetailView):
         obj.colors = Connector.objects.filter(product = product,active=True).exclude(color = obj.color).values('color__name','image').distinct()
 
         obj.sizes = Connector.objects.filter(product = product ,active=True, color = obj.color ).values_list('size__size',flat=True).order_by('size')
-        print(obj.sizes)
         return obj
     
     def get_context_data(self, **kwargs):
@@ -280,6 +289,11 @@ class CartList(UserPermissionCustomMixin,ListView):
                 i.quantity = i.connect.count
                 i.save()
         return queryset
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context =  super().get_context_data(**kwargs)
+        context['coupons'] = Coupon.objects.filter(expire_date__gte= now())
+        return context
 
 
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
@@ -314,6 +328,8 @@ def AddWallet(request):
             
             wallet.balance = wallet.balance + amount
             wallet.save()
+            transaction = Transaction(user = request.user , transaction_type="Credit" , amount =  amount)
+            transaction.save()
             return JsonResponse({'success':True})   
         except UserWallet.DoesNotExist:
             return JsonResponse({'success' : False})
@@ -379,7 +395,7 @@ from django.db.models import Q
 def CheckOut(request):
     previous_path = request.session.get('previous_url',None)
     current_path = request.session.get('current_url',None)
-
+    
     print(previous_path , current_path)
 
     if not previous_path:
@@ -387,13 +403,34 @@ def CheckOut(request):
 
     if not request.user.is_authenticated or not request.user.is_active:
         return redirect('Ecom:home')
-    
+    coupon_id = request.session.get('coupon' ,None)
+    coupon_discount=0
+    if coupon_id != '0':
+        coupon = Coupon.objects.get(pk = coupon_id)
+        coupon_discount = coupon.amount_to_reduce
     data = UserCart.objects.filter(id__in = request.session['checkout_product'])
     
     address = Address.objects.filter(user = request.user)
+    max_retail_price = data.aggregate(total_price=Sum(F('connect__product__maximum_retail_price') * F('quantity')))['total_price']
+    discount_price = data.aggregate(total_price=Sum(F('connect__product__price') * F('quantity')))['total_price']
+    discount_percentage = 100 -( (discount_price/max_retail_price )*100)
+    discount_percentage = round(discount_percentage,2)
 
     if request.method == 'POST':
         try:
+            payment_method  = request.POST.get('payment_method')
+            if payment_method == '3':
+                if UserWallet.objects.filter(user = request.user).exists():
+                    obj1 = UserWallet.objects.get(user = request.user)
+                    if obj1.balance >= int(request.session.get('total_amount')):
+                        obj1.balance -= int(request.session.get('total_amount'))
+                        obj1.save()
+                        transaction = Transaction(user = request.user , transaction_type="Debit" , amount = int(request.session.get('total_amount')))
+                        transaction.save()
+                    else:
+                        return JsonResponse({'error':True,'account':False , 'amount' : True})
+                else:
+                    return JsonResponse({'error':True,'account':True})
             address = request.POST.get('address')
             obj = Order()
             obj.user = request.user
@@ -401,16 +438,20 @@ def CheckOut(request):
             
             obj.total_price = request.session.get('total_amount')
             obj.total_item = request.session.get('total_items')
-            coupon_id = request.session.get('coupon')
+            
             if int(coupon_id) != 0:
                 coupon = Coupon.objects.get(pk = coupon_id)
                 obj.coupon = coupon
                 coupon.maximum_apply = coupon.maximum_apply -1
                 coupon.save()
-            payment_method  = request.POST.get('payment_method')
+            
             if payment_method =='1':
 
                 obj.payment_method = 'cash_on_delivery'
+
+            elif payment_method == '3':
+                obj.payment_method = 'wallet'
+            
             else:
                 obj.payment_method = 'online'
             obj.status = 'pending'
@@ -432,6 +473,17 @@ def CheckOut(request):
             conformationmail(request.user.email)
             messages.success(request, 'success')
 
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                'admin_group',
+                {
+                    'type': 'admin_message',
+                    'message': json.dumps({
+                        'message': 'A new order has been placed.'
+                    })
+                }
+            )
+
 
             return JsonResponse({'success':True , 'pk' : obj.pk})
         except:
@@ -439,7 +491,7 @@ def CheckOut(request):
         
         # return redirect('Ecom:successpage',pk=obj.pk)
 
-    return render(request,"user/checkout.html" ,{'products':data , 'total_amount':request.session['total_amount'] , 'address':address})
+    return render(request,"user/checkout.html" ,{'products':data , 'total_amount':request.session['total_amount'] ,'mrp':max_retail_price,'coupon' : coupon_discount,'dp':discount_percentage, 'address':address})
 
 
 
@@ -539,7 +591,6 @@ from django.db.models import F, ExpressionWrapper, IntegerField
 from django.db.models.functions import Now,Trunc
 from django.db import models
 
-from django.utils.timezone import now
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
 class UserOrder(UserPermissionCustomMixin,ListView):
 
@@ -548,9 +599,9 @@ class UserOrder(UserPermissionCustomMixin,ListView):
     context_object_name = 'orders'
 
     def get_queryset(self) :
-        orders = Order.objects.all()
+        orders = Order.objects.filter(user = self.request.user).order_by('-id')
         for i in orders:
-            i.days_since_order = (i.order_date.date() - now().date()).days
+            i.days_since_order = ( now().date() - i.order_date.date() ).days
         return orders
     
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
@@ -922,15 +973,17 @@ def Ratting_Product(request , pk):
     if request.method == 'POST':
         try:
             value = request.POST.get('value')
-            order  = Order.objects.get(id = pk)
-            for i in order.product_cover.all():
-                obj = Product.objects.get(id = i.products.product.id)
-                rate = Ratting(product =obj , rating = value )
-                rate.save()
-                average_rating = Ratting.objects.filter(product=i.products.product).aggregate(Avg('rating'))['rating__avg']
-                print(average_rating)
-                i.products.product.rating = average_rating
-                i.products.product.save()
+            order  = ProductOrdered.objects.get(id = pk)
+            order.rating = value
+            order.save()
+            
+            obj = Product.objects.get(id = order.products.product.id)
+            rate = Ratting(product =obj , rating = value )
+            rate.save()
+            average_rating = Ratting.objects.filter(product=order.products.product).aggregate(Avg('rating'))['rating__avg']
+            print(average_rating)
+            order.products.product.rating = average_rating
+            order.products.product.save()
             return JsonResponse({'success' :True})
         except:
             return JsonResponse({'success':False})
@@ -949,53 +1002,3 @@ def Comment_Product(request , pk):
             return JsonResponse({'success' : False})
         
         # @cache_control(no_cache=True, must_revalidate=True, no_store=False)
-# def CheckOut(request):
-#     previous_path = request.session.get('previous_url',None)
-#     current_path = request.session.get('current_url',None)
-
-#     print(previous_path , current_path)
-
-#     if not request.user.is_authenticated or not request.user.is_active:
-#         return redirect('Ecom:home')
-#     data = UserCart.objects.filter(id__in = request.session['checkout_product'])
-#     address = Address.objects.filter(user = request.user)
-
-#     if request.method == 'POST':
-#         address = request.POST.get('address')
-#         obj = Order()
-#         obj.user = request.user
-#         obj.address = Address.objects.get(id = address)
-        
-#         obj.total_price = request.session.get('total_amount')
-#         obj.total_item = request.session.get('total_items')
-#         coupon_id = request.session.get('coupon')
-#         if int(coupon_id) != 0:
-#             coupon = Coupon.objects.get(pk = coupon_id)
-#             obj.coupon = coupon
-#         payment_method  = request.POST.get('payment_method')
-#         if payment_method =='1':
-
-#             obj.payment_method = 'cash_on_delivery'
-#         else:
-#             obj.payment_method = 'online'
-#         obj.status = 'pending'
-#         obj.save()
-#         total_count = 0
-#         for i in data:
-#             productCover = ProductOrdered(products =i.connect , quantity = i.quantity , total_price =  i.connect.product.price * i.quantity )
-#             productCover.save()
-#             obj.product_cover.add(productCover)
-#             i.connect.count = i.connect.count-i.quantity
-#             i.connect.sale = i.connect.sale + i.quantity
-#             i.connect.save()
-#             i.delete_cart = True
-#             i.save()
-
-#         obj.save()
-#         if payment_method == '2':
-#             return redirect('Ecom:online_payment' ,pk = obj.pk)
-#         conformationmail(request.user.email)
-#         return redirect('Ecom:successpage',pk=obj.pk)
-
-#     return render(request,"user/checkout.html" ,{'products':data , 'total_amount':request.session['total_amount'] , 'address':address})
-

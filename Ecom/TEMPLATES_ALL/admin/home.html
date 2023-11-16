@@ -5,7 +5,7 @@
 
 {% block css %} 
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base1.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.css">
@@ -19,15 +19,41 @@
 <div class="container-fluid">
     <div class="row p-0">
         {% include 'base/adminnav.html' with page='home' %}
-        <div class="col-lg-8 bodysection">
-            <div class="container-fluid">
+        <div class="col-lg-8 ms-lg-5 ms-0 bodysection">
+            <div class="container-fluid ">
+                <div class="row">
+                    <div class="col-12">
+                        {% include 'base/admin_top_nav.html' %}
+                    </div>
+                </div>
+                <div class="row p-3 py-5 rounded my-5 justify-content-around" style="background-color: #302d2d98;box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;">
+                    <div class="col-lg-3 col-3 text-center">
+                        <p class="fw-semibold">Year Sales</p>
+                        <h3>₹ {% if total_sales_year_value.total_sales_amount %} {{total_sales_year_value.total_sales_amount}} {% else %} 0 {% endif %}</h3>
+                        <p class="text-success">{{total_sales_year_value.total_sales_count}}+</p>
+                    </div>
+                    <div class="vr p-0"></div>
+                    <div class="col-lg-3 col-3 text-center">
+                        <p class="fw-semibold">Month Sales</p>
+                        <h3>₹ {% if total_sales_month_value.total_sales_amount %} {{total_sales_month_value.total_sales_amount}} {% else %} 0 {% endif %}</h3>
+                        <p class="text-success">{{total_sales_month_value.total_sales_count}}+</p>
+                    </div>
+                    <div class="vr p-0"></div>
+                    <div class="col-lg-3 col-3 text-center">
+                        <p class="fw-semibold">Today Sales</p>
+                        <h3>₹ {% if total_sales_today_value.total_sales_amount %} {{total_sales_today_value.total_sales_amount}} {% else %} 0 {% endif %}</h3>
+                        <p class="text-success">{{total_sales_today_value.total_sales_count}}+</p>
+                    </div>
+                    
+                    
+                </div>
                 <div class="row justify-content-around m-2">
                     
-                    <div class="col-8">
+                    <div class="col-lg-7 col-12 p-4 rounded-2" style="background-color: #302d2d98;box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;">
                         <div class="d-flex justify-content-between mb-3">
                             <p>Sales Report</p>
                             <div class="d-flex">
-                                <select class="form-select form-control me-2" id="sales_year" aria-label="Default select example">
+                                <select class="shadow-none form-select form-control me-2" id="sales_year" aria-label="Default select example">
                                     {% for year in years %}
                                         {% if year == currentyear %}
                                         <option selected value="{{year}}">{{year}}</option>
@@ -37,25 +63,125 @@
                                     {% endfor %}
                                     
                                   </select>
-                                <a href="{% url 'admins:salesreport' %}" class="btn btn-outline-dark" id="sales_search_button">SEARCH</a>
+                                <a href="{% url 'admins:salesreport' %}" class="btn  btn-outline-success" id="sales_search_button">SEARCH</a>
                             </div>
                         </div>
                         <div>
                             <canvas id="myChart"></canvas>
                         </div>
                     </div>
+                    <div class="col-lg-4 mt-lg-0 mt-4 rounded-2 col-12 p-4" style="background-color: #302d2d98;box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;">
+                        <p>Hit Rate</p>
+                        <canvas id="myChartpie"></canvas>
+                    </div>
+                    
+                </div>
 
-                    <div class="col-3 d-flex flex-column justify-content-center align-items-center ">
+                <div class="row my-5 justify-content-between" >
+                    <div class="col-lg-3 col-6 p-3 rounded-2 d-flex flex-column justify-content-center align-items-center " style="background-color: #302d2d98;box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;">
                         <p class="mb-3">Today sale count</p>
                         <div id="todaysaleprogresscontainer">
 
                         </div>
                     </div>
+                    <div class="col-lg-8 col-6 p-3 rounded-2 d-flex flex-column justify-content-center align-items-center " style="background-color: #302d2d98;box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;">
+                        <p class="mb-3">Sales Report</p>
+                        <div class="d-flex" style="gap:10px">
+                            <div class="mb-3">
+                                <p class="text-center">Start Date</p>
+                                <input type="date" class="form-control" id="start_date">
+                            </div>
+                            <div class="mb-3">
+                                <p class="text-center">End Date</p>
+                                <input type="date" class="form-control" id="end_date">
+
+                            </div>
+                        </div>
+                        <div>
+                            <a href="{% url 'admins:export_to_pdf' %}" data-target="{% url 'admins:export_to_pdf' %}" class="btn btn-primary disabled" id="sales_report_1">sales report as pdf</a>
+                            <a href="{% url 'admins:export_to_excel' %}" data-target="{% url 'admins:export_to_excel' %}" class="btn btn-primary disabled" id="sales_report_2">sales report as excel</a>
+                        </div>
+                    </div>
+                    <script>
+                            // Get references to the date inputs and anchor tags
+                            const startDateInput = document.getElementById('start_date');
+                            const endDateInput = document.getElementById('end_date');
+                            const salesReport1 = document.getElementById('sales_report_1');
+                            const salesReport2 = document.getElementById('sales_report_2');
+
+                            // Function to check if a given date is valid and not greater than today
+                            const isValidDate = (dateString) => {
+                                const inputDate = new Date(dateString);
+                                const today = new Date();
+                                return !isNaN(inputDate) && inputDate <= today;
+                            };
+
+                            function generateLink() {
+                                // Get the values of start and end date
+                                const startDate = startDateInput.value;
+                                const endDate = endDateInput.value;
+
+
+                                // Construct the URL with query parameters
+                                const baseUrl1 = salesReport1.dataset.target; // Replace with your actual URL
+                                const queryParams1 = `?start=${startDate}&end=${endDate}`;
+                                const urlWithParams1 = baseUrl1 + queryParams1;
+                                salesReport1.href = urlWithParams1
+
+                                // Construct the URL with query parameters
+                                const baseUrl2 = salesReport2.dataset.target; // Replace with your actual URL
+                                const queryParams2 = `?start=${startDate}&end=${endDate}`;
+                                const urlWithParams2 = baseUrl2 + queryParams2;
+                                salesReport2.href = urlWithParams2
+
+                                
+                            }
+
+                            // Function to handle the date input change
+                            const handleDateChange = () => {
+                                const startDate = startDateInput.value;
+                                const endDate = endDateInput.value;
+
+                                const isValidStart = isValidDate(startDate);
+                                const isValidEnd = isValidDate(endDate);
+
+                                // Enable anchor tags if conditions are met
+                                if (isValidStart && isValidEnd && startDate <= endDate) {
+                                    if(salesReport1.classList.contains('disabled')){
+                                        salesReport1.classList.remove('disabled');
+                                        
+                                    }
+                                    if(salesReport2.classList.contains('disabled')){
+                                        salesReport2.classList.remove('disabled');
+                                        
+                                    }
+                                    generateLink()
+                                } else {
+                                    if(!salesReport1.classList.contains('disabled')){
+                                        salesReport1.classList.add('disabled');
+                                        
+                                    }
+                                    if(!salesReport2.classList.contains('disabled')){
+                                        salesReport2.classList.add('disabled');
+                                        
+                                    }
+                                   
+                                }
+                            };
+
+                            // Attach change event listeners to date inputs
+                            startDateInput.addEventListener('change', handleDateChange);
+                            endDateInput.addEventListener('change', handleDateChange);
+
+                    </script>
+                    
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+{{total_sales_today_value.total_sales_count|json_script:"total_sales_today_value"}}
 
 {% endblock %}
 
@@ -70,8 +196,42 @@
 <script src="https://cdn.jsdelivr.net/npm/progressbar.js@1.1.0/dist/progressbar.min.js"></script>
 
 <script>
+      const ws = new WebSocket( 'ws://' + window.location.host+'/ws/admin/' )
+
+        
+      ws.onopen = function() {
+                // window.alert("open!");
+                console.log('connection success');
+                
+            }
+
+            ws.onmessage = function(event) {
+
+                var data = JSON.parse(event.data);
+
+                Toastify({
+                    text: "new order placed",
+                    duration: 3000, 
+                    gravity: 'top', 
+                    position: 'top ', 
+                    backgroundColor: 'green',
+                 }).showToast();
+                
+                
+            }
+            
+            ws.onclose = function() {
+                console.log("Closed");
+            }   
+            
+            ws.onerror = function() {
+                console.log("error in connection");
+            } 
+
+    let total_sales_today_value = parseInt(JSON.parse(document.getElementById('total_sales_today_value').textContent))
+           
     var target = parseInt('{{today_sale.target}}');
-    var sales = 20;//parseInt('{{today_sale.sale}}')
+    var sales = total_sales_today_value;//parseInt('{{today_sale.sale}}')
     var percentage = sales / target;
     if (percentage > 1.0) {
         percentage = 1.0;
@@ -160,26 +320,84 @@
     const ctx = document.getElementById('myChart');
   
     const chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['jan', 'feb', 'mar', 'apr', 'may', 'jun' , 'jul' ,'aug' ,'sep' , 'oct' , 'nov' , 'dec'],
-        datasets: [{
-          label: 'sales',
-          data: converter(),
-          borderWidth: 1,
-          barThickness: 6,
-          backgroundColor:'rgba(247, 109, 10,1)'
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true
-          }
+  type: 'bar',
+  data: {
+    labels: ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'],
+    datasets: [{
+      label: 'sales',
+      data: converter(),
+      borderWidth: 1,
+      barThickness: 6,
+      backgroundColor: 'rgba(247, 109, 10,1)'
+    }]
+  },
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(255, 255, 255, 0.2)' // Change vertical grid line color
+        },
+        ticks: {
+          color: 'white' // Change y-axis labels color to white
         }
-        
+      },
+      x: {
+        grid: {
+          color: 'rgba(255, 255, 255, 0.2)' // Change horizontal grid line color
+        },
+        ticks: {
+          color: 'white' // Change x-axis labels color to white
+        }
       }
-    });
+    },
+    plugins: {
+      legend: {
+        labels: {
+          color: 'white' // Change legend label color to white
+        }
+      }
+    }
+  }
+});
+
+
+
+const hit_rate = 100
+let current_need_hit_rate = hit_rate - total_sales_today_value
+if (current_need_hit_rate < 0 ){
+    current_need_hit_rate =0
+}
+const datapie = {
+  labels: [
+    'Today sales ',
+    'Hit Point sales',
+    
+  ],
+  datasets: [{
+    label: 'sales',
+    data: [total_sales_today_value, current_need_hit_rate],
+    backgroundColor: [
+      'rgb(255, 99, 132)',
+      'rgb(54, 162, 235)',
+    ],
+    hoverOffset: 4,
+    cutout:'90%',
+    circumference:180,
+    rotation:270
+  }]
+};
+
+const config = {
+  type: 'doughnut',
+  data: datapie,
+};
+
+const ctxpie = document.getElementById('myChartpie');
+
+
+
+const pie = new Chart(ctxpie,config)
 </script>
 
 {% endblock %}

@@ -46,22 +46,12 @@
         background-color: var(--main-color);
     }
 
-    ol { list-style: none;}
-    .breadcrumb { width: 100%; float: left; margin: 20px 0; padding: 7px; position: relative; display: block; background: rgba(0,0,0,.05)}
-    .breadcrumb ol { list-style: none;}
-    .breadcrumb li { height: 30px; line-height: 30px; float: left; padding: 0 12px;}
-    .breadcrumb li a { text-decoration: none;}
-    .breadcrumb li .fa { width: 30px; height: 30px; line-height: 30px;}
-    .breadcrumb a:hover { text-decoration: none;}
-
-    .breadcrumb-fill2.style3 { border-radius: 30px; background: #bb123c;}
-    .breadcrumb-fill2.style3 .fa { background: #F62459;}
-
-
+   
     .selected_color{
 
         padding:5px;
         border:1px solid var(--main-color);
+        border-radius: 50%;
     }
 
     /* Chrome, Safari, Edge, Opera */
@@ -73,6 +63,79 @@
 
     
 </style>
+
+<style>
+
+    form {
+      position: relative;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, 0%);
+      transition: all 1s;
+      width: 50%;
+      min-width: 300px;
+      height: 30px;
+      background: white;
+      box-sizing: border-box;
+      /* border-radius: 25px; */
+      border: 4px solid white;
+      padding: 15px;
+      /* border-bottom:1px solid rgba(128, 128, 128, 0.621); */
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
+
+    }
+    
+    input.s {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 90%;
+      height: 25.5px;
+      line-height: 30px;
+      outline: 0;
+      border: 0;
+      display: block;
+      font-size: 1em;
+      border-radius: 20px;
+      padding: 0 20px;
+      overflow: hidden;
+    }
+    
+    .fa {
+      box-sizing: border-box;
+      padding: 5px;
+      width: 24.5px;
+      height: 23.5px;
+      position: absolute;
+      top: -4px;
+      right: 0;
+      border-radius: 50%;
+      color: #07051a;
+      text-align: center;
+      font-size: 14px;
+      transition: all 1s;
+      margin:5px;
+    }
+    
+    form:hover,
+    form:valid {
+
+      cursor: pointer;
+    }
+    
+   
+    
+    form:hover .fa,
+    form:valid .fa {
+      background: #07051a;
+      color: white;
+    }
+    
+    
+    
+    
+    
+    </style>
 {% endblock %}
 
 {% block main %}
@@ -87,18 +150,50 @@
     </div>
 </div>
 
-<div class="container-fluid">
+
+<div class="container-fluid mb-3 p-3 rounded-3 position-sticky top-0 start-0" style="z-index: 300;background-color: #fff; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;" >
+    <div class="row justify-content-center align-items-center">
+        
+        <div class="col-12 mb-5">
     
-        <ol class="breadcrumb breadcrumb-fill1">
-            <li><a href="{% url 'Ecom:home' %}">Home</a></li>
-            <li><a href="{% url 'Ecom:products' %}" >Products</a></li>
-            <li><a href="#" class="maincolor">Products detail</a></li>
+                
+
+                <div class="d-flex justify-content-center">
+                    <a href="{% url 'Ecom:home' %}" class="btn text-light me-2" style="background-color:rgba(128, 128, 128, 0.568) ;">Home</a>
+                    <a href="{% url 'Ecom:products' %}" class="btn text-light me-2" style="background-color:rgba(128, 128, 128, 0.568) ;" >Products</a>
+                    <a href="#" class="btn text-light me-2" style="background-color:var(--main-color) ;">Products detail</a>
+                </div>
             
-        </ol>
-    
+        </div>
+        
+        <div class="col-12">
+            <div>
+                <form>
+                    <input type="search" id="search_value" class="s" placeholder="SEARCH" required>
+                    <i class="fa fa-search" id="submit_search"></i>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            const submit_search = document.getElementById('submit_search');
+
+            submit_search.addEventListener('click' ,()=>{
+                const search_value = document.getElementById('search_value')
+
+                if (search_value.value != ''){
+                    window.location = `/products?name=${search_value.value}`
+                }
+                
+            })
+        </script>
+        
+    </div>
 </div>
 
-<div class="container-fluid mb-5">
+
+
+<div class="container-fluid my-5">
     <div class="row p-0">
         <div class="col-lg-12 ">
 
@@ -107,21 +202,26 @@
                    
                     <div class="col-lg-6  d-flex justify-content-around">
                         <div class="d-flex flex-column justify-content-between">
-                            <div class="p-1 img-box" >
-                                <img src="{{product.image.normal_image.url}}" id="normal_image"  style="height:100px;width:100px;object-fit: cover;"  alt="normal-view" class=" img-zoom">
-                                <p  class="m-0">normal</p>
+                            <style>
+                                .active_img{
+                                    border:1px solid var(--main-color)!important
+                                }
+                                .main_img{
+                                    height:30rem;
+                                    
+                                }
+                            </style>
+                            <div class=" img-box text-center">
+                                <img src="{{product.image.normal_image.url}}" data-active="1" id="normal_image"  style="border:1px solid rgba(128, 128, 128, 0.39);height:100px;width:100px;object-fit: cover;"  alt="normal-view" class="active_img img-zoom p-2">
                             </div>
                             <div class="p-1 img-box" >
-                                <img src="{{product.image.front_image.url}}" id="front_image"   style="height:100px;width:100px;object-fit: cover;" alt="front-view" class=" img-zoom">
-                                <p class="m-0">front</p>
+                                <img src="{{product.image.front_image.url}}" data-active="0" id="front_image"   style="border:1px solid rgba(128, 128, 128, 0.39);height:100px;width:100px;object-fit: cover;" alt="front-view" class=" img-zoom p-2">
                             </div>
                             <div class="p-1 img-box" >
-                                <img src="{{product.image.back_image.url}}" id="back_image"  style="height:100px;width:100px;object-fit: cover;" alt="back-view" class=" img-zoom">
-                                <p class="m-0">back</p>
+                                <img src="{{product.image.back_image.url}}" data-active="0" id="back_image"  style="border:1px solid rgba(128, 128, 128, 0.39);height:100px;width:100px;object-fit: cover;" alt="back-view" class=" img-zoom p-2">
                             </div>
                             <div class="p-1 img-box" >
-                                <img src="{{product.image.side_image.url}}" id="side_image"  style="height:100px;width:100px;object-fit: cover;" alt="side-view" class=" img-zoom">
-                                <p class="m-0">side</p>
+                                <img src="{{product.image.side_image.url}}" data-active="0" id="side_image"  style="border:1px solid rgba(128, 128, 128, 0.39);height:100px;width:100px;object-fit: cover;" alt="side-view" class=" img-zoom p-2">
                             </div>
                         </div>
 
@@ -132,107 +232,119 @@
                         
                         
                     </div>
-                    <div class="col-lg-3 col-md-3 col-3">
-                        <h3>{{product.product.name}}</h3>
-                        <p>{{product.product.description}}</p>
-                        <div class="d-flex my-2">
-                            {% if product.product.rating >= 1 %}
-                            <i class="fa-solid fa-star text-warning"></i>
-                            {% else %}
-                            <i class="fa-solid fa-star text-secondary"></i>
-                            {% endif %}
-                            {% if product.product.rating >= 2 %}
-                            <i class="fa-solid fa-star text-warning"></i>
-                            {% else %}
-                            <i class="fa-solid fa-star text-secondary"></i>
-                            {% endif %}
-                            {% if product.product.rating >= 3 %}
-                            <i class="fa-solid fa-star text-warning"></i>
-                            {% else %}
-                            <i class="fa-solid fa-star text-secondary"></i>
-                            {% endif %}
-                            {% if product.product.rating >= 4 %}
-                            <i class="fa-solid fa-star text-warning"></i>
-                            {% else %}
-                            <i class="fa-solid fa-star text-secondary"></i>
-                            {% endif %}
-                            {% if product.product.rating == 5 %}
-                            <i class="fa-solid fa-star text-warning"></i>
-                            {% else %}
-                            <i class="fa-solid fa-star text-secondary"></i>
-                            {% endif %}
+                    <div class="col-lg-6 ">
+                        <div class="container-fluid">
+                            <div class="row mb-3">
+                                <div class="col-lg-6">
+                                    <h3>{% filter upper %}{{product.product.name}}{% endfilter %}</h3>
+                                    <div class="d-flex my-2">
+                                        {% if product.product.rating >= 1 %}
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                        {% else %}
+                                        <i class="fa-solid fa-star text-secondary"></i>
+                                        {% endif %}
+                                        {% if product.product.rating >= 2 %}
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                        {% else %}
+                                        <i class="fa-solid fa-star text-secondary"></i>
+                                        {% endif %}
+                                        {% if product.product.rating >= 3 %}
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                        {% else %}
+                                        <i class="fa-solid fa-star text-secondary"></i>
+                                        {% endif %}
+                                        {% if product.product.rating >= 4 %}
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                        {% else %}
+                                        <i class="fa-solid fa-star text-secondary"></i>
+                                        {% endif %}
+                                        {% if product.product.rating == 5 %}
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                        {% else %}
+                                        <i class="fa-solid fa-star text-secondary"></i>
+                                        {% endif %}
 
-                        </div>
-                        <p class="card-text text-success">discount {{product.product.discount}} %</p>
-                              <p class="card-text">₹ <small class="text-decoration-line-through me-2">{{product.product.maximum_retail_price}}</small> ₹ {{product.product.price}}</p>
-                        <p>Brand :{{product.product.brand.name}}</p>
-                        <p>Category :{{product.product.category.name}}</p>
-                        <div class="d-flex  align-items-center mb-2">
-                            <p class="m-0 me-3">Color</p>
-                            <div class="selected_color all_color" data-active ='True' data-image='{% url "Ecom:get_data_product" pk=product.image.id %}'>
-                                <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{product.color.name}}"></table>
-                            </div>
-                            {% for each_color in product.colors %}
-                            <div class=" ms-2 all_color" data-active ='False' data-image='{% url "Ecom:get_data_product" pk=each_color.image %}'>
-                                <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{each_color.color__name}}"></table>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <div class="d-flex align-items-center mb-3">
-                            <p class="m-0 me-2">size</p>
-                            <select class="form-select form-select-lg" id="select_size" style="width:100px">
-                            {% for each_size in all_size %}
+                                    </div>
+                                    <p>{{product.product.description}}</p>
+                                    
+                                
+                                    <p class="card-text text-secondary m-0">discount {{product.product.discount}} %</p>
+                                        <p class="card-text text-success"><small class="text-danger text-decoration-line-through me-2">₹ {{product.product.maximum_retail_price}}</small> ₹ {{product.product.price}}</p>
+                                    <div class="d-flex mb-2">
+                                            <p class="card-text m-0 me-2 px-2 py-1 text-light rounded-2" style="background-color: #04011a6e;"> {{product.product.brand.name}}</p>
+                                            <p class="card-text m-0 px-2 py-1 text-light rounded-2" style="background-color: rgb(212, 83, 8);">{{product.product.category.name}}</p>
+                                    </div>
+                                    
+                                    <div class="d-flex  align-items-center mb-2">
+                                        <div class="selected_color all_color" data-active ='True' data-image='{% url "Ecom:get_data_product" pk=product.image.id %}'>
+                                            <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{product.color.name}}"></table>
+                                        </div>
+                                        {% for each_color in product.colors %}
+                                        <div class=" ms-2 all_color" data-active ='False' data-image='{% url "Ecom:get_data_product" pk=each_color.image %}'>
+                                            <table style="width:20px;height:20px; border-radius:50%;" bgcolor="{{each_color.color__name}}"></table>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="d-flex flex-column align-items-start justify-content-center mb-3">
+                                        <p class="m-0 me-2">size</p>
+                                        <select class="form-select form-select-lg py-1 px-2 shadow-none text-start" id="select_size" style="width:50px">
+                                        {% for each_size in all_size %}
 
-                            {% if each_size.size == product.size.size %}
-                                {% if product.count > 0 %}
-                                <option class="size_option" value="{{product.id}}" selected>{{product.size.size}}</option>
-                                {% else %}
-                                <option class="size_option" value="{{product.id}}" disabled>{{product.size.size}}</option>
-                                {% endif %}
-                            {% elif each_size.size in product.sizes %}
-                                <option class="size_option" value="{{size_id|get_item:each_size.size}}" >{{each_size.size}}</option>
-                            {% else %}
-                                <option class="size_option" value="" disabled>{{each_size.size}}</option>
-                            {% endif %}
+                                        {% if each_size.size == product.size.size %}
+                                            {% if product.count > 0 %}
+                                            <option class="size_option" value="{{product.id}}" selected>{{product.size.size}}</option>
+                                            {% else %}
+                                            <option class="size_option" value="{{product.id}}" disabled>{{product.size.size}}</option>
+                                            {% endif %}
+                                        {% elif each_size.size in product.sizes %}
+                                            <option class="size_option" value="{{size_id|get_item:each_size.size}}" >{{each_size.size}}</option>
+                                        {% else %}
+                                            <option class="size_option" value="" disabled>{{each_size.size}}</option>
+                                        {% endif %}
 
-                            {% endfor %}
-                            </select>
-                        </div>
+                                        {% endfor %}
+                                        </select>
+                                    </div>
 
-                        <div class="d-flex align-items-center mb-3" style="gap:10px">
-                            <div id="minus_button">
-                                <i class="fa-solid fa-minus"></i>
-                            </div>
-                            <input type="number" value="1" name="count" id="needed_count" style="width:50px;padding:5px;">
-                            <div id="plus_button">
-                                <i class="fa-solid fa-plus"></i>
+                                    <div class="d-flex align-items-center mb-3" style="gap:10px">
+                                        <div id="minus_button">
+                                            <i class="fa-solid fa-minus p-2 rounded-3 bg-secondary text-light"></i>
+                                        </div>
+                                        <input type="number" value="1" name="count" id="needed_count" style="width:50px;padding:5px;text-align: center;">
+                                        <div id="plus_button">
+                                            <i class="fa-solid fa-plus p-2 rounded-3 bg-secondary text-light"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 p-4 " style="box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;background-color: rgba(233, 228, 228, 0.288);">
+                                    <div class="position-relative rounded w-100 p-0 overflow-scroll" style="max-height: 350px;">
+                                        <h4 style="background-color: #07051a;" class="my-2 mb-5 text-light position-sticky top-0 start-0 p-2 text-center">Comments</h4>
+                                        {% if product.product.comment_product.all %}
+                                        {% for review in product.product.comment_product.all %}
+            
+                                        <p class=" p-2 " style="box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;">{{review.comment}}</p>
+            
+                                        {% endfor %}
+            
+                                        {% else %}
+                                        <p class="text-secondary ">No review..</p>
+                                        {% endif %}
+                                        
+                                    </div>
+                                </div>
+                                
                             </div>
                         </div>
 
                         <div class="position-relative">
-                            <p class="m-0 mb-2 p-1 text-light bg-success rounded position-absolute start-0 visually-hidden" id="signal_cart_added_success" style="width:max-content;bottom:-50px;">Added to cart</p>
-                            <p class="m-0 mb-2 p-1 text-light bg-danger rounded position-absolute start-0 visually-hidden" id="signal_cart_added_error" style="width:max-content;bottom:-50px;">try again later</p>
-                            <a href="{% url 'Ecom:addcart' %}" class="btn btn-primary" id="cart_button">add cart</a>
+                            <p class="m-0 mb-2 p-1 text-light bg-success rounded position-absolute start-0 visually-hidden" id="signal_cart_added_success" style="width:100%;bottom:-50px;">Added to cart</p>
+                            <p class="m-0 mb-2 p-1 text-light bg-danger rounded position-absolute start-0 visually-hidden" id="signal_cart_added_error" style="width:100%;bottom:-50px;">try again later</p>
+                            <a href="{% url 'Ecom:addcart' %}" class="btn btn-primary w-100" id="cart_button">add cart</a>
 
                         </div>
                     </div>
-                    <div class="col-lg-2 overflow-scroll">
-                        <div class="border border-warning rounded h-100 w-100 p-1" >
-                            <h4 class="my-2">Comments</h4>
-                            {% if product.product.comment_product.all %}
-                            {% for review in product.product.comment_product.all %}
-
-                            <p class="p-2 my-2 bg-warning rounded">{{review.comment}}</p>
-
-                            {% endfor %}
-
-                            {% else %}
-                            <p class="text-secondary">No review..</p>
-                            {% endif %}
-
-                        </div>
-                        
-                    </div>
+                    
+                   
                 </div>
             </div>
 
@@ -262,7 +374,18 @@
     let img = document.querySelectorAll('.img-zoom')
     img.forEach(ele=>{
         ele.addEventListener('click',()=>{
+
+            if (ele.dataset.active === '1'){
+                return
+            }
+
+            let previous = document.querySelector('.img-zoom[data-active = "1"]')
+            previous.dataset.active = '0'
+            previous.classList.remove('active_img')
+            ele.dataset.active = '1'
+            ele.classList.add('active_img')
             let main_img = document.querySelector(".main_img");
+
             main_img.src = ele.src;
             active_ele.removeData('elevateZoom');
             active_ele.elevateZoom();

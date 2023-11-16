@@ -4,10 +4,29 @@
 
 {% block css %} 
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base1.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<style>
+    .custom_style{
+        color:white;
+        box-shadow: none !important;
+        
+    }
+
+    input.custom_style{
+        color:white;
+    }
+
+    input.custom_style:focus {
+        color:white;
+        border:none!important;
+        outline: none;
+        border-bottom: 1px solid white !important;
+    }
+</style>
 
 {% endblock %}
 
@@ -15,58 +34,74 @@
 
 <div class="container-fluid">
     <div class="row p-0">
-        {% include 'base/adminnav.html' with page='product' %}
+        {% include 'base/adminnav.html' with page='order' %}
         <div class="col-lg-8 bodysection">
             <div class="container-fluid p-2 mt-5">
-                <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                      <tr>
-                        <th scope="col">No</th>
-                        <th scope="col">Order Id</th>
-                        <th scope="col">Product</th>
-                        <th scope="col">User</th>
-                        <th scope="col">Address</th>
-                        <th scope="col">Total Price</th>
-                        <th scope="col">Payment Method</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Detail</th>
+                <div class="row">
+                    <div class="col-12">
+                        <h4>ORDERS</h4>
+                        {% if orders %}
 
-                      </tr>
-                    </thead>
-                    <tbody>
-                        {% for each in orders %}
-                      <tr>
-                        <th scope="row">{{forloop.counter}}</th>
-                        <td>{{each.id}}</td>
-                        <td>
-                            <p style="width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                {% for each_p in each.product_cover.all %}
-                                {{each_p.products.product.name}},
-                                {% endfor %}
-                            </p>
-                        </td>
-                        <td>{{each.user.user.first_name}}</td>
-                        <td >
-                            <p style="width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{each.address}}</p>
-                        </td>
-                        <td>{{each.total_price}}</td>
-                        <td>{{each.payment_method}}</td>
-                        <td>
-                            {% if each.return_product %}
-                            returned
-                            {% else %}
-                            {{each.status}}
-                            {% endif %}
-                            
-                        </td>
-                        <td><a href="{% url 'admins:orderdetail' pk=each.id %}" class="btn btn-outline-dark">Detail</a></td>
+                        <div class="table-responsive bg-dark my-5 p-4 rounded-2">
+                            <form method="get" class="mb-3 d-flex justify-content-end">
+                                <input type="search" placeholder="search" class="custom_style text-light border-0 bg-transparent border-bottom border-light" name="search" >
+                                <button type="submit" class="custom_style border-0 bg-transparent border-bottom border-light">
+                                    <i class="fa-solid fa-search text-light"></i>
+                                </button>
+                            </form>
+                            <table class="table table-dark table-hover ">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">NO</th>
+                                        <th scope="col">ORDER Id</th>
+                                        <th scope="col">PRODUCTS</th>
+                                        <th scope="col">USER</th>
+                                        <th scope="col">ADDRESS</th>
+                                        <th scope="col">PRICE</th>
+                                        <th scope="col">PAYMENT</th>
+                                        <th scope="col">STATUS</th>
+                                        <th scope="col">DETAIL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for each in orders %}
+                                    <tr>
+                                        <th scope="row">{{forloop.counter}}</th>
+                                        <td>ORDNY{{each.id}}</td>
+                                        <td>
+                                            <p style="width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                {% for each_p in each.product_cover.all %}
+                                                {{each_p.products.product.name}},
+                                                {% endfor %}
+                                            </p>
+                                        </td>
+                                        <td>{{each.user.user.first_name}}</td>
+                                        <td >
+                                            <p style="width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{each.address}}</p>
+                                        </td>
+                                        <td>{{each.total_price}}</td>
+                                        <td>{{each.payment_method}}</td>
+                                        <td>
+                                            {% if each.return_product %}
+                                            returned
+                                            {% else %}
+                                            {{each.status}}
+                                            {% endif %}
+                                            
+                                        </td>
+                                        <td><a href="{% url 'admins:orderdetail' pk=each.id %}" class="btn btn-outline-light">Detail</a></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
 
-                        
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
+                        {% else %}
+
+                        <p>no transaction made through the wallet</p>
+
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>

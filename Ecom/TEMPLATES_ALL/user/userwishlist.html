@@ -138,36 +138,81 @@
     </div>
     
     <div class="row" id="box_container">
+        <div class="col-12 text-center">
+            <h1 class="fs-3 my-3">
+                WISH LIST
+            </h1>
+        </div>
         {% if wishlist %}
 
         {% for ele in wishlist %}
 
-        <div class="col-lg-3 p-2" id="box{{forloop.counter}}">
-            <div class="card position-relative">
-                <img src="{{ele.product.varient.image.normal_image.url}}" class="card-img-top" alt="products" style="height:20rem;object-fit: cover;">
+        
+        <div class="col-lg-3 col-6 p-3" id="box{{forloop.counter}}">
+
+            <div class="card position-relative p-3 border-0" style="box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;">
+                <div class="position-relative">
+                    <img src="{{ele.product.varient.image.normal_image.url}}" class="card-img-top rounded-3" alt="products" style="height:13rem;object-fit: cover;box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;">
+                    <div class="position-absolute p-2" style="top:70%;left:0%;background-color:green">
+                        <p class="card-text text-light">Discount {{ele.product.discount}} %</p>
+
+                    </div>
+                </div>                            
                 <div class="card-body">
-                    <h5 class="card-title">{{ele.product.name}}</h5>
-                    <p class="card-text">{{ele.product.description}}</p>
-                    <p class="card-text">$ {{ele.product.price}}</p>
-                    <p class="card-text">Brand : {{ele.product.brand.name}}</p>
-                    <p class="card-text">Ctegory : {{ele.product.category.name}}</p>
-                    <div class="d-flex  align-items-center">
-                    <p class="m-0 me-2">color : </p>
-                    <table style="width:20px;height:20px; border-radius:50%; " bgcolor="{{ele.product.varient.color.name}}"></table>
+                    <div class="d-flex my-2">
+                        {% if ele.product.rating >= 1 %}
+                        <i class="fa-solid fa-star text-warning"></i>
+                        {% else %}
+                        <i class="fa-solid fa-star text-secondary"></i>
+                        {% endif %}
+                        {% if ele.product.rating >= 2 %}
+                        <i class="fa-solid fa-star text-warning"></i>
+                        {% else %}
+                        <i class="fa-solid fa-star text-secondary"></i>
+                        {% endif %}
+                        {% if ele.product.rating >= 3 %}
+                        <i class="fa-solid fa-star text-warning"></i>
+                        {% else %}
+                        <i class="fa-solid fa-star text-secondary"></i>
+                        {% endif %}
+                        {% if ele.product.rating >= 4 %}
+                        <i class="fa-solid fa-star text-warning"></i>
+                        {% else %}
+                        <i class="fa-solid fa-star text-secondary"></i>
+                        {% endif %}
+                        {% if ele.product.rating == 5 %}
+                        <i class="fa-solid fa-star text-warning"></i>
+                        {% else %}
+                        <i class="fa-solid fa-star text-secondary"></i>
+                        {% endif %}
+
                     </div>
-                    <div>
-                    <a href="{% url 'Ecom:product_detail' pk=ele.product.varient.id %}" class="btn btn-primary">DETAIL</a>
+                  <h5 class="card-title fs-2">{{ele.product.name}}</h5>
+
+                    <div class="d-flex mb-2">
+                        <p class="card-text m-0 me-2 px-2 py-1 text-light rounded-2" style="background-color: #04011a6e;"> {{ele.product.brand.name}}</p>
+                        <p class="card-text m-0 px-2 py-1 text-light rounded-2" style="background-color: rgb(212, 83, 8);">{{ele.product.category.name}}</p>
                     </div>
+                  <p class="text-secondary m-0" style=" overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" >{{ele.product.description}}</p>
+                  <p class="card-text m-0 text-success"><small class="text-decoration-line-through me-2 text-danger">₹ {{ele.product.maximum_retail_price}}</small> ₹ {{ele.product.price}}</p>
+                  
+                  <div class="d-flex mb-2   align-items-center">
+                    <p class="m-0 me-2">color </p>
+                    <table style="width:20px;height:20px; border-radius:10%; " bgcolor="{{ele.product.varient.color.name}}"></table>
+                  </div>
+                  <div>
+                    <a href="{% url 'Ecom:product_detail' pk=ele.product.varient.id %}" class="btn p-1 rounded-3 w-100" style="background-color: rgba(119, 118, 117, 0.26);font-size: 15px;">DETAIL</a>
+                  </div>
                 </div>
-                
                 <div class="like_button" data-like="True" data-target="{{ele.product.id}}" data-remove = 'box{{forloop.counter}}'>
                     
                     <i class="fa-solid fa-heart fs-3 text-warning"></i>
                                                     
                 </div>
-                
             </div>
         </div>
+
+      
         {% endfor %}
 
         {% else %}

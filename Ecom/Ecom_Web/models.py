@@ -65,6 +65,7 @@ class ProductOrdered(models.Model):
     products = models.ForeignKey(Connector,related_name='order_product' , on_delete=models.SET_NULL , null=True , blank = True)
     quantity = models.IntegerField(blank=False , null=False , default=1)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    rating = models.IntegerField(blank=True,null=True,default=0)
 
 class Coupon(models.Model):
     coupon_code = models.CharField(max_length=20 )
@@ -92,6 +93,7 @@ class Order(models.Model):
     PAYMENT_METHOD_CHOICES = (
         ('online', 'Online Payment'),
         ('cash_on_delivery', 'Cash on Delivery'),
+        ('wallet' , 'Wallet')
     )
 
     order_date = models.DateTimeField(default=timezone.now)

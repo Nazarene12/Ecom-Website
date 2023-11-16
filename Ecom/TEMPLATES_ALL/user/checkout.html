@@ -7,6 +7,8 @@
 
 {% block css %} 
 
+<!-- overflow: hidden; text-overflow: ellipsis; white-space: nowrap; -->
+
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <link rel="stylesheet" href="{% static 'css/nav.css' %}">
 <link rel="stylesheet" href="{% static 'css/loader.css' %}">
@@ -83,66 +85,86 @@
     <div class="row">
         <div class="col-lg-6">
             <div class="container-fluid my-4">
+                <div class="row mb-3" >
                 {% for each in products %}
-                <div class="row mb-3 border rounded p-3">
-                    
-
-                    <div class="col-4">
-                        <img src="{{each.connect.image.normal_image.url}}" alt="image" class="img-fluid rounded" style="height:150px;object-fit: cover;">
-                    </div>
-
-                    <div class="col-4">
-                        <p class="fs-4 m-0">{{each.connect.product.name}}</p>
-                        <p class="fs-5 m-0" style="width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{each.connect.product.description}}</p>
-                        <div class="d-flex align-items-center" style="gap:30px;">
-                            <p class="fs-6 m-0 text-success"> ₹ {{each.connect.product.price}}</p>
-                            <p class="text-secondary m-0">Size : {{each.connect.size.size}}</p>
+                    <div class="col-lg-12 mb-3 p-2" >
+                        <div class="container-fluid p-3 rounded-3" style="box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;">
+                            <div class="row">
+                                <div class="col-lg-2 col-4">
+                                    <img src="{{each.connect.image.normal_image.url}}" alt="image" class="img-fluid rounded" style="width:100%;height:100px;object-fit: cover;">
+                                </div>
+            
+                                <div class="col-lg-6 col-6">
+                                    <p class="fs-4 m-0 fw-bold">{{each.connect.product.name}}</p>
+                                    <p class="fs-5 m-0" style="width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{each.connect.product.description}}</p>
+                                    
+            
+                                    <p class="text-success m-0">discount {{each.connect.product.discount}} %</p>
+                                    <p class="amout_product m-0" > <small class="text-decoration-line-through text-danger me-2">₹ {{each.connect.product.maximum_retail_price}}</small> ₹ {{each.connect.product.price}}</p>
+                                               
+            
+                                    
+                                </div>
+            
+                                <div class="col-lg-4 col-6">
+                                    <div class="d-flex flex-column" >
+                                        <p class="m-0  fs-6 fw-normal" style=" color:#3635357a">Size: <small class="text-dark">{{each.connect.size.size}}</small></p>
+                                        <p class="m-0  fs-6 fw-normal" style=" color:#3635357a">Color: <small class="text-dark"> {{each.connect.color.name}}</small></p>
+                                        <p class="m-0   fs-6 fw-normal" style=" color:#3635357a">Brand: <small class="text-dark">{{each.connect.product.brand.name}}</small></p>
+                                        <p class="m-0  fs-6 fw-normal" style=" color:#3635357a">Category: <small class="text-dark">{{each.connect.product.category.name}}</small></p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 col-6 text-center">
+                                    <p class="m-0  fs-6 fw-normal" >Number of quantity on this product is <small class="text-success">{{each.quantity}}</small></p>
+                                        
+                                </div>
+                            </div>
                         </div>
-
-                        <div class="d-flex" style="gap:30px;">
-                            <p class="m-0 badge bg-secondary fs-6 fw-normal">{{each.connect.color.name}}</p>
-                            <p class="m-0 badge bg-secondary fs-6 fw-normal">{{each.connect.product.brand.name}}</p>
-                            <p class="m-0 badge bg-secondary fs-6 fw-normal">{{each.connect.product.category.name}}</p>
-                        </div>
-                    </div>
 
                 </div>
                 {% endfor %}
-
-                <div class="row">
-                    <p class="m-0">Total <small class="ms-4 fs-4 fw-bold">₹ {{total_amount}}</small></p>
-                    <p class="text-success m-0"> Delivary Free</p>
+                <div class="col-lg-12 mb-3 p-2" >
+                    <div class="p-4 rounded-3" style="box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;background-color: rgba(0, 0, 0, 0.103);">
+                        <p class="m-0 text-decoration-line-through text-danger">MRP :<small class="ms-4 fs-6 fw-bold">₹ {{mrp}}</small></p>
+                        <p class="m-0">Discount :<small class="ms-4 fs-6 fw-bold text-success"> {{dp}} %</small></p>
+                        {% if coupon %}
+                        <p class="m-0">Discount Coupon :<small class="ms-4 fs-6 fw-bold">₹ {{coupon}}</small></p>
+                        {% endif %}
+                        <p class="m-0">Total :<small class="ms-4 fs-5 fw-bold text-success">₹ {{total_amount}}</small></p>
+                        <p class="text-success m-0"> Delivary Free</p>
+                        <p class=" m-0"> You can expect the delivery with in 7 days..</p>
+                    </div>
                 </div>
+                </div>
+
+                
 
             </div>
         </div>
-        <div class="col-lg-6">
+        <div class="col-lg-6 mt-5">
 
 
-            <form  method="post">
+            <form  method="post"  class="p-3 rounded-3" style="background-color: rgba(0, 0, 0, 0.103);">
                 {% csrf_token %}
-                <p  class="my-4">select the address</p>
+                <p  class="my-4 text-decoration-underline">ADDRESS</p>
                 <div class="container-fluid">
-                    <div class="row">
+                    <div class="row bg-light rounded-3">
                         
                             {% if address %}
                             {% for ism in address %}
                             <div class="col-lg-6">
-                                <div class="form-check d-flex align-items-center" style="gap:30px;">
+                                <div class="form-check d-flex align-items-center p-3" style="gap:20px;">
                                     {% if ism.primary_address %}
                                     <input class="form-check-input" name="address" type="radio" value="{{ism.id}}" id="add{{forloop.counter}}" checked>
                                     {% else %}
                                     <input class="form-check-input"  name="address" type="radio" value="{{ism.id}}" id="add{{forloop.counter}}">
                                     {% endif %}
-                                    <label class="form-check-label" for="add{{forloop.counter}}">
-                                    <div class="p-3 border rounded">
-                                            <p class="m-0">{{ism.village}}</p>
-                                            <p class="m-0">{{ism.city}}</p>
-                                            <div class="d-flex">
-                                                <p class="m-0">{{ism.district}} - </p>
-                                                <p class="m-0">{{ism.pincode}}</p>
-                                            </div>
-                                            <p class="m-0">{{ism.first_phone_number}}</p>
+                                    <label class="form-check-label" for="add{{forloop.counter}}" style="width:80%">
+                                    <div>
+                                            <p class="m-0" style=" overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ism.village}} , {{ism.city}}</p>
+                                            <p class="m-0" style=" overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ism.district}}</p>
+                                            <p class="m-0" style=" overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Pincode :{{ism.pincode}}</p>
+                                            <p class="m-0" style=" overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ism.first_phone_number}}</p>
                                             {% if ism.second_phone_number %}
                                             <p class="m-0">{{ism.second_phone_number}}</p>
                                             {% endif %}
@@ -151,7 +173,7 @@
                                             <p class="m-0">{{ism.landmark}}</p>
                                             {% endif %}
 
-                                            <a href="{% url 'Ecom:addressupdate' pk=ism.id %}?next={% url 'Ecom:checkout' %}" class="btn btn-outline-dark">CHANGE ADDRESS</a>
+                                            <a href="{% url 'Ecom:addressupdate' pk=ism.id %}?next={% url 'Ecom:checkout' %}" class="btn p-1 btn-outline-dark mt-3" style="font-size: 13px;">UPDATE</a>
 
                                     </div>
                                     </label>
@@ -165,13 +187,14 @@
                 </div>
                 
 
-                <a href="{% url 'Ecom:addaddress' %}?next={% url 'Ecom:checkout' %}" class="btn btn-outline-dark">ADD ADDRESS</a>
+                <a href="{% url 'Ecom:addaddress' %}?next={% url 'Ecom:checkout' %}" class="btn mt-3 btn-outline-dark" style="font-size: 13px;">ADD ADDRESS</a>
 
                 <p  class="my-4">payment method</p>
 
-                <select class="form-select form-select-lg mb-3 fs-6" id = "payment_method_select" name="payment_method" aria-label=".form-select-lg example" style="width: max-content;">
+                <select class="form-select  shadow-none form-select-lg mb-3 fs-6" id = "payment_method_select" name="payment_method" aria-label=".form-select-lg example" style="width: max-content;">
                     <option value="1" selected>Cash On Delivery</option>
                     <option value="2" >online</option>
+                    <option value="3" >Wallet</option>
                 </select>
                 <div class="text-center my-5">
                     <input type="submit" id="place_order_button" value="PLACE ORDER" class="btn btn-outline-dark ">
@@ -403,6 +426,22 @@
                         ).then((result) => {
                             window.location.href = '/ordersuccess/' + res.data.pk;
                         });
+                }
+                else if(res.data.error){
+                    if (res.data.account){
+                        Swal.fire(
+                            'Order Cancelled',
+                            'Add Payment to the wallet',
+                            'error'
+                        )
+                    }
+                    else if (res.data.amount){
+                        Swal.fire(
+                            'Order Cancelled',
+                            'Insufficient Fund in wallet',
+                            'error'
+                        )
+                    }
                 }
                 else{
                     Swal.fire(

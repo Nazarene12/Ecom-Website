@@ -34,7 +34,7 @@ from django.templatetags.static import static
 from Ecom_Web import form
 from.forms import CategoryForm,ProductForm,SizeCountForm,UpdateProductVarient,UpdatedProductAddForm,VarientForm,VarientCountFormSetFactory,SizeCountFormSetFactory,VarientCountColorFormSet,SizeCountFormSet, AddAditionVarientForm,AddAditionVarientColorForm,OredrFormStatus,ColorForm,SizeForm,BrandForm
 from Ecom_Web.models import UserProfile,Order,Coupon,UserWallet
-from .models import Category,Product,Connector,ProductImage,Color,Size,Brand
+from .models import Category,Product,Connector,ProductImage,Color,Size,Brand,Transaction
 
 
 from django.db.models import Count
@@ -42,6 +42,60 @@ from django.db.models.functions import TruncMonth
 # Create your views here.
 
 from django.contrib.auth.mixins import UserPassesTestMixin
+
+from django.http import HttpResponse
+from openpyxl import Workbook
+from xhtml2pdf import pisa
+from django.template.loader import get_template
+
+
+def export_to_pdf(request):
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    order = Order.objects.filter(order_date__gte = start,order_date__lte = end)
+    template_path = 'admin/salesreport.html'
+    context = {'orders': order}
+   
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+    
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response ,encoding='UTF-8')
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def export_to_excel(request):
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="products.xlsx"'
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Sales report"
+
+    # Add headers
+    headers = ["order_id","order_date","products", "user" , "total_price" ,"total_item" ,"payment_method" ]
+    ws.append(headers)
+
+    # Add data from the model
+    order = Order.objects.filter(order_date__gte = start,order_date__lte = end)
+    for i in order:
+        product=""
+        for j in i.product_cover.all():
+            product +=j.products.product.name
+
+        ws.append([f"ORD{i.id}",str(i.order_date),product,i.user.username,i.total_price,i.total_item,i.payment_method])
+
+    # Save the workbook to the HttpResponse
+    wb.save(response)
+    return response
 
 class SuperUserRequiredMixin(UserPassesTestMixin):
     def test_func(self):
@@ -129,6 +183,33 @@ def get_today_sale():
     return {'target':target , 'sale' : count}
 
 from datetime import datetime
+from django.db.models import Sum  ,Count
+
+def total_sales_year():
+    sales = Order.objects.filter(order_date__year=timezone.now().year)
+    
+    # Calculate total sales amount and count of sales for the current day
+    total_sales = sales.aggregate(total_sales_amount=Sum('total_price'), total_sales_count=Count('id'))
+    
+    # Accessing the total sales amount and count
+    return total_sales
+def total_sales_month():
+    sales = Order.objects.filter(order_date__month=timezone.now().month)
+    
+    # Calculate total sales amount and count of sales for the current day
+    total_sales = sales.aggregate(total_sales_amount=Sum('total_price'), total_sales_count=Count('id'))
+    
+    # Accessing the total sales amount and count
+    return total_sales
+def total_sales_today():
+    sales = Order.objects.filter(order_date__date=timezone.now().date())
+    
+    # Calculate total sales amount and count of sales for the current day
+    total_sales = sales.aggregate(total_sales_amount=Sum('total_price'), total_sales_count=Count('id'))
+    
+    # Accessing the total sales amount and count
+    return total_sales
+
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=False)
@@ -141,17 +222,23 @@ def home(request):
     today_sale = get_today_sale()
     dataset = get_orders_per_month(current_year)
     years = get_distinct_years()
-    return render(request , 'admin/home.html' ,{'dataset':dataset , 'years' : years , 'currentyear':current_year , 'today_sale':today_sale})
+    total_sales_year_value = total_sales_year()
+    total_sales_month_value = total_sales_month()
+    total_sales_today_value = total_sales_today()
+    return render(request , 'admin/home.html' ,{'dataset':dataset , 'years' : years , 'currentyear':current_year , 'today_sale':today_sale , 'total_sales_year_value':total_sales_year_value , 'total_sales_month_value':total_sales_month_value,'total_sales_today_value':total_sales_today_value})
 
 class Offer(TemplateView):
     template_name = "admin/offer.html" 
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context =  super().get_context_data(**kwargs)
+        search_parm = self.request.GET.get('search')
         offer_querset =  Product.objects.filter(category__active = True , brand__active = True)
+        if search_parm:
+            offer_querset = offer_querset.filter(name__icontains = search_parm)
         for each in offer_querset:
 
-            each.varient  = each.detail_product.filter(active = True).first()
+            each.varient  = each.detail_product.filter().first()
 
         context['offerproduct'] = offer_querset
 
@@ -195,15 +282,31 @@ class UserList(ListView):
     context_object_name ='users'
 
     def get_queryset(self):
-        return User.objects.filter(is_superuser=False)
+        search_term = self.request.GET.get('search')
+        obj = User.objects.filter(is_superuser=False)
+        if search_term:
+            obj = obj.filter(user__first_name__icontains=search_term)
+        return obj
     
-   
+from django.shortcuts import get_object_or_404 
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
 @method_decorator(login_required, name='dispatch')    
 class UserDetail(DetailView):
     model = UserProfile 
     template_name="admin/userdetail.html"
     context_object_name = 'user'
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context =  super().get_context_data(**kwargs)
+        user_profile = get_object_or_404(UserProfile, id=self.kwargs['pk'])
+        context['transaction'] = Transaction.objects.filter(user = user_profile.user).order_by('-id')
+        search_term = self.request.GET.get('search')
+        obj = Order.objects.filter(user= user_profile.user).order_by('-id')
+        if search_term:
+            obj = obj.filter(product_cover__products__product__name__icontains=search_term)
+       
+        context['order'] = obj
+        return context
 @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')  
 @method_decorator(login_required, name='dispatch')
 class ToggleUserActiveStatus(View):
@@ -472,6 +575,20 @@ class ProductList(ListView):
 
     def get_queryset(self):
         return Product.objects.filter(active = True)
+    
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
+@method_decorator(login_required, name='dispatch')
+class StockList(ListView):
+    model = Connector
+    template_name= 'admin/stocklist.html'
+    context_object_name ='stocks'
+
+    def get_queryset(self):
+        search_term = self.request.GET.get('search')
+        obj = Connector.objects.filter(active=True).order_by('count', '-sale')
+        if search_term:
+            obj = obj.filter(product__name__icontains=search_term)
+        return obj
 
 class ProductVarient( CreateView ):
     model = Connector
@@ -519,88 +636,6 @@ class ProductDetail(DetailView):
     #     return context
     
 
-# def add_product(request):
-#     product_form = ProductForm()
-#     # size_count_formset = SizeCountForm(prefix='size_count')
-#     if request.method == 'POST':
-#         product_form = ProductForm(request.POST, request.FILES)
-
-#         size_count_formse = formset_factory(SizeCountForm)
-#         size_count_formset = size_count_formse(request.POST)
-
-#         if product_form.is_valid() and size_count_formset.is_valid():
-#             # size_count_formset = product_form.cleaned_data['size_count_formset']
-#             # Create Product and ProductImage objects
-#             product = product_form.save(commit=False)
-#             product.brand = product_form.cleaned_data['brand']
-#             product.category = product_form.cleaned_data['category']
-#             product.save()
-
-#             normal_image = product_form.cleaned_data['normal_image']
-#             front_image = product_form.cleaned_data['front_image']
-#             back_image = product_form.cleaned_data['back_image']
-#             side_image = product_form.cleaned_data['side_image']
-
-#             product_image = ProductImage(normal_image=normal_image, front_image=front_image, back_image=back_image, side_image=side_image)
-#             product_image.save()
-
-#             color = product_form.cleaned_data['color']
-
-#             # Create Connector objects for each size and count
-#             for form in size_count_formset:
-#                 size = form.cleaned_data.get('size')
-#                 count = form.cleaned_data.get('count')
-
-#                 connector = Connector(product=product, color=color, image=product_image, size=size, count=count)
-#                 connector.save()
-
-#             return redirect('admins:productlist')  # Redirect to the product list page after successful creation
-
-
-#     return render(request, 'admin/addproduct.html', {'product_form': product_form})
-# @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=False), name='dispatch')
-# @method_decorator(login_required, name='dispatch')
-# class AddProduct(CreateView):
-#     model = Product
-#     form_class = ProductForm
-#     template_name = 'admin/addproduct.html'
-
-
-#     def form_valid(self, form):
-#         size_count_formse = formset_factory(SizeCountForm)
-#         size_count_formset = size_count_formse(self.request.POST)
-#         if size_count_formset.is_valid():
-#             # print("helo")
-#             product = form.save(commit=False)
-#             product.brand = form.cleaned_data['brand']
-#             product.category = form.cleaned_data['category']
-            
-#             product.save()
-
-#             normal_image = form.cleaned_data['normal_image']
-#             front_image = form.cleaned_data['front_image']
-#             back_image = form.cleaned_data['back_image']
-#             side_image = form.cleaned_data['side_image']
-
-#             product_image = ProductImage(normal_image=normal_image, front_image=front_image, back_image=back_image, side_image=side_image)
-#             product_image.save()
-
-            
-
-#             color = form.cleaned_data['color']
-
-#             for size_count_form in size_count_formset:
-#                 size = size_count_form.cleaned_data.get('size')
-#                 count = size_count_form.cleaned_data.get('count')
-
-#                 connector = Connector(product=product, color=color, image=product_image, size=size, count=count)
-#                 if not Connector.objects.filter(product = product).exists():
-#                     connector.first_preference = True
-#                 connector.save()
-
-#             return redirect('admins:productlist')
-#         return self.render_to_response(self.get_context_data(form=form))
-
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=False)
@@ -631,6 +666,9 @@ def update_product(request,pk):
                 product.image.side_image =request.FILES['side_image']
             product.image.save()
             product.save()
+
+            if request.GET.get('stock'):
+                return redirect('admins:stock')
             return redirect('admins:productvarient' ,pk=product.product.id)
 
 
@@ -643,6 +681,13 @@ class OrderList(ListView):
     model = Order
     template_name= 'admin/orderlist.html'
     context_object_name ='orders'
+
+    def get_queryset(self) -> QuerySet[Any]:
+        search_term = self.request.GET.get('search')
+        obj = Order.objects.all()
+        if search_term:
+            obj = obj.filter(product_cover__products__product__name__icontains=search_term)
+        return obj
 
 
 
@@ -693,6 +738,7 @@ class OrderUpdate(UpdateView):
 
 def  CouponManager(request):
     coupon = form.CouponForm()
+    search_param = request.GET.get('search')
     if request.method == "POST":
         coupon = form.CouponForm(request.POST)
         if coupon.is_valid():
@@ -700,6 +746,8 @@ def  CouponManager(request):
             messages.success(request, 'Coupon is added')
             return redirect('admins:coupon')
     all_coupon  = Coupon.objects.all()
+    if search_param:
+        all_coupon = all_coupon.filter(coupon_code__icontains = search_param)
     return render(request,'admin/coupon.html' , {'form':coupon , 'coupon' : all_coupon}) 
 
 
@@ -862,3 +910,5 @@ class AddAdditionProductVarient(CreateView):
                 connector.save()
 
         return redirect('admins:productvarient' , pk=self.kwargs['pk'])
+
+

@@ -84,9 +84,9 @@
     </div>
 </div>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-lg-4 col-2 navsection  border ">
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-4 shadow-sm col-10 order-2 order-lg-1  navsection  border ">
             <div class="border border-secondary rounded p-5 mt-3">
                 <p class="text-success">Your order is eligible for FREE Delivery.</p>
                 <p id="total_count"></p>
@@ -94,68 +94,117 @@
                 <a href="{% url 'Ecom:f_handlecart' %}" id="checkout_button">Process to buy</a>
             </div>
             <div class="input-group mt-3 mb-3">
-                <input type="text" class="form-control" id="coupon_code_value" placeholder="coupon">
-                <span class="input-group-text" id="coupon">COUPON</span>
+                <input type="text" class="form-control shadow-none" id="coupon_code_value" placeholder="coupon">
+                <span class="input-group-text bg-success text-light" id="coupon">COUPON</span>
                 <span class="input-group-text" id="cancel_coupon">CANCEL</span>
             </div>
+
+            <div>
+                {% for each in coupons %}
+
+                <div class="p-3 border rounded-2" style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="p-2 border rounded">
+                            {{each.coupon_code}}
+                            <i class=" ms-3 fa-solid fa-copy copy_icon"></i>
+                        </p>
+                        <p >Discount <small class="text-success">₹ {{each.amount_to_reduce}}</small></p>
+                    </div>
+                    <div>
+                        <p style="font-size: 15px;">To apply for this you need to purchase more than <small class="text-danger text-decoration-underline">{{each.minimum_purchase}}</small></p>
+                    </div>
+                </div>
+                {% endfor %}
+                <script>
+                    let copy_icon = document.querySelectorAll('.copy_icon')
+                    copy_icon.forEach(ele=>{
+
+                        ele.addEventListener('click' , ()=>{
+                            var textElement = ele.parentElement;
+
+                            /* Create a range and select the text */
+                            var textToCopy = textElement.textContent.trim();
+
+                            navigator.clipboard.writeText(textToCopy)
+                        })
+                    })
+                </script>
+            </div>
         </div>
-        <div class="col-lg-7 col-10 bodysection">
+        <div class="col-lg-7 order-1 order-lg-2 col-10 bodysection">
             <div class="container-fluid p-5">
                 <div class="row" id="parent_container_cart">
                     {% for each_ele in cart %}
 
-                    <div class="col-lg-12 border rounded p-2 mb-3" id="each_cart_row{{forloop.counter}}">
+                    <div class="col-lg-12 border rounded p-4 mb-3" id="each_cart_row{{forloop.counter}}" style="box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;">
 
-                        <div class="d-flex each_cart_row" style="gap:20px">
-                            {% if each_ele.connect.count == 0 %}
-                            <input type="checkbox" name="items" class="items" value="{{each_ele.id}}" disabled>
-                            {% else %}
-                            <input type="checkbox" name="items" class="items" value="{{each_ele.id}}" checked>
-                            {% endif %}
-                            <div>
-                                <img src="{{each_ele.connect.image.normal_image.url}}" alt="image"
-                                    style="width:200px;height: 200px;object-fit: cover;border-radius: 10px;">
+                        <div class="d-flex each_cart_row flex-wrap justify-content-around" style="gap:20px">
+                            <div class="d-flex" style="gap:20px">
+                                {% if each_ele.connect.count == 0 %}
+                                <input type="checkbox" name="items" class="items" value="{{each_ele.id}}" disabled>
+                                {% else %}
+                                <input type="checkbox" name="items" class="items" value="{{each_ele.id}}" checked>
+                                {% endif %}
+                                <div>
+                                    <img src="{{each_ele.connect.image.normal_image.url}}" alt="image"
+                                        style="width:100px;height: 100px;object-fit: cover;border-radius: 10px;">
+                                </div>
                             </div>
 
-                            <div>
-                                <p>{{each_ele.connect.product.name}}</p>
-                                <p class="amout_product" data-amount="{{each_ele.connect.product.price}}">₹
-                                    {{each_ele.connect.product.price}}</p>
-                                <p>size : {{each_ele.connect.size.size}}</p>
-                                <p>color : {{each_ele.connect.color.name}}</p>
+                            <div class="d-flex" style="gap:20px">
+                                <div>
+                                    <p class="m-0 fw-bold">{{each_ele.connect.product.name}}</p>
+                                    
+                                    <p class="text-success m-0">discount {{each_ele.connect.product.discount}} %</p>
+                                    <p class="amout_product m-0" data-amount="{{each_ele.connect.product.price}}">₹ <small class="text-decoration-line-through me-2">{{each_ele.connect.product.maximum_retail_price}}</small> ₹ {{each_ele.connect.product.price}}</p>
+                                    <div class="d-flex" style="gap:20px">
+                                        <p class="m-0 bg-warning rounded-2 p-1 ">size {{each_ele.connect.size.size}}</p>
+                                        <p class="m-0 bg-primary rounded-2 p-1 text-light">color {{each_ele.connect.color.name}}</p>
+                                    </div>
+                                </div>
+                               
+                            </div>
+                            <div class="d-flex flex-column justify-content-center align-items-center" style="gap:10px">
                                 {% if each_ele.connect.count == 0 %}
                                 <p class="text-danger"> currently not available</p>
                                 {% else %}
+                            
                                 <small class="text-success">In stock</small>
-                                <div class="d-flex align-items-center mb-3" style="gap:10px">
+                                <div class="d-flex align-items-center " style="gap:10px">
                                     <div class="minus_button" data-min="1">
                                         <i class="fa-solid fa-minus"></i>
                                     </div>
                                     {% if each_ele.quantity > each_ele.connect.count %}
-                                    <input type="number" data-pk="{{each_ele.id}}" value="{{each_ele.connect.count}}"
-                                        name="count" class="needed_count sufficient" style="width:50px;padding:5px;">
+                                    <input type="number"  style="height:25px;;width:40px;text-align: center;border: 1px solid var(--main-color);" data-pk="{{each_ele.id}}" value="{{each_ele.connect.count}}"
+                                        name="count" class="needed_count sufficient rounded" style="width:50px;padding:5px;">
                                     <div class="plus_button" data-max="{{each_ele.connect.count}}">
                                         <i class="fa-solid fa-plus"></i>
                                     </div>
                                     {% else %}
-                                    <input type="number" data-pk="{{each_ele.id}}" value="{{each_ele.quantity}}"
-                                        name="count" class="needed_count" style="width:50px;padding:5px;">
+                                    <input type="number"  style="height:25px;width:40px ; text-align: center;border: 1px solid var(--main-color);" data-pk="{{each_ele.id}}" value="{{each_ele.quantity}}"
+                                        name="count" class="needed_count rounded" style="width:50px;padding:5px;">
                                     <div class="plus_button" data-max="5">
                                         <i class="fa-solid fa-plus"></i>
                                     </div>
                                     {% endif %}
 
                                 </div>
+                            
                                 {% if each_ele.quantity > each_ele.connect.count %}
                                 <p class="text-danger">only {{each_ele.connect.count}} is available not
                                     {{each_ele.quantity}}</p>
                                 {% endif %}
 
                                 {% endif %}
+
+                                <div>
+                                    <button class="btn btn-primary cart_delete_button" data-delete="{{each_ele.id}}"
+                                    data-target="each_cart_row{{forloop.counter}}">Delete</button>
+                                </div>
                             </div>
+                            
                         </div>
-                        <button class="btn btn-primary cart_delete_button" data-delete="{{each_ele.id}}"
-                            data-target="each_cart_row{{forloop.counter}}">Delete</button>
+                        
                     </div>
 
                     {% endfor %}

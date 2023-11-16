@@ -5,7 +5,7 @@
 
 {% block css %} 
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base1.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
 <link rel="stylesheet" href="{% static 'css/form.css' %}">
 
@@ -20,16 +20,16 @@
 
     
     .form-control{
-        color:black;
+        color:white;
         box-shadow: none !important;
     }
 
     input.form-control{
-        color:black;
+        color:white;
     }
 
     input.form-control:focus {
-        color:black;
+        color:white;
     }
 </style>
 {% endblock %}
@@ -119,14 +119,14 @@
 <div class="modal  fade" id="cropperboard" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="m-0">Add Similar Varient</h4>
+        <div class="modal-header ">
+          <h4 class="m-0 text-dark ">Add Similar Varient</h4>
           <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body bg-dark">
             <div class="container-fluid">
-                <div class="row">
-                        <form  method="post" class=" forms" novalidate>
+                <div class="row ">
+                        <form  method="post" class=" forms d-flex flex-column justify-content-center align-items-center" novalidate>
                             {% csrf_token %}
 
 
@@ -156,7 +156,7 @@
                             {% endfor %}
 
 
-                            <div class="col-12">
+                            <div class="col-12 text-center">
                                 <input type="submit" value="ADD" name="add" class="btn btn-primary">
                             </div>
                         </form> 

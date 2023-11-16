@@ -1,6 +1,6 @@
 (() =>{
 
-    front_end_error = document.querySelector(".front_end_error_validation")
+    let front_end_error = document.querySelector(".front_end_error_validation")
 
 if (! front_end_error.classList.contains("visually-hidden")){
     front_end_error.classList.add('visually-hidden')

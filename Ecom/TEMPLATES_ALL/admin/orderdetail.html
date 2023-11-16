@@ -4,7 +4,7 @@
 
 {% block css %} 
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base1.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -15,37 +15,56 @@
 
 <div class="container-fluid">
     <div class="row p-0">
-        {% include 'base/adminnav.html' with page='product' %}
+        {% include 'base/adminnav.html' with page='order' %}
         <div class="col-lg-8 bodysection">
-            <div class="container-fluid p-2 mt-5">
-                <div class="row border rounded p-5 m-5">
-                    <div class="col-lg-6">
+            <div class="container-fluid p-2 ">
+                <div class="row ">
+                    <div class="col-12">
+                        {% include 'base/admin_top_nav.html' %}
+
+                    </div>
+                </div>
+                <div class="row rounded p-5 m-5" style="background-color: #302d2d98;">
+                    <div class="col-lg-12">
             
                         <div class="container-fluid">
                             <div class="row">
-                                {% for ele in order.product_cover.all %}
+                                {% for each in order.product_cover.all %}
             
-                                <div class="col-lg-5 me-2 mb-3">
-                    
-                                    <div>
-                                        <img src="{{ele.products.image.normal_image.url}}" alt="image" class="rounded" style="width:100px;height:100px;object-fit: cover;">
-                                    </div>
-                                    <div>
-                                        <p class="fs-4 m-0">{{ele.products.product.name}}</p>
-                                        <p class="fs-5 m-0" style="width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ele.products.product.description}}</p>
-                                        <div class="d-flex align-items-center flex-wrap" style="gap:10px;">
-                                            <p class="fs-6 m-0 text-success"> ₹ {{ele.products.product.price}}</p>
-                                            <p class="text-secondary m-0">Size : {{ele.products.size.size}}</p>
+                                <div class="col-lg-12 mb-3 p-2 " >
+                                    <div class="container-fluid bg-light p-3 rounded-3" style="box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;">
+                                        <div class="row">
+                                            <div class="col-lg-2 col-md-4 col-12">
+                                                <img src="{{each.products.image.normal_image.url}}" alt="image" class="img-fluid rounded" style="width:100%;height:100px;object-fit: cover;">
+                                            </div>
+                        
+                                            <div class="col-lg-6 col-md-6 col-12">
+                                                <p class="fs-4 m-0 fw-bold text-dark">{{each.products.product.name}}</p>
+                                                <p class="fs-5 m-0 text-dark" style="width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{each.products.product.description}}</p>
+                                                
+                        
+                                                <p class="text-success m-0">discount {{each.products.product.discount}} %</p>
+                                                <p class="amout_product m-0 text-dark" > <small class="text-decoration-line-through text-danger me-2">₹ {{each.products.product.maximum_retail_price}}</small> ₹ {{each.products.product.price}}</p>
+                                                           
+                        
+                                                
+                                            </div>
+                        
+                                            <div class="col-lg-4 col-md-6 col-12">
+                                                <div class="d-flex flex-column" >
+                                                    <p class="m-0  fs-6 fw-normal" style=" color:#3635357a">Size: <small class="text-dark">{{each.products.size.size}}</small></p>
+                                                    <p class="m-0  fs-6 fw-normal" style=" color:#3635357a">Color: <small class="text-dark"> {{each.products.color.name}}</small></p>
+                                                    <p class="m-0   fs-6 fw-normal" style=" color:#3635357a">Brand: <small class="text-dark">{{each.products.product.brand.name}}</small></p>
+                                                    <p class="m-0  fs-6 fw-normal" style=" color:#3635357a">Category: <small class="text-dark">{{each.products.product.category.name}}</small></p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 col-12 text-start my-2">
+                                                <p class="m-0  fs-6 fw-normal text-dark" >Number of quantity on this product is <small class="text-success">{{each.quantity}}</small></p>
+                                                    
+                                            </div>
                                         </div>
-                    
-                                        <div class="d-flex flex-wrap" style="gap:10px;">
-                                            <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.products.color.name}}</p>
-                                            <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.products.product.brand.name}}</p>
-                                            <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.products.product.category.name}}</p>
-                                        </div>
                                     </div>
-                    
-                    
+            
                                 </div>
                                 {% endfor %}
             
@@ -55,24 +74,26 @@
                         
                     </div>
             
-                    <div class="col-lg-4">
-                        <p class="fs-4 m-0">Total amount : ₹ {{order.total_price}}</p>
-                        <p class="fs-5 m-0">Total items : {{order.total_item}}</p>
-                        <p class="fs-5 m-0">Order Date : {{order.order_date}}</p>
+                    <div class="col-lg-7">
+                        <p class="fs-5 m-0">TOTAL AMOUNT : <small class="text-success">₹ {{order.total_price}}</small></p>
+                        <p class="fs-6 m-0">TOTAL ITEMS : {{order.total_item}}</p>
+                        <p class="fs-6 m-0">ORDER DATE : {{order.order_date}}</p>
 
                         {% if order.return_product %}
-                            Status : returned
+                        <p class="fs-5 m-0"> STATUS : returned</p>
                         {% else %}
-                        <p class="fs-5 m-0">Status :</p>{{form}}
+                                <p class="fs-6 m-0 text-decoration-underline mb-2">STATUS</p>
+                                {{form}}
                         {% endif %}
-                        <p class="fs-5 m-0">Payment : {{order.payment_method}}</p>
+                        <p class="fs-6 m-0 my-2">PAYMENT : {{order.payment_method}}</p>
             
                         
                     </div>
             
-                    <div class="col-lg-2" id="container_button">
-                        <p class="fs-4 m-0">Delivery Address :</p>
-                        <div class="p-3 " style="width: max-content;">
+                    <div class="col-lg-5" id="container_button">
+                        <p class="fs-6 m-0">USER : <a href="{% url 'admins:userdetail' pk=order.user.user.pk %}" class="nav-link text-primary d-inline">{{order.user.user.first_name}} {{order.user.user.last_name}}</a></p>
+                        <p class="fs-6 m-0">DELIVERY ADDRESS</p>
+                        <div >
                             <p class="m-0">{{order.address.village}}</p>
                             <p class="m-0">{{order.address.city}}</p>
                             <div class="d-flex">
@@ -91,7 +112,7 @@
                         </div>
                         {% if order.status == 'delivered' or order.status == 'cancel' or order.return_product %}
                         {% else %}
-                        <a href="{% url 'admins:orderupdate' pk=order.id %}" id="order_status_button" class="btn btn-outline-dark">Change</a>
+                        <a href="{% url 'admins:orderupdate' pk=order.id %}" id="order_status_button" class="btn btn-outline-light">Change</a>
                         {% endif %}
                     </div>
                     

@@ -5,22 +5,22 @@
 
 {% block css %} 
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base1.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
 <link rel="stylesheet" href="{% static 'css/form.css' %}">
 <style>
 
     .form-control{
-        color:black;
+        color:white;
         box-shadow: none !important;
     }
 
     input.form-control{
-        color:black;
+        color:white;
     }
 
     input.form-control:focus {
-        color:black;
+        color:white;
     }
     
 
@@ -80,9 +80,13 @@
             
 
             <div class="container-fluid">
-                
+                <div class="row">
+                    <div class="col-12">
+                        {% include 'base/admin_top_nav.html' %}
+                    </div>
+                </div>
                     
-                <form method="post" class=" forms" enctype="multipart/form-data" novalidate>
+                <form method="post" class="p-2 rounded-2 my-5 forms" style="background-color: #302d2d98;" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-lg-12">
@@ -206,7 +210,7 @@
                     
                             
                             <div class="w-100 text-center">
-                                <input type="submit" class="btn btn-outline-dark " value="Add Product">
+                                <input type="submit" class="btn btn-outline-light " value="Add Product">
                             </div>
                     </div>
                 </form>

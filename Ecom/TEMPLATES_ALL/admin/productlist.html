@@ -4,7 +4,7 @@
 
 {% block css %} 
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base1.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -18,13 +18,19 @@
         {% include 'base/adminnav.html' with page='product' %}
         <div class="col-lg-8 bodysection">
             <div class="container-fluid p-5">
-                <div class="row mb-4">
-                    <a href="{% url 'admins:add_product' %}" class="btn btn-primary" style="width:max-content">ADD PRODUCT</a>
+                <div class="row">
+                    <div class="col-12">
+                        {% include 'base/admin_top_nav.html' %}
+                    </div>
+                </div>
+                <div class="row my-4 p-2">
+
+                    <a href="{% url 'admins:add_product' %}" class="btn btn-primary" style="width:max-content">NEW PRODUCT</a>
                 </div>
                 <div class="row" id="container_product">
                     {% for ele in products %}
 
-                    <div class="col-lg-4 col-md-4 col-6 " id="product_box{{forloop.counter}}">
+                    <div class="col-lg-4 mb-3 col-md-4 col-6 " id="product_box{{forloop.counter}}">
                         <div class="card" >
                             {% for varient in ele.detail_product.all %}
                                 {% if varient.first_preference %}
@@ -32,16 +38,16 @@
                                 {% endif %}
                             {% endfor %}
                             <div class="card-body">
-                              <h5 class="card-title">Name :{{ele.name}}</h5>
-                              <p class="card-text m-0">Price :{{ele.price}}</p>
+                              <h5 class="card-title text-dark">Name :{{ele.name}}</h5>
+                              <p class="card-text m-0 text-dark">Price :{{ele.price}}</p>
                               <div>
                                 <div class="d-flex">
-                                    <p class="m-0 me-2">Category</p>
-                                    <a href="" class="me-2">{{ele.category.name}}</a>
+                                    <p class="m-0 me-2 text-dark">Category</p>
+                                    <a href="" class="me-2 text-dark">{{ele.category.name}}</a>
                                 </div>
                                 <div class="d-flex">
-                                    <p class="m-0 me-2">Brand</p>
-                                    <a href="" class="me-2">{{ele.brand.name}}</a>
+                                    <p class="m-0 me-2 text-dark">Brand</p>
+                                    <a href="" class="me-2 text-dark">{{ele.brand.name}}</a>
                                 </div>
                               </div>
 

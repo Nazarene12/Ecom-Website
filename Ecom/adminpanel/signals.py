@@ -6,7 +6,8 @@ from .models import Connector , ProductImage,Product,Brand
 @receiver(pre_save, sender=Connector)
 def delete_product_if_count_zero(sender, instance, **kwargs):
     if instance.count == 0:
-        instance.active = False
+        # instance.active = False
+        pass
 
 @receiver(pre_delete, sender=Connector)
 def delete_product_media_if_one_connector_deleted(sender, instance, **kwargs):

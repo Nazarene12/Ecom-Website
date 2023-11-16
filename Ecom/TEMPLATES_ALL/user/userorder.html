@@ -88,75 +88,39 @@
         text-align: center !important
     }
 
-    ol.progtrckr {
-    margin: 0;
-    padding: 0;
-    list-style-type :none;
-}
-
-ol.progtrckr li {
-    display: inline-block;
-    text-align: center;
-    line-height: 3.5em;
-}
-
-ol.progtrckr[data-progtrckr-steps="2"] li { width: 49%; }
-ol.progtrckr[data-progtrckr-steps="3"] li { width: 30%; }
-ol.progtrckr[data-progtrckr-steps="4"] li { width: 20%; }
-ol.progtrckr[data-progtrckr-steps="5"] li { width: 19%; }
-ol.progtrckr[data-progtrckr-steps="6"] li { width: 16%; }
-ol.progtrckr[data-progtrckr-steps="7"] li { width: 14%; }
-ol.progtrckr[data-progtrckr-steps="8"] li { width: 12%; }
-ol.progtrckr[data-progtrckr-steps="9"] li { width: 11%; }
-
-ol.progtrckr li.progtrckr-done {
-    color: black;
-    border-bottom: 4px solid yellowgreen;
-}
-ol.progtrckr li.progtrckr-todo {
-    color: silver; 
-    border-bottom: 4px solid silver;
-}
-
-ol.progtrckr li:after {
-    content: "\00a0\00a0";
-}
-ol.progtrckr li:before {
-    position: relative;
-    bottom: -2.5em;
-    float: left;
-    left: 50%;
-    line-height: 1em;
-}
-ol.progtrckr li.progtrckr-done:before {
-    content: "\2713";
-    color: white;
-    background-color: yellowgreen;
-    height: 2.2em;
-    width: 2.2em;
-    line-height: 2.2em;
-    border: none;
-    border-radius: 2.2em;
-    position:absolute;
-    top:100%;
-    left:100%;
-    z-index: 100;
-    transform: translate(-50%, -50%);
-
-}
-ol.progtrckr li.progtrckr-todo:before {
-    content: "\039F";
-    color: silver;
-    background-color: white;
-    font-size: 2.2em;
-    height:max-content;
-    position:absolute;
-    top:100%;
-    left:100%;
-    transform: translate(-50%, -30%);
-}
 
 
+</style>
+
+<style>
+    .success_line_track::before{
+        content: '\2713';
+        position: absolute;
+        color:white;
+        top:0px;
+        left:50%;
+        transform: translate(-50%,0%);
+        background-color: rgb(3, 250, 3 ,1);
+        width:20px;
+        height:20px;
+        border-radius: 50%;
+        text-align: center;
+
+    }
+    .not_success_line_track::before{
+        content: 'x';
+        position: absolute;
+        color:white;
+        top:0px;
+        left:50%;
+        transform: translate(-50%,0%);
+        background-color: rgb(95, 95, 95);
+        width:20px;
+        height:20px;
+        border-radius: 50%;
+        text-align: center;
+
+    }
 </style>
 
 
@@ -194,96 +158,139 @@ ol.progtrckr li.progtrckr-todo:before {
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-12 text-center fs-3 my-4">
+            <h1>ORDERS</h1>
+        </div>
+    </div>
     
     {% for each in orders %}
-    <div class="row border rounded p-5 m-5">
-        <div class="col-lg-5">
+    <div class="row rounded p-5 m-5" style="box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;">
+        <div class="col-lg-12">
 
             <div class="container-fluid">
-                <div class="row">
                     {% for ele in each.product_cover.all %}
-                    
-                    <div class="col-lg-6 mb-3">
-        
-                        <div>
-                            <img src="{{ele.products.image.normal_image.url}}" alt="image" class="rounded" style="width:150px;height:150px;object-fit: cover;">
-                        </div>
-                        <div>
-                            <p class="fs-4 m-0">{{ele.products.product.name}}</p>
-                            <p class="fs-5 m-0" style="width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ele.products.product.description}}</p>
-                            <div class="d-flex align-items-center" style="gap:30px;">
-                                <p class="fs-6 m-0 text-success"> ₹ {{ele.products.product.price}}</p>
-                                <p class="text-secondary m-0">Size : {{ele.products.size.size}}</p>
-                            </div>
-        
-                            <div class="d-flex flex-wrap" style="gap:10px;">
-                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.products.color.name}}</p>
-                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.products.product.brand.name}}</p>
-                                <p class="m-0 badge bg-secondary fs-6 fw-normal">{{ele.products.product.category.name}}</p>
-                            </div>
-                        </div>
 
-                        <div class="mt-3">
-                            <button class="btn btn-outline-dark review" data-target="{% url 'Ecom:comment' pk=ele.products.product.id %}">REVIEW</button>
+                <div class="row mb-3 justify-content-center align-items-center p-3 rounded-3" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;">
+
+
+                    <div class="col-lg-2">
+                        <div>
+                            <img src="{{ele.products.image.normal_image.url}}" alt="image" class="rounded" style="width:100px;height:100px;object-fit: cover;">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <p class="fs-4 m-0">{{ele.products.product.name}}</p>
+                        <p class="fs-5 m-0" style="width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ele.products.product.description}}</p>
+                        <div class="d-flex flex-column align-items-start" >
+                            <p class="text-success m-0">discount {{ele.products.product.discount}} %</p>
+                            <p class="amout_product m-0" data-amount="{{ele.products.product.price}}"><small class="text-decoration-line-through text-danger me-2">₹ {{ele.products.product.maximum_retail_price}}</small> ₹ {{ele.products.product.price}}</p>
+                        </div>
+                    </div>
+
+                    
+
+                    <div class="col-lg-2 col-6">
+                        <div class="d-flex flex-column text-center" style="gap:20px">
+                            <p class="m-0 bg-warning rounded-2 p-1 ">size {{ele.products.size.size}}</p>
+                            <p class="m-0 bg-primary rounded-2 p-1 text-light">color {{ele.products.color.name}}</p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2 col-6">
+                        <div class="d-flex flex-column text-center" style="gap:20px">
+                            <p class=" m-0 me-2 px-2 py-1 text-light rounded-2" style="background-color: #04011a6e;"> {{ele.products.product.brand.name}}</p>
+                            <p class=" m-0 px-2 py-1 text-light rounded-2" style="background-color: rgb(212, 83, 8);">{{ele.products.product.category.name}}</p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2 mt-2 mt-lg-0">
+                        <p class="m-0">Quantity purchased on this product is {{ele.quantity}}</p>
+                        <p class="m-0 text-secondary"><small class="text-danger">Note : </small> Register on the website to get the warrenty</p>
+                    </div>
+
+                    <div class="col-lg-2">
+
+                        <div  >
+                            <button class="btn text-decoration-underline review p-1 text-success" style="font-size: 13px;"  data-target="{% url 'Ecom:comment' pk=ele.products.product.id %}">REVIEW</button>
                         </div>
                         
-        
+                        
+                        
+                        {% if ele.rating == 0 %}
+
+                            {% if each.status == 'delivered' or each.return_product %}
+
+                            <div class="mt-2"  style="gap:1px" >
+                                <button id="ratebutton{{forloop.counter}}" style="font-size: 13px;" class="btn p-1 text-decoration-underline p-1 text-warning rating" data-delete="ratebutton{{forloop.counter}}" data-target="{% url 'Ecom:ratting' pk=ele.id %}">RATE</button>
+                            </div>
+
+                            {% endif %}
+
+
+                        {% else %}
+
+                        <div id="star" class="{% if ele.rating == 0 %} d-none {% else %} d-flex {% endif %} my-2">
+                            {% if ele.rating >= 1 %}
+                            <i class="fa-solid fa-star text-warning"></i>
+                            {% else %}
+                            <i class="fa-solid fa-star text-secondary"></i>
+                            {% endif %}
+                            {% if ele.rating >= 2 %}
+                            <i class="fa-solid fa-star text-warning"></i>
+                            {% else %}
+                            <i class="fa-solid fa-star text-secondary"></i>
+                            {% endif %}
+                            {% if ele.rating >= 3 %}
+                            <i class="fa-solid fa-star text-warning"></i>
+                            {% else %}
+                            <i class="fa-solid fa-star text-secondary"></i>
+                            {% endif %}
+                            {% if ele.rating >= 4 %}
+                            <i class="fa-solid fa-star text-warning"></i>
+                            {% else %}
+                            <i class="fa-solid fa-star text-secondary"></i>
+                            {% endif %}
+                            {% if ele.rating == 5 %}
+                            <i class="fa-solid fa-star text-warning"></i>
+                            {% else %}
+                            <i class="fa-solid fa-star text-secondary"></i>
+                            {% endif %}
+
+                        </div>
+                        {% endif %}
+
                     </div>
+                </div>
+                    
                     {% endfor %}
 
-                </div>
             </div>
 
             
         </div>
 
-        <div class="col-lg-5">
-            <p class="fs-4 m-0">Total amount : ₹ {{each.total_price}}</p>
-            <p class="fs-5 m-0">Total items : {{each.total_item}}</p>
-            <p class="fs-5 m-0">Order Date : {{each.order_date}}</p>
-            
-            <p class="fs-5 m-0" id ="status{{forloop.counter}}">Status :{% if each.return_product %} Returned {% else %} {{each.status}} {% endif %} </p>
-            <p class="fs-5 m-0">Payment : {{each.payment_method}}</p>
-
-            <div>
-                <ol class="progtrckr position-relative" data-progtrckr-steps="4">
-                    <li class="progtrckr-done position-relative">
-                        Order
-                    </li>
-                    {% if each.status == 'cancel' %}
-                    <li class="progtrckr-done position-relative">Cancel</li>
-                    {% elif each.return_product %}
-                    <li class="progtrckr-done position-relative">Return</li>
-                    {% else %}
-                        {% if each.status == 'delivered' %}
-                        <li class="progtrckr-done position-relative">Production</li>
-                        <li class="progtrckr-done position-relative">Shipped</li>
-                        <li class="progtrckr-done position-relative">Delivered</li>
-                        {% elif each.days_since_order > 4 %}
-                        <li class="progtrckr-done position-relative">Production</li>
-                        <li class="progtrckr-todo position-relative">Shipped</li>
-                        <li class="progtrckr-todo position-relative">Delivered</li>
-                        {% elif each.days_since_order > 2 %}
-                        <li class="progtrckr-done position-relative">Production</li>
-                        <li class="progtrckr-done position-relative">Shipped</li>
-                        <li class="progtrckr-todo position-relative">Delivered</li>
-                        {% else %}
-                        <li class="progtrckr-todo position-relative">Production</li>
-                        <li class="progtrckr-todo position-relative">Shipped</li>
-                        <li class="progtrckr-todo position-relative">Delivered</li>
-                        {% endif %}
-                    {% endif %}
-                </ol>
+        <div class="col-lg-4">
+            <div class="p-3 rounded-2" style="height:max-content;background-color: rgba(228, 227, 227, 0.966);">
+                <p class="fs-4 m-0">Total amount <small class="text-success">₹ {{each.total_price}}</small></p>
+                <p class="fs-5 m-0"><small class="text-secondary fs-6" >Total items  </small> {{each.total_item}}</p>
+                <p class="fs-5 m-0"><small class="text-secondary fs-6" >Order Date</small> {{each.order_date}}</p>
+                
+                <p class="fs-5 m-0" id ="status{{forloop.counter}}"><small class="text-secondary fs-6" >Status </small>{% if each.return_product %} Returned {% else %} {{each.status}} {% endif %} </p>
+                <p class="fs-6 m-0 text-secondary">{{each.payment_method}}</p>
             </div>
+
+            
         </div>
 
-        <div class="col-lg-2">
-            <p class="fs-4 m-0">Delivery Address :</p>
-            <div class="p-3 " style="width: max-content;">
-                <p class="m-0">{{each.address.village}}</p>
-                <p class="m-0">{{each.address.city}}</p>
+        <div class="col-lg-4">
+            <p class="fs-4 m-0">DELIVERY ADDRESS</p>
+            <div class="p-3 ">
+                <p class="m-0 text-truncate">{{each.address.village}} , {{each.address.city}}</p>
                 <div class="d-flex">
-                    <p class="m-0">{{each.address.district}} - </p>
+                    <p class="m-0">{{each.address.district}}-</p>
                     <p class="m-0">{{each.address.pincode}}</p>
                 </div>
                 <p class="m-0">{{each.address.first_phone_number}}</p>
@@ -295,24 +302,136 @@ ol.progtrckr li.progtrckr-todo:before {
                 <p class="m-0">{{each.address.landmark}}</p>
                 {% endif %}
 
+                {% if each.status == 'delivered' or each.status == 'cancel' or each.return_product %}
+                {% else %}
+                <a href="{% url 'Ecom:cancelorder' pk=each.id %}" data-set="{{forloop.counter}}" class="btn  cancel_button text-light" style="background-color: var(--main-color);padding: 2px 30px;">Cancel Order</a>
+                {% endif %}
+                {% if each.status == 'delivered' and not each.return_product %}
+                <a href="{% url 'Ecom:returnorder' pk=each.id %}" data-set="{{forloop.counter}}" class="btn  return_button text-light" style="background-color: var(--main-color);padding: 2px 30px;">Return</a>
+                {% endif %}
+
             </div>
-            {% if each.status == 'delivered' or each.status == 'cancel' or each.return_product %}
-            {% else %}
-            <a href="{% url 'Ecom:cancelorder' pk=each.id %}" data-set="{{forloop.counter}}" class="btn btn-outline-dark cancel_button">Cancel Order</a>
-            {% endif %}
-            {% if each.status == 'delivered' and not each.return_product %}
-            <a href="{% url 'Ecom:returnorder' pk=each.id %}" data-set="{{forloop.counter}}" class="btn btn-outline-dark return_button">Return</a>
-            {% endif %}
+            
 
         </div>
+
+        <div class="col-lg-4">
+            
+            <div class="d-flex" style="gap:20px">
+                <div class="d-flex flex-column justify-content-center">
+                    <div class="vr opacity-100 success_line_track position-relative" style="width:3px;background-color: rgb(3, 250, 3 ,1);height: 60px;"></div>
+                </div>
+                <div>
+                    <p class="m-0">Ordered</p>
+                    <p class="m-0">{{each.order_date}}</p>
+                </div>
+            </div>
+            {% if each.status == 'cancel' %}
+
+            <div class="d-flex" style="gap:20px">
+                <div class="d-flex flex-column justify-content-center">
+                    <div class="vr opacity-100 success_line_track position-relative" style="width:3px;background-color: rgb(3, 250, 3 ,1);height: 60px;"></div>
+                </div>
+                <div>
+                    <p class="m-0">Canceled</p>
+                </div>
+            </div>
+
+            
+
+            {% else %}
+
+                {% if each.days_since_order > 2 or each.status == 'delivered' %}
+                <div class="d-flex" style="gap:20px">
+                    <div class="d-flex flex-column justify-content-center">
+                        <div class="vr opacity-100 success_line_track position-relative" style="width:3px;background-color: rgb(3, 250, 3 ,1);height: 60px;"></div>
+                    </div>
+                    <div>
+                        <p class="m-0">Production</p>
+                        <p class="m-0 text-secondary">Expect delivery in 4 days</p>
+                    </div>
+                </div>
+                {% else %}
+
+                <div class="d-flex" style="gap:20px">
+                    <div class="d-flex flex-column justify-content-center">
+                        <div class="vr opacity-100 not_success_line_track position-relative" style="width:3px; background-color: rgb(95, 95, 95);height: 60px;"></div>
+                    </div>
+                    <div>
+                        <p class="m-0">Production</p>
+                        <p class="m-0 text-secondary">will be in production in 2 days</p>
+                    </div>
+                </div>
+
+                {% endif %}
+                {% if each.days_since_order > 4 or each.status == 'delivered' %}
+                <div class="d-flex" style="gap:20px">
+                    <div class="d-flex flex-column justify-content-center">
+                        <div class="vr opacity-100 success_line_track position-relative" style="width:3px;background-color: rgb(3, 250, 3 ,1);height: 60px;"></div>
+                    </div>
+                    <div>
+                        <p class="m-0">Shipping</p>
+                        <p class="m-0 text-secondary">Expect delivery in 2 days</p>
+                    </div>
+                </div>
+                {% else %}
+
+                <div class="d-flex" style="gap:20px">
+                    <div class="d-flex flex-column justify-content-center">
+                        <div class="vr opacity-100 not_success_line_track position-relative" style="width:3px; background-color: rgb(95, 95, 95);height: 60px;"></div>
+                    </div>
+                    <div>
+                        <p class="m-0">Shipping</p>
+                        <p class="m-0 text-secondary">shipped in 4 days</p>
+                    </div>
+                </div>
+
+                {% endif %}
+                {% if each.status == 'delivered' or each.return_product %}
+                <div class="d-flex" style="gap:20px">
+                    <div class="d-flex flex-column justify-content-center">
+                        <div class="vr opacity-100 success_line_track position-relative" style="width:3px;background-color: rgb(3, 250, 3 ,1);height: 60px;"></div>
+                    </div>
+                    <div>
+                        <p class="m-0">Delivered</p>
+                    </div>
+                </div>
+                {% else %}
+
+                <div class="d-flex" style="gap:20px">
+                    <div class="d-flex flex-column justify-content-center">
+                        <div class="vr opacity-100 not_success_line_track position-relative" style="width:3px; background-color: rgb(95, 95, 95);height: 60px;"></div>
+                    </div>
+                    <div>
+                        <p class="m-0">Delivered</p>
+                    </div>
+                </div>
+
+                {% endif %}
+                {% if each.return_product %}
+                <div class="d-flex" style="gap:20px">
+                    <div class="d-flex flex-column justify-content-center">
+                        <div class="vr opacity-100 success_line_track position-relative" style="width:3px;background-color: rgb(3, 250, 3 ,1);height: 60px;"></div>
+                    </div>
+                    <div>
+                        <p class="m-0">Returned</p>
+                    </div>
+                </div>
+                
+                {% endif %}
+
+                
+            {% endif %}
+        </div>
         
+       
 
     </div>
     {% endfor %}
 
 </div>
 
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="exampleModal" tabindex="-1"  aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header text-center">
@@ -326,6 +445,72 @@ ol.progtrckr li.progtrckr-todo:before {
             <button class="btn btn-outline-dark mt-4" id="add_review">ENTER</button>
         </div>          
           
+        
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .rate {
+      float: left;
+      height: 46px;
+      padding: 0 10px;
+  }
+  .rate:not(:checked) > input {
+      position:absolute;
+      opacity: 0;
+  }
+  .rate:not(:checked) > label {
+      float:right;
+      width:1em;
+      overflow:hidden;
+      white-space:nowrap;
+      cursor:pointer;
+      font-size:30px;
+      color:#ccc;
+  }
+  .rate:not(:checked) > label:before {
+      content: '★ ';
+  }
+  .rate > input:checked ~ label {
+      color: #ffc700;    
+  }
+  .rate:not(:checked) > label:hover,
+  .rate:not(:checked) > label:hover ~ label {
+      color: #deb217;  
+  }
+  .rate > input:checked + label:hover,
+  .rate > input:checked + label:hover ~ label,
+  .rate > input:checked ~ label:hover,
+  .rate > input:checked ~ label:hover ~ label,
+  .rate > label:hover ~ input:checked ~ label {
+      color: #c59b08;
+  }
+  </style>
+
+
+  <div class="modal fade" id="exampleModalrate" tabindex="-1"  aria-hidden="true">-
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header text-center">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body d-flex flex-column justify-content-center align-items-center">
+          <h1 class="modal-title fs-5" data-delete="" data-target="" id="exampleModalLabel">RATING</h1>
+          
+          <div class="rate my-5">
+            <input type="radio" id="star5" name="rate" value="5" />
+            <label for="star5" title="text">5 stars</label>
+            <input type="radio" id="star4" name="rate" value="4" />
+            <label for="star4" title="text">4 stars</label>
+            <input type="radio" id="star3" name="rate" value="3" />
+            <label for="star3" title="text">3 stars</label>
+            <input type="radio" id="star2" name="rate" value="2" />
+            <label for="star2" title="text">2 stars</label>
+            <input type="radio" id="star1" name="rate" value="1" />
+            <label for="star1" title="text">1 star</label>
+          </div>
+        </div>
         
       </div>
     </div>
@@ -408,7 +593,6 @@ ol.progtrckr li.progtrckr-todo:before {
     return_button.forEach(ele=>{
 
         ele.addEventListener('click' ,(e)=>{
-
             e.preventDefault()
 
             Swal.fire({
@@ -494,6 +678,9 @@ ol.progtrckr li.progtrckr-todo:before {
         })
     })
 
+
+
+
     let add_review = document.getElementById('add_review')
 
     add_review.addEventListener('click',()=>{
@@ -547,6 +734,68 @@ ol.progtrckr li.progtrckr-todo:before {
         }
     })
 
+
+
+    const myModalrate = new bootstrap.Modal(document.getElementById('exampleModalrate'))
+
+    const exampleModalLabel = document.getElementById('exampleModalLabel')
+    let rate = document.querySelectorAll('.rating');
+
+    rate.forEach(ele=>{
+
+        ele.addEventListener('click' , ()=>{
+            // console.log('d');
+            myModalrate.show()
+            exampleModalLabel.dataset.target = ele.dataset.target
+            exampleModalLabel.dataset.delete = ele.dataset.delete
+        })
+    })
+
+    let radios = document.querySelectorAll('input[type="radio"]');
+  // Add an event listener to each radio button
+    radios.forEach(radio => {
+    radio.addEventListener('click', (e) => {
+      // Prevent the default action
+      e.preventDefault();
+      myModalrate.hide()
+      console.log(e.target.value ,exampleModalLabel.dataset.target);
+      // Log the value of the selected radio button
+      let formData = new FormData()
+      formData.append('value' , e.target.value)
+      axios.post(exampleModalLabel.dataset.target , formData)
+      .then(function(res) {
+  
+            if(res.data.success){
+                console.log('yes')
+                let element_delete =document.getElementById(exampleModalLabel.dataset.delete)
+                let parent_element = element_delete.parentElement
+                parent_element.classList.add('d-flex')
+
+                element_delete.remove()
+
+                for (var i= 1 ; i<= 5 ; i++){
+                    if(i  <= parseInt(e.target.value)){
+                        parent_element.innerHTML += `<i class="fa-solid fa-star text-warning"></i>`
+                    }
+                    else{
+                        parent_element.innerHTML += `<i class="fa-solid fa-star text-secondary"></i>`
+                    }
+                    
+                }
+
+
+            }
+            else{
+                console.log('error')
+            }
+
+      })
+      .catch(function(error){
+        console.error(error)
+      })
+      
+   });
+  });
 </script>
 
 {% endblock %}

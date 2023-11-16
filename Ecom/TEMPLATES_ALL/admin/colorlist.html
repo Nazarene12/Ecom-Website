@@ -6,7 +6,7 @@
 
 {% block css %} 
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base1.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
 <link rel="stylesheet" href="{% static 'css/form.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -31,11 +31,17 @@ input.form-control{
 
 <div class="container-fluid">
     <div class="row p-0">
-        {% include 'base/adminnav.html' with page='category' %}
+        {% include 'base/adminnav.html' with page='color' %}
         <div class="col-lg-8 bodysection">
             <div class="container-fluid">
-                <div class="row justify-content-center">
-                    <div class="col-12 p-4 rounded">
+                <div class="row ">
+                    <div class="col-12">
+                        {% include 'base/admin_top_nav.html' %}
+
+                    </div>
+                </div>
+                <div class="row my-5 justify-content-center">
+                    <div class="col-12 p-4 rounded" style="background-color: #302d2d98;">
                         <h5 class="text-center text-light">ADD COLOR</h5>
                         <p class="front_end_error_validation text-light bg-danger visually-hidden p-2 rounded mt-3"></p>
 
@@ -53,7 +59,7 @@ input.form-control{
                                             {% if ele.help_text %}
                     
                                                 <div class="text-start">
-                                                    <small class="text-danger">{{ele.help_text}}</small>
+                                                    <small class="text-light">{{ele.help_text}}</small>
                                                 </div>
                     
                                             {% endif %}
@@ -71,7 +77,7 @@ input.form-control{
                                         {% endfor %}
                                     </div>
                                     <div class="col-4">
-                                        <input type="submit" class="btn btn-outline-dark w-100 p-2" name="add" value="ADD">
+                                        <input type="submit" class="btn btn-outline-light w-100 p-2" name="add" value="ADD">
                                     </div>
                                 </div>
                             </div>
@@ -108,12 +114,12 @@ input.form-control{
 
                                         <div class="bg-light d-flex justify-content-around align-items-start border rounded p-2">
                                             <div class="me-2">
-                                                <p>{{color.name}}</p>
+                                                <p class="text-dark">{{color.name}}</p>
                                                 <table style="width:50px;height:25px;" bgcolor="{{color.color}}" class="rounded"></table>
                                             </div>
 
                                             <div>
-                                                <a href="{% url 'admins:deletecolor' pk=color.id %}" data-target="{{color.id}}" class="delete_color text-danger"><i class="fa-solid fa-xmark"></i></a>
+                                                <a href="{% url 'admins:deletecolor' pk=color.id %}" data-target="{{color.id}}" class="delete_color "><i class="fa-solid fa-xmark text-danger"></i></a>
                                             </div>
                                         </div>
                                     </div>

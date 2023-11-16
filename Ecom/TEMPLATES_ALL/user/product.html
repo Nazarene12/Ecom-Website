@@ -54,6 +54,80 @@
 
 </style>
 
+
+<style>
+
+    form {
+      position: relative;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, 0%);
+      transition: all 1s;
+      width: 50%;
+      min-width: 300px;
+      height: 30px;
+      background: white;
+      box-sizing: border-box;
+      /* border-radius: 25px; */
+      border: 4px solid white;
+      padding: 15px;
+      /* border-bottom:1px solid rgba(128, 128, 128, 0.621); */
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
+
+    }
+    
+    input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 90%;
+      height: 25.5px;
+      line-height: 30px;
+      outline: 0;
+      border: 0;
+      display: block;
+      font-size: 1em;
+      border-radius: 20px;
+      padding: 0 20px;
+      overflow: hidden;
+    }
+    
+    .fa {
+      box-sizing: border-box;
+      padding: 5px;
+      width: 24.5px;
+      height: 23.5px;
+      position: absolute;
+      top: -4px;
+      right: 0;
+      border-radius: 50%;
+      color: #07051a;
+      text-align: center;
+      font-size: 14px;
+      transition: all 1s;
+      margin:5px;
+    }
+    
+    form:hover,
+    form:valid {
+
+      cursor: pointer;
+    }
+    
+   
+    
+    form:hover .fa,
+    form:valid .fa {
+      background: #07051a;
+      color: white;
+    }
+    
+    
+    
+    
+    
+    </style>
+
 {% endblock %}
 
 
@@ -69,196 +143,170 @@
     </div>
 </div>
 
-<div class="container">
-    <div class="verticals ten offset-by-one">
-        <ol class="breadcrumb breadcrumb-fill1">
-            <li><a href="{% url 'Ecom:home' %}">Home</a></li>
-            <li><a href="{% url 'Ecom:products' %}" class="maincolor">Products</a></li>           
-        </ol>
-    </div>
+
+
+
     
 </div>
 
-<style>
+<div class="container-fluid mb-3 p-3 rounded-3 position-sticky top-0 start-0" style="z-index: 300;background-color: #fff; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;" >
+    <div class="row justify-content-center align-items-center">
+        
+        
+        <div class="col-1">
+            <nav class="navbar ">
+      
 
-form {
-  position: relative;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, 0%);
-  transition: all 1s;
-  width: 50px;
-  height: 50px;
-  background: white;
-  box-sizing: border-box;
-  border-radius: 25px;
-  border: 4px solid white;
-  padding: 5px;
-}
-
-input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 42.5px;
-  line-height: 30px;
-  outline: 0;
-  border: 0;
-  display: none;
-  font-size: 1em;
-  border-radius: 20px;
-  padding: 0 20px;
-}
-
-.fa {
-  box-sizing: border-box;
-  padding: 10px;
-  width: 42.5px;
-  height: 42.5px;
-  position: absolute;
-  top: 0;
-  right: 0;
-  border-radius: 50%;
-  color: #07051a;
-  text-align: center;
-  font-size: 1.2em;
-  transition: all 1s;
-}
-
-form:hover,
-form:valid {
-  width: 200px;
-  cursor: pointer;
-}
-
-form:hover input,
-form:valid input {
-  display: block;
-}
-
-form:hover .fa,
-form:valid .fa {
-  background: #07051a;
-  color: white;
-}
-
-
-
-
-
-</style>
-<div class="container">
-    <div class="row">
-        <div class="col-lg-2 col-5 navsection p-2">
+                <button
+                  class="navbar-toggler shadow-none p-2"
+                  type="button"
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#filter"
+                  aria-controls="filter"
+                >
+                  <i class="fa-solid fa-filter fs-5 act"></i>
+                </button>
+                <div
+                  class="offcanvas offcanvas-end flex-lg-grow-0"
+                  tabindex="-1"
+                  id="filter"
+                  aria-labelledby="filterLabel"
+                  style="top:150px;"
+                >
+                  <div class="offcanvas-header  bg-light justify-content-end">
+                    <button
+                      type="button"
+                      class="shadow-none border-0 bg-transparent"
+                      data-bs-dismiss="offcanvas"
+                      aria-label="Close"
+                    >
+                      <i class="fa-solid fa-xmark fs-4 text-dark"></i>
+                    </button>
+                  </div>
+        
+                  <div class="offcanvas-body bg-light">
+                      <div>
+                          <div class="card mb-2 rounded"  style="box-shadow: rgba(0, 0, 0, 0.09) 0px 3px 12px;" >
+                              
+                              <div class="card-header text-center">
+                                Price
+                              </div>
+                              <ul class="list-group list-group-flush text-center">
+                              {% if price_param and not price_start_param %}
+                              
+                                  <li class="list-group-item f-item main-background" data-option = 'price' data-select = 'True' data-value="1000">Below 1000</li>
+                              {% else %}
+                                  <li class="list-group-item f-item" data-option = 'price' data-select = 'False' data-value="1000">Below 1000</li>
+          
+                              {% endif %}
+          
+                              {% if price_param and price_start_param %}
+                                  <li class="list-group-item   f-item main-background" data-option = 'price' data-select = 'True' data-value="2000" data-start="1000">1000 - 2000</li>
+                              {% else %}
+                                  <li class="list-group-item   f-item" data-option = 'price' data-select = 'False' data-value="2000" data-start="1000">1000 - 2000</li>
+          
+                              {% endif %}
+          
+                              {% if price_start_param and not price_param  %}
+                                  <li class="list-group-item   f-item main-background" data-option = 'price' data-select = 'True' data-start="2000">Above 2000</li>
+                              {% else %}
+                                  <li class="list-group-item   f-item" data-option = 'price' data-select = 'False' data-start="2000">Above 2000</li>
+          
+                              {% endif %}
+                              </ul>
+                          </div>
+          
+                          <div class="card mb-2 rounded" style="box-shadow: rgba(0, 0, 0, 0.09) 0px 3px 12px;" >
+                              <div class="card-header text-center">
+                                Brand
+                              </div>
+                              <ul class="list-group list-group-flush text-center">
+                              {% for ele in brand %}
+                                  {% if ele.id == brand_param %}
+                                      <li class="list-group-item   f-item main-background" data-option = 'brand' data-select = 'True' data-value="{{ele.id}}">{{ele.name}}</li>
+                                  {% else %}
+                                      <li class="list-group-item   f-item" data-option = 'brand' data-select = 'False' data-value="{{ele.id}}">{{ele.name}}</li>
+                                  {% endif %}
+                              {% endfor %}
+                                
+                              </ul>
+                          </div>
+          
+                          <div class="card mb-2 rounded" style="box-shadow: rgba(0, 0, 0, 0.09) 0px 3px 12px;" >
+                              <div class="card-header text-center">
+                                Category
+                              </div>
+                              <ul class="list-group list-group-flush text-center">
+                                  {% for ele in category %}
+                                      {% if ele.id == category_param %}
+                                      
+                                          <li class="list-group-item  f-item main-background" data-option = 'category' data-select = 'True' data-value="{{ele.id}}">{{ele.name}}</li>
+                                      {% else %}
+                                          <li class="list-group-item  f-item" data-option = 'category' data-select = 'False' data-value="{{ele.id}}">{{ele.name}}</li>
+                                      {% endif %}
+                                  {% endfor %}
+                                
+                              </ul>
+                          </div>
+          
+                          <div class="card mb-2 rounded" style="box-shadow: rgba(0, 0, 0, 0.09) 0px 3px 12px;" >
+                              <div class="card-header text-center">
+                                color
+                              </div>
+                              <ul class="list-group list-group-flush text-center">
+                                  {% for ele in color %}
+                                      {% if ele.id == color_param %}
+          
+                                          <li class="list-group-item   f-item main-background" data-option = 'color' data-select = 'True' data-value="{{ele.id}}">{{ele.name}}</li>
+                                      {% else %}
+                                          <li class="list-group-item   f-item" data-option = 'color' data-select = 'False' data-value="{{ele.id}}">{{ele.name}}</li>
+                                      {% endif %}
+          
+                                  {% endfor %}
+                                
+                              </ul>
+                          </div>
+          
+                          <div>
+                              <a href="{% url 'Ecom:products' %}" id="options" class="btn btn-primary main-background w-100">Apply</a>
+                          </div>
+          
+                      </div>
+                  </div>
+                </div>
+            </nav>
+        </div>
+        <div class="col-11">
             <div>
-                <div class="card mb-2 rounded" >
-                    <div class="bg-secondary p-2 rounded">
-                        <form>
-                            <input type="search" id="search_value" required>
-                            <i class="fa fa-search" id="submit_search"></i>
-                        </form>
-
-                        <script>
-                           
-                        </script>
-                    </div>
-                    <div class="card-header text-center">
-                      Price
-                    </div>
-                    <ul class="list-group list-group-flush text-center">
-                    {% if price_param == '1000' %}
-                    
-
-                        <li class="list-group-item f-item main-background" data-option = 'price' data-select = 'True' data-value="1000">1000</li>
-                    {% else %}
-                        <li class="list-group-item f-item" data-option = 'price' data-select = 'False' data-value="1000">1000</li>
-
-                    {% endif %}
-
-                    {% if price_param == '2000' %}
-                        <li class="list-group-item   f-item main-background" data-option = 'price' data-select = 'True' data-value="2000">2000</li>
-                    {% else %}
-                        <li class="list-group-item   f-item" data-option = 'price' data-select = 'False' data-value="2000">2000</li>
-
-                    {% endif %}
-
-                    {% if price_param == '3000' %}
-                        <li class="list-group-item   f-item main-background" data-option = 'price' data-select = 'True' data-value="3000">3000</li>
-                    {% else %}
-                        <li class="list-group-item   f-item" data-option = 'price' data-select = 'False' data-value="3000">3000</li>
-
-                    {% endif %}
-                    </ul>
-                </div>
-
-                <div class="card mb-2 rounded" >
-                    <div class="card-header text-center">
-                      Brand
-                    </div>
-                    <ul class="list-group list-group-flush text-center">
-                    {% for ele in brand %}
-                        {% if ele.id == brand_param %}
-                            <li class="list-group-item   f-item main-background" data-option = 'brand' data-select = 'True' data-value="{{ele.id}}">{{ele.name}}</li>
-                        {% else %}
-                            <li class="list-group-item   f-item" data-option = 'brand' data-select = 'False' data-value="{{ele.id}}">{{ele.name}}</li>
-                        {% endif %}
-                    {% endfor %}
-                      
-                    </ul>
-                </div>
-
-                <div class="card mb-2 rounded" >
-                    <div class="card-header text-center">
-                      Category
-                    </div>
-                    <ul class="list-group list-group-flush text-center">
-                        {% for ele in category %}
-                            {% if ele.id == category_param %}
-                            
-                                <li class="list-group-item  f-item main-background" data-option = 'category' data-select = 'True' data-value="{{ele.id}}">{{ele.name}}</li>
-                            {% else %}
-                                <li class="list-group-item  f-item" data-option = 'category' data-select = 'False' data-value="{{ele.id}}">{{ele.name}}</li>
-                            {% endif %}
-                        {% endfor %}
-                      
-                    </ul>
-                </div>
-
-                <div class="card mb-2 rounded" >
-                    <div class="card-header text-center">
-                      color
-                    </div>
-                    <ul class="list-group list-group-flush text-center">
-                        {% for ele in color %}
-                            {% if ele.id == color_param %}
-
-                                <li class="list-group-item   f-item main-background" data-option = 'color' data-select = 'True' data-value="{{ele.id}}">{{ele.name}}</li>
-                            {% else %}
-                                <li class="list-group-item   f-item" data-option = 'color' data-select = 'False' data-value="{{ele.id}}">{{ele.name}}</li>
-                            {% endif %}
-
-                        {% endfor %}
-                      
-                    </ul>
-                </div>
-
-                <div>
-                    <a href="{% url 'Ecom:products' %}" id="options" class="btn btn-primary main-background w-100">Apply</a>
-                </div>
-
+                <form>
+                    <input type="search" id="search_value" placeholder="SEARCH" required>
+                    <i class="fa fa-search" id="submit_search"></i>
+                </form>
             </div>
         </div>
-        <div class="col-lg-9 col-7 bodysection">
+        
+    </div>
+</div>
+
+<div class="container">
+    <div class="row position-relative">
+       
+        <div class=" col-12 bodysection">
             <div class="container-fluid">
                 <div class="row">
                     {% if products %}
 
                     {% for ele in products %}
-                    <div class="col-lg-4 p-2">
+                    <div class="col-lg-3 col-6 p-3">
 
-                        <div class="card position-relative">
-                            <img src="{{ele.varient.image.normal_image.url}}" class="card-img-top" alt="products" style="height:20rem;object-fit: cover;">
+                        <div class="card position-relative p-3 border-0" style="box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;">
+                            <div class="position-relative">
+                                <img src="{{ele.varient.image.normal_image.url}}" class="card-img-top rounded-3" alt="products" style="height:13rem;object-fit: cover;box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;">
+                                <div class="position-absolute p-2" style="top:70%;left:0%;background-color:green">
+                                    <p class="card-text text-light">Discount {{ele.discount}} %</p>
+
+                                </div>
+                            </div>                            
                             <div class="card-body">
                                 <div class="d-flex my-2">
                                     {% if ele.rating >= 1 %}
@@ -288,18 +336,21 @@ form:valid .fa {
                                     {% endif %}
 
                                 </div>
-                              <h5 class="card-title">{{ele.name}}</h5>
-                              <p class="card-text">{{ele.description}}</p>
-                              <p class="card-text text-success">discount {{ele.discount}} %</p>
-                              <p class="card-text">₹ <small class="text-decoration-line-through me-2">{{ele.maximum_retail_price}}</small> ₹ {{ele.price}}</p>
-                              <p class="card-text">Brand : {{ele.brand.name}}</p>
-                              <p class="card-text">Category : {{ele.category.name}}</p>
-                              <div class="d-flex  align-items-center">
-                                <p class="m-0 me-2">color : </p>
-                                <table style="width:20px;height:20px; border-radius:50%; " bgcolor="{{ele.varient.color.name}}"></table>
+                              <h5 class="card-title fs-2">{{ele.name}}</h5>
+
+                                <div class="d-flex mb-2">
+                                    <p class="card-text m-0 me-2 px-2 py-1 text-light rounded-2" style="background-color: #04011a6e;"> {{ele.brand.name}}</p>
+                                    <p class="card-text m-0 px-2 py-1 text-light rounded-2" style="background-color: rgb(212, 83, 8);">{{ele.category.name}}</p>
+                                </div>
+                              <p class="text-secondary m-0" style=" overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" >{{ele.description}}</p>
+                              <p class="card-text m-0 text-success"><small class="text-decoration-line-through me-2 text-danger">₹ {{ele.maximum_retail_price}}</small> ₹ {{ele.price}}</p>
+                              
+                              <div class="d-flex mb-2   align-items-center">
+                                <p class="m-0 me-2">color </p>
+                                <table style="width:20px;height:20px; border-radius:10%; " bgcolor="{{ele.varient.color.name}}"></table>
                               </div>
                               <div>
-                                <a href="{% url 'Ecom:product_detail' pk=ele.varient.id %}" class="btn btn-primary">DETAIL</a>
+                                <a href="{% url 'Ecom:product_detail' pk=ele.varient.id %}" class="btn p-1 rounded-3 w-100" style="background-color: rgba(119, 118, 117, 0.26);font-size: 15px;">DETAIL</a>
                               </div>
                             </div>
                             {% if liked_products != 'empty' %}
@@ -331,6 +382,8 @@ form:valid .fa {
                 </div>
             </div>
         </div>
+        </div>
+        
     </div>
     <div class="row justify-content-center align-items-center">
         <nav aria-label="Page navigation example" style="width:max-content">
@@ -350,7 +403,7 @@ form:valid .fa {
 
                 <li class="page-item"><a class="page-link" href="?page={{page_obj.paginator.num_pages}}">{{page_obj.paginator.num_pages}}</a></li>
                 {% endif %}
-              
+            
             </ul>
         </nav>
     </div>
@@ -375,7 +428,6 @@ form:valid .fa {
 <!-- loader  -->
 <script src="{% static 'js/loader.js' %}"></script>
 
-<script src="{% static 'js/adminnav.js' %}"></script>
 
 
 
@@ -387,7 +439,7 @@ form:valid .fa {
     const apply_btn = document.getElementById('options')
 
     let send_value = {
-        'price':'{% if price_param %}{{price_param}}{% endif %}','brand':'{% if brand_param %}{{brand_param}}{% endif %}','category':'{% if category_param %}{{category_param}}{% endif %}','color':'{% if color_param %}{{color_param}}{% endif %}'
+        'price':'{% if price_param %}{{price_param}}{% endif %}','start_price':'{% if price_start_param %}{{price_start_param}}{% endif %}','brand':'{% if brand_param %}{{brand_param}}{% endif %}','category':'{% if category_param %}{{category_param}}{% endif %}','color':'{% if color_param %}{{color_param}}{% endif %}'
     }
 
     filter_button.forEach(ele =>{
@@ -404,9 +456,31 @@ form:valid .fa {
                     }
                 })
 
-                send_value[ele.dataset.option] = ele.dataset.value
+                if (ele.dataset.option == 'price'){
+                    if (ele.dataset.start && ! ele.dataset.value){
+                        send_value['start_price'] = ele.dataset.start 
+                        send_value['price'] = '' 
+                    }
+                    else if(ele.dataset.start && ele.dataset.value){
+                        send_value['start_price'] = ele.dataset.start 
+                        send_value[ele.dataset.option] = ele.dataset.value
+
+                    }
+                    else{
+                        send_value[ele.dataset.option] = ele.dataset.value
+                        send_value['start_price'] = ''
+
+                    }
+                }
+                else{
+                    send_value[ele.dataset.option] = ele.dataset.value
+
+                }
+
                 ele.dataset.select = 'True'
                 ele.classList.add("main-background")
+
+                
 
 
             }

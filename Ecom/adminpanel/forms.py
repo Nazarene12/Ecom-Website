@@ -528,11 +528,12 @@ class OredrFormStatus(forms.ModelForm):
         fields = ['status']
 
         widgets = {
-            'status': forms.Select(attrs={'class': 'form-select form-control', 'required': 'required'}),
+            'status': forms.Select(attrs={'class': 'shadow-none form-select form-control', 'required': 'required'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['status'].label = ''
         instance = kwargs.pop('instance',None)
         if instance:
             # Disable specific choices based on the instance

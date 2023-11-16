@@ -5,7 +5,7 @@
 
 {% block css %}
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base1.css' %}">
 <link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
 <link rel="stylesheet" href="{% static 'css/form.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -22,35 +22,66 @@
         color: black;
     }
 </style>
+
+<style>
+    .custom_style{
+        color:white;
+        box-shadow: none !important;
+        
+    }
+
+    input.custom_style{
+        color:white;
+    }
+
+    input.custom_style:focus {
+        color:white;
+        border:none!important;
+        outline: none;
+        border-bottom: 1px solid white !important;
+    }
+</style>
 {% endblock %}
 
 {% block main %}
 
 <div class="container-fluid">
     <div class="row p-0">
-        {% include 'base/adminnav.html' with page='category' %}
+        {% include 'base/adminnav.html' with page='offer' %}
         <div class="col-lg-8 bodysection">
             <div class="container-fluid">
-                <div class="row justify-content-center">
+                <div class="row ">
+                    <div class="col-12">
+                        {% include 'base/admin_top_nav.html' %}
+
+                    </div>
+                </div>
+                <div class="row my-5 justify-content-center">
 
                     <div class="col-8">
 
                         <div class="container">
-                            <div class="row p-3">
+                            <div class="row p-3 rounded-2"  style="background-color: #302d2d98;">
+                                <form method="get" class="d-flex justify-content-end my-5">
+                                    <input type="search" placeholder="search" class="custom_style text-light border-0 bg-transparent border-bottom border-light" name="search" >
+                                    <button type="submit" class="custom_style border-0 bg-transparent border-bottom border-light">
+                                        <i class="fa-solid fa-search text-light"></i>
+                                    </button>
+                                </form>
                                 {% for each in offerproduct %}
 
                                 <div class="col-lg-4 mb-4" id = 'box{{forloop.counter}}'>
                                     <div class="bg-white rounded shadow-sm">
                                         <img src="{{each.varient.image.front_image.url}}" alt="" class="img-fluid card-img-top" style="height:150px;object-fit: cover;">
                                             
-                                        <div class="p-4">
+                                        <div class="p-4" style="background-color: #302d2d3f;">
                                             <h5> {{each.name}}</h5>
-                                            <p class="small text-muted mb-0">{{each.description}}</p>
+                                            <p class="small  mb-0">{{each.description}}</p>
                                             <div
-                                                class="d-flex align-items-center justify-content-between rounded-pill   py-2 mt-4">
+                                                class="d-flex align-items-center justify-content-between rounded-pill   py-2 mt-2">
                                                 <div>
                                                     <p class="discount_percentage text-success m-0">Discount {{each.discount}} %</p>
-                                                    <p><small class="text-decoration-line-through me-2">₹ {{each.maximum_retail_price}}</small> <small class="sale_price">₹ {{each.price}}</small></p>
+                                                    <p><small class="text-decoration-line-through text-danger me-2">₹ {{each.maximum_retail_price}}</small> <small class="sale_price">₹ {{each.price}}</small></p>
 
                                                     
                                                     <a href="{% url 'admins:offerproduct' pk=each.id %}" data-target="box{{forloop.counter}}" class="btn btn-outline-dark offer">offer</a>

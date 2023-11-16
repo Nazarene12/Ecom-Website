@@ -1,0 +1,144 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block css %} 
+
+<link rel="stylesheet" href="{% static 'css/base1.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminnav.css' %}">
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<style>
+
+.custom_style{
+        color:white;
+        box-shadow: none !important;
+        
+    }
+
+    input.custom_style{
+        color:white;
+    }
+
+    input.custom_style:focus {
+        color:white;
+        border:none!important;
+        outline: none;
+        border-bottom: 1px solid white !important;
+    }
+
+
+</style>
+
+{% endblock %}
+
+{% block main %}
+
+<div class="container-fluid">
+    <div class="row p-0">
+        {% include 'base/adminnav.html' with page='stock' %}
+        <div class="col-lg-8 bodysection">
+            <div class="container-fluid p-2 mt-5">
+                <div class="row">
+                    <div class="col-12">
+                        {% include 'base/admin_top_nav.html' %}
+                    </div>
+                </div>
+                <div class="my-5 row">
+                    
+                    <div class="col-12">
+                        <h4>STOCKS</h4>
+
+                        <form method="get" class="d-flex justify-content-end">
+                            <input type="search" placeholder="search" class="custom_style text-light border-0 bg-transparent border-bottom border-light" name="search" >
+                            <button type="submit" class="custom_style border-0 bg-transparent border-bottom border-light">
+                                <i class="fa-solid fa-search text-light"></i>
+                            </button>
+                        </form>
+
+                        {% if stocks %}
+
+                        <div class="table-responsive bg-dark my-1 p-4 rounded-2">
+                            <table class="table table-dark table-hover ">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">NO</th>
+                                        <th scope="col">PRODUCT</th>
+                                        <th scope="col">STATUS</th>
+                                        <th scope="col">IMAGE</th>
+                                        <th scope="col">COLOR</th>
+                                        <th scope="col">SIZE</th>
+                                        <th scope="col">COUNT</th>
+                                        <th scope="col">SALE</th>
+                                        <th scope="col">UPDATE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for each in stocks %}
+                                    <tr>
+                                        <th scope="row">{{forloop.counter}}</th>
+                                        <td>{{each.product.name}}</td>
+                                        <td>
+                                                {% if each.count == 0 %}
+
+                                                <p class="text-danger">
+                                                    OUT STOCK
+                                                </p>
+                                                
+
+                                                {% elif each.count <= 5 %}
+                                                <p class="text-danger">
+                                                    RUNNING OUT
+                                                </p>
+                                                {% else %}
+                                                <p class="text-success">
+                                                    IN STOCK
+                                                </p>
+                                                {% endif %}
+                                        </td>
+                                        <td>
+                                            <img src="{{each.image.front_image.url}}" style="width:100px;height:100px;object-fit: cover;border-radius: 10px;" alt="product image">
+                                        </td>
+                                        <td >
+                                            <p style="width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{each.color.name}}</p>
+                                        </td>
+                                        <td>{{each.size.size}}</td>
+                                        <td>{{each.count}}</td>
+                                        <td>
+                                            {{each.sale}}
+                                            
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'admins:updateproduct' pk=each.id %}?stock=_" class="btn btn-light me-2">UPDATE</a>
+
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% else %}
+
+                        <p>No products matching ..</p>
+
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+<script src="{% static 'js/adminnav.js' %}"></script>
+
+
+
+{% endblock %}

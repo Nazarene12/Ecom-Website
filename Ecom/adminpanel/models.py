@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.db.models import Q
 
+from django.contrib.auth.models import User
 
 
 # Create your models here.
@@ -100,5 +101,19 @@ class Ratting(models.Model):
 class Comment(models.Model):
     product = models.ForeignKey(Product,on_delete=models.CASCADE,related_name='comment_product')
     comment = models.CharField(max_length=100 , blank=False, null=False)
+
+class Transaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('credit', 'Credit'),
+        ('debit', 'Debit'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
+    date = models.DateField(auto_now_add=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.transaction_type} - {self.date} - Amount: {self.amount}"
 
 
