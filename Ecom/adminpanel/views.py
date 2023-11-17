@@ -680,6 +680,7 @@ class OrderList(ListView):
     model = Order
     template_name= 'admin/orderlist.html'
     context_object_name ='orders'
+    paginate_by=10
 
     def get_queryset(self) -> QuerySet[Any]:
         search_term = self.request.GET.get('search')

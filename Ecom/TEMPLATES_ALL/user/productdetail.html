@@ -370,7 +370,11 @@
     axios.defaults.xsrfCookieName = "csrftoken"
 
     var active_ele = $('#zoom_01');
-    active_ele.elevateZoom();
+    active_ele.elevateZoom({
+        zoomType: 'lens',
+    lensShape: 'round',
+    lensSize: 200
+    });
     let img = document.querySelectorAll('.img-zoom')
     img.forEach(ele=>{
         ele.addEventListener('click',()=>{
@@ -388,7 +392,11 @@
 
             main_img.src = ele.src;
             active_ele.removeData('elevateZoom');
-            active_ele.elevateZoom();
+            active_ele.elevateZoom({
+        zoomType: 'lens',
+    lensShape: 'round',
+    lensSize: 200
+    });
 
             // console.log("clicked");
         })
