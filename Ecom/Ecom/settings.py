@@ -106,7 +106,7 @@ DATABASES = {
         'NAME': 'ecom_web',
         'USER': 'ecomadmin',
         'PASSWORD': 'ecomadmin',
-        'HOST': 'localhost',  # Or your MySQL host
+        'HOST': 'ecom.cll2znklbbu2.ap-southeast-2.rds.amazonaws.com',  # Or your MySQL host
         'PORT': '3306',       # MySQL default port
     }
 }
@@ -159,10 +159,11 @@ STATIC_ROOT = os.path.join(BASE_DIR , 'STATIC_ROOT')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR , 'media')
 
-SITE_ID = 2
+SITE_ID = 3
 
 LOGOUT_REDIRECT_URL = '/'
 
+LOGIN_REDIRECT_URL = '/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

@@ -27,8 +27,8 @@ from django.template.loader import get_template
 from django.http import HttpResponse
 from django.utils.timezone import now
 
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
+# from channels.layers import get_channel_layer
+# from asgiref.sync import async_to_sync
 
 
 
