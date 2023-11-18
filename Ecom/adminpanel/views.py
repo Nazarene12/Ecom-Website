@@ -430,7 +430,7 @@ class DeleteColor(DeleteView):
         
 class BrandList(ListView) :
     model = Brand
-    template_name = 'admin/Brandlist.html'
+    template_name = 'admin/brandlist.html'
     context_object_name ='brands'
 
     def get_context_data(self, **kwargs):
